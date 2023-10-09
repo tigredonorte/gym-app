@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  gym-web-app:
+    build:
+      context: .
+      dockerfile: ./apps/gym-web-app/Dockerfile
+    ports:
+      - "4200:80"
+    restart: always
+    environment:
+      - NODE_ENV=production
   gym-api:
     build:
       context: .
