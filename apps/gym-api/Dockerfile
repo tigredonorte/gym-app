@@ -4,9 +4,9 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm install -g pnpm
+RUN npm install -g pnpm@8.8.0
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 RUN npx nx build gym-api
 
