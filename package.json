@@ -8,6 +8,7 @@
     "dev:web-app": "nx serve gym-web-app --open",
     "docker:up": "./scripts/start-docker.sh",
     "docker:down": "./scripts/stop-docker.sh",
+    "init:repo": "sudo ./scripts/init-repository.sh",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "format": "prettier --write ."
