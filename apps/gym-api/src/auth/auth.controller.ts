@@ -1,8 +1,12 @@
 import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import { User } from '../user/user.model';
 import { ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto } from './auth.dto';
+import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
+
+  constructor(private authService: AuthService) {}
 
   @Post('login')
   async login(@Body(new ValidationPipe()) loginData: LoginDto) {
@@ -10,8 +14,8 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body(new ValidationPipe()) signupData: SignupDto) {
-    return `signup ${signupData.email} ${signupData.password}`;
+  async signup(@Body() signupDto: SignupDto): Promise<User> {
+    return this.authService.signup(signupDto);
   }
 
   @Post('forgot-password')

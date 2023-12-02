@@ -1,16 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AuthRouter from '../modules/auth/Auth.router';
 
-const App: React.FC = () => {
-  if (!localStorage.getItem('token')) {
-    return (<AuthRouter />);
-  }
+const isAuthenticated = () => {
+  const userData = localStorage.getItem('userData');
+  return !!userData;
+};
 
-  return (
-    <>
-      User logged in
-    </>
-  );
+const App: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const onAuthRoute = location.pathname.startsWith('/auth');
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/');
+    } else {
+      if (onAuthRoute) return;
+      navigate('/auth');
+    }
+  }, [navigate]);
+
+  // Render based on authentication
+  return isAuthenticated() ? <div>User logged in</div> : <AuthRouter />;
 }
 
 export default App;

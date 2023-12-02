@@ -22,14 +22,19 @@ services:
     ports:
       - "3000:3000"
   mongo:
-    image: mongo:7.0.0
+    image: mongo:7.0.2
+    container_name: mongo
+    hostname: mongo
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
     ports:
-      - "27017:27017"
+      - 27017:27017
     volumes:
       - mongodb_data:/data/db
 
 volumes:
   mongodb_data:
+
+networks:
+  gym-network:
