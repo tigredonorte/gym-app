@@ -9,6 +9,7 @@ import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { NameField } from '../components/fields/NameField';
 import { PasswordField } from '../components/fields/PasswordField';
+import { FormProvider } from '../components/FormModule/FormContext';
 
 interface SignupState {
   isFormValid: boolean;
@@ -36,8 +37,9 @@ export default class Signup extends Component<{}, SignupState> {
     this.setState({ isFormValid });
   }
 
-  handleSubmit = async (formData: FormType) => {
+  handleSignup = async (formData: FormType) => {
     try {
+      console.log('Signup form data', formData);
       const response = await fetch(`${environment.backendEndpoint}/auth/signup`, {
         method: 'POST',
         headers: {
@@ -69,17 +71,18 @@ export default class Signup extends Component<{}, SignupState> {
 
     return (
       <Box className='auth-page'>
-        <Form.Container className="auth-form box" onSave={this.handleSubmit} onValidityChange={this.handleValidityChange}>
-          {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
-          <Form.Title title="Signup" />
-          <NameField name='name'/>
-          <EmailField name='email'/>
-          <PasswordField name='password'/>
-          <Button type="submit" variant="contained" color="primary" disabled={!isFormValid} fullWidth>
-            Signup
-          </Button>
-        </Form.Container>
-
+        <FormProvider>
+          <Form.Container className="auth-form box" onSave={this.handleSignup} onValidityChange={this.handleValidityChange}>
+            {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
+            <Form.Title title="Signup" />
+            <NameField name='name'/>
+            <EmailField name='email'/>
+            <PasswordField name='password'/>
+            <Form.Button.Submit fullWidth>
+              Signup
+            </Form.Button.Submit>
+          </Form.Container>
+        </FormProvider>
         <LoginLink />
       </Box>
     );

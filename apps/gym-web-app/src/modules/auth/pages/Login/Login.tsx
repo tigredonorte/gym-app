@@ -2,10 +2,11 @@ import { Box, Button } from '@mui/material';
 import React from 'react';
 import '../Auth.scss';
 import Form from '../components/FormModule';
+import { FormContainerType } from '../components/FormModule/FormContainer';
+import { FormProvider } from '../components/FormModule/FormContext';
 import { ForgotLink, SignupLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { PasswordField } from '../components/fields/PasswordField';
-import { FormContainerType } from '../components/FormModule/FormContainer';
 
 interface LoginState {
   email: string;
@@ -48,18 +49,18 @@ export default class Login extends React.Component<IProps, LoginState> {
 
     return (
       <Box className='auth-page'>
-        <Form.Container onSave={this.handleSubmit} className="auth-form box" noValidate autoComplete="off">
-          <EmailField name='email' value={email} onChange={this.handleInputChange} onValidityChange={(isValid)=> this.handleValidityChange('email', isValid)}/>
-          <PasswordField name='password' value={password} onChange={this.handleInputChange} />
-          <Button type="submit" variant="contained" color="primary" disabled={!isFormValid} fullWidth>
-            Login
-          </Button>
-          <Box className='auth-links'>
-            <ForgotLink includeSubTitle={false} />
-          </Box>
-        </Form.Container>
-        
-        <SignupLink />
+        <FormProvider>
+          <Form.Container onSave={this.handleSubmit} className="auth-form box" noValidate autoComplete="off">
+            <Form.Title title="Login" />
+            <EmailField name='email' value={email} onChange={this.handleInputChange}/>
+            <PasswordField name='password' value={password} onChange={this.handleInputChange} />
+            <Form.Button.Submit fullWidth title='Login' />
+            <Box className='auth-links'>
+              <ForgotLink includeSubTitle={false} />
+            </Box>
+          </Form.Container>
+          <SignupLink />
+        </FormProvider>
       </Box>
     );
   }

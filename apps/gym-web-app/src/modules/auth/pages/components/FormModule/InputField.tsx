@@ -1,5 +1,6 @@
-import React from 'react';
 import { FormControl, TextField, TextFieldProps } from '@mui/material';
+import React from 'react';
+import { FormContext } from './FormContext';
 
 type ValidatorFunction<T> = (value: T) => string | null;
 
@@ -13,7 +14,6 @@ export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'o
   ref?: React.Ref<never>;
   onChange?: ChangeFunction<T>;
   onBlur?: (event: React.FocusEvent<InputElements>) => void;
-  onValidityChange?: (isValid: boolean, name: string) => void;
   validators?: ValidatorFunction<T> | ValidatorFunction<T>[];
   value?: T;
   initialValue?: T;
@@ -25,6 +25,8 @@ interface InputFieldState {
 }
 
 export class InputField<T> extends React.Component<InputFieldProps<T>, InputFieldState> {
+  static contextType = FormContext;
+  declare context: React.ContextType<typeof FormContext>;
   constructor(props: InputFieldProps<T>) {
     super(props);
     this.state = {
@@ -33,15 +35,17 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     };
   }
 
+  componentDidMount() {
+    const { name, value, initialValue } = this.props;
+    const currentValue = value || initialValue || '';
+    this.context.updateFormData(name, currentValue);
+    this.validateAndNotify(currentValue as never, name);
+  }
+
   validateAndNotify = (value: T, name: string) => {
     const error = this.validate(value);
+    this.context.updateFieldValidity(name, error === null);
     this.setState({ error });
-
-    // Notify the parent about validity change
-    if (this.props.onValidityChange) {
-      console.log('onValidityChange', error === null, name);
-      this.props.onValidityChange(error === null, name);
-    }
   }
 
   validate = (value: T) => {
@@ -60,18 +64,21 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const { value, name } = event.target as InputElements;
     const { onChange } = this.props;
     this.validateAndNotify(value as T, name);
+    this.context.updateFormData(name, value);
     onChange?.({ value, name } as { value: T, name: string });
   };
 
   handleBlur = (event: React.FocusEvent<InputElements>) => {
     this.setState({ touched: true });
     this.handleChange(event as unknown as React.ChangeEvent<InputElements>);
-    if (this.props.onBlur) this.props.onBlur(event);
+    if (this.props.onBlur) {
+      this.props.onBlur(event);
+    }
   };
 
   render() {
     const { touched, error } = this.state;
-    const { validators, onValidityChange, ...inputProps } = this.props;
+    const { validators, ...inputProps } = this.props;
 
     return (
       <FormControl variant="outlined" fullWidth margin="normal">
