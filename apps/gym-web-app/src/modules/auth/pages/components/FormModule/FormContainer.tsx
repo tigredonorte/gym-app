@@ -1,23 +1,28 @@
-import { Button, Container } from '@mui/material';
+import { Box } from '@mui/material';
 import React, { Component } from 'react';
 import { InputFieldProps } from './InputField';
 
-interface FormContainerProps<FormProps> {
+interface FormContainerProps<FormProps> extends React.HTMLProps<HTMLFormElement> {
+  containerClassName?: string;
   children: React.ReactNode[];
-  onSubmit: (state: FormProps) => void;
+  onSave: (state: FormProps) => void;
   onValidityChange?: (isFormValid: boolean) => void;
 }
+
+export type FormContainerType = Record<string, unknown>;
 
 interface FormContainerState<FormProps> {
   formData: FormProps;
   formValidity: Record<keyof FormProps, boolean>;
+  isFormValid: boolean;
 }
 
-export class FormContainer<FormProps extends Record<string, unknown>> extends Component<FormContainerProps<FormProps>, FormContainerState<FormProps>> {
+export class FormContainer<FormProps extends FormContainerType> extends Component<FormContainerProps<FormProps>, FormContainerState<FormProps>> {
 
   state: Readonly<FormContainerState<FormProps>> = {
     formData: {} as FormProps,
-    formValidity: {} as Record<keyof FormProps, boolean>
+    formValidity: {} as Record<keyof FormProps, boolean>,
+    isFormValid: false,
   };
 
   constructor(props: FormContainerProps<FormProps>) {
@@ -45,66 +50,69 @@ export class FormContainer<FormProps extends Record<string, unknown>> extends Co
 
     this.state = {
       formData: initialState.formData,
-      formValidity: initialState.formValidity
+      formValidity: initialState.formValidity,
+      isFormValid: false,
     };
   }
 
-  handleFieldChange = (change: { value: unknown; name: string }) => {
-    console.log('change', change);
-    this.setState(({formData}) => ({
-      formData: {
-        ...formData,
-        [change.name]: change.value
-      }
-    }));
-  };
+  handleFieldChange = (change: { value: unknown; name: string }) => this.setState(({formData}) => ({
+    formData: {
+      ...formData,
+      [change.name]: change.value
+    }
+  }));
 
   handleFieldValidityChange = (name: string, isValid: boolean) => {
-    this.setState(({formValidity}) => ({
-      formValidity: { ...formValidity, [name]: isValid }
-    }));
     const { onValidityChange } = this.props;
-    onValidityChange?.(this.isFormValid());
+    this.setState(({ formValidity: validity }) => {
+      const formValidity = { ...validity, [name]: isValid };
+      const isFormValid = this.isFormValid(formValidity);
+      onValidityChange?.(isFormValid);
+      return {
+        formValidity,
+        isFormValid,
+      }
+    });
   };
 
-  isFormValid = () => {
-    const { formValidity } = this.state;
-    return Object.values(formValidity).every(Boolean);
-  };
+  isFormValid = (formValidity: Record<keyof FormProps, boolean>) => Object.values(formValidity).every(Boolean);
 
   handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (this.isFormValid()) {
-      this.props.onSubmit(this.state.formData);
+    if (this.state.isFormValid) {
+      this.props.onSave(this.state.formData);
     }
   };
 
   render() {
-    const { children } = this.props;
+    const { children, containerClassName, onValidityChange, onSave, ...props } = this.props;
     const { formData } = this.state;
 
     // Clone children to inject additional props
     const childrenWithProps = React.Children.map(children, (child) => {
-      if (React.isValidElement(child) && child.props.name) {
-        const value: any = formData[child.props.name] ?? child.props.initialValue;
-        console.log({ value, name: child.props.name });
-    
-        // Use type assertion here
-        return React.cloneElement(child as React.ReactElement<InputFieldProps<any>>, {
-          value,
-          onChange: this.handleFieldChange,
-          onValidityChange: (isValid: boolean) => this.handleFieldValidityChange(child.props.name, isValid),
-        });
+      if (!React.isValidElement(child)) {
+        return child;
       }
-      return child;
+      if (!child.props.name) {
+        return child;
+      }
+      const value: any = formData[child.props.name] ?? child.props.initialValue;
+  
+      console.log({ name: child.props.name, value });
+      // Use type assertion here
+      return React.cloneElement(child as React.ReactElement<InputFieldProps<any>>, {
+        value,
+        onChange: this.handleFieldChange,
+        onValidityChange: (isValid: boolean) => this.handleFieldValidityChange(child.props.name, isValid),
+      });
     });
 
     return (
-      <Container>
-        <form onSubmit={this.handleSubmit}>
+      <Box className={containerClassName}>
+        <form onSubmit={this.handleSubmit} {...props}>
           {childrenWithProps}
         </form>
-      </Container>
+      </Box>
     );
   }
 }

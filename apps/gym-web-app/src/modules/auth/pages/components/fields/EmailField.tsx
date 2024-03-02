@@ -4,7 +4,7 @@ import { isEmailValid } from './validateInput';
 
 interface EmailFieldProps extends InputFieldProps<string> {}
 
-export const EmailField = ({ value, ...props }: EmailFieldProps) => (
+export const EmailField: React.FC<EmailFieldProps> = ({ value, ...props }: EmailFieldProps) => (
   <InputField
     {...props}
     type="email"

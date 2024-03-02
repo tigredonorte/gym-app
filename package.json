@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "dev:api": "docker:up:db & nx serve gym-api",
+    "dev:api": "yarn docker:up:db & nx serve gym-api",
     "dev:app": "nx serve gym-app",
-    "dev:web-app": "nx serve gym-web-app --open",
+    "dev:web": "nx serve gym-web-app --open",
     "docker:up": "./scripts/start-docker.sh",
     "docker:down": "./scripts/stop-docker.sh",
     "docker:up:db": "docker-compose up -d mongo",

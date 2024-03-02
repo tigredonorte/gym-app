@@ -1,6 +1,10 @@
 import { Typography } from "@mui/material";
 
-export const FormTitle = ({ title }: { title: string }) => (
+interface FormTitleProps {
+  title: string;
+}
+
+export const FormTitle: React.FC<FormTitleProps> = ({ title }) => (
   <Typography variant="h4" gutterBottom>
     {title}
   </Typography>

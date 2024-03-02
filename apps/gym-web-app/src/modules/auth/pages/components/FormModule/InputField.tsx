@@ -9,6 +9,7 @@ export type ChangeValue<T> = { value: T, name: string };
 type ChangeFunction<T> = (change: ChangeValue<T>) => void;
 
 export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'ref'> {
+  name: string;
   ref?: React.Ref<never>;
   onChange?: ChangeFunction<T>;
   onBlur?: (event: React.FocusEvent<InputElements>) => void;
@@ -70,7 +71,7 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
 
   render() {
     const { touched, error } = this.state;
-    const { validators, ...inputProps } = this.props;
+    const { validators, onValidityChange, ...inputProps } = this.props;
 
     return (
       <FormControl variant="outlined" fullWidth margin="normal">

@@ -4,7 +4,7 @@ import { isPasswordValid } from './validateInput';
 
 interface PasswordFieldProps extends InputFieldProps<string> {}
 
-export const PasswordField = ({ value, ...props }: PasswordFieldProps) => (
+export const PasswordField: React.FC<PasswordFieldProps> = ({ value, ...props }: PasswordFieldProps) => (
   <InputField
     {...props}
     type="password"
