@@ -2,19 +2,25 @@ import { FormControl, TextField, TextFieldProps } from '@mui/material';
 import React from 'react';
 import { FormContext } from './FormContext';
 
-type ValidatorFunction<T> = (value: T) => string | null;
+type ValidatorFunction<T> = (value: T) => Promise<string | null> | string | null;
+type ValidatorType<T> = ValidatorFunction<T> | ValidatorFunction<T>[] | undefined;
 
 type InputElements = HTMLInputElement | HTMLTextAreaElement;
 
 export type ChangeValue<T> = { value: T, name: string };
 type ChangeFunction<T> = (change: ChangeValue<T>) => void;
 
+export function mergeValidators<T>(...validators: ValidatorType<T>[]): ValidatorFunction<T>[] {
+  return validators.flat().filter((validator) => validator !== null) as ValidatorFunction<T>[];
+}
+
 export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'ref'> {
   name: string;
   ref?: React.Ref<never>;
   onChange?: ChangeFunction<T>;
   onBlur?: (event: React.FocusEvent<InputElements>) => void;
-  validators?: ValidatorFunction<T> | ValidatorFunction<T>[];
+  validators?: ValidatorType<T>;
+  blurValidators?: ValidatorType<T>;
   value?: T;
   initialValue?: T;
 }
@@ -39,53 +45,57 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const { name, value, initialValue } = this.props;
     const currentValue = value || initialValue || '';
     this.context.updateFormData(name, currentValue);
-    this.validateAndNotify(currentValue as never, name);
+    this.validate(currentValue as never, this.getValidators());
   }
 
-  validateAndNotify = (value: T, name: string) => {
-    const error = this.validate(value);
-    this.context.updateFieldValidity(name, error === null);
-    this.setState({ error });
+  getValidators = (isBlur = false) => {
+    const { validators, blurValidators } = this.props;
+    const current = isBlur ? blurValidators : validators;
+    if (!current) return [];
+    return Array.isArray(current) ? current : [current];
   }
 
-  validate = (value: T) => {
-    const { validators } = this.props;
+  validate = async(value: T, validatorArray: ValidatorFunction<T>[]) => {
+    const { validators, name } = this.props;
     if (!validators) return null;
 
-    const validatorArray = Array.isArray(validators) ? validators : [validators];
+    let error: string | null = null;
     for (let validator of validatorArray) {
-      const error = validator(value);
-      if (error) return error;
+      const err = await validator?.(value);
+      if (err) {
+        error = err;
+        break;
+      }
     }
-    return null;
+    this.context.updateFieldValidity(name, error === null);
+    this.setState({ error });
   };
 
-  handleChange = (event: React.ChangeEvent<InputElements>) => {
+  handleChange = (event: React.ChangeEvent<InputElements>, validators = this.getValidators()) => {
     const { value, name } = event.target as InputElements;
     const { onChange } = this.props;
-    this.validateAndNotify(value as T, name);
+    this.validate(value as T, validators);
     this.context.updateFormData(name, value);
     onChange?.({ value, name } as { value: T, name: string });
   };
 
   handleBlur = (event: React.FocusEvent<InputElements>) => {
+    const { onBlur } = this.props;
     this.setState({ touched: true });
-    this.handleChange(event as unknown as React.ChangeEvent<InputElements>);
-    if (this.props.onBlur) {
-      this.props.onBlur(event);
-    }
+    this.handleChange(event as unknown as React.ChangeEvent<InputElements>, this.getValidators(true));
+    onBlur?.(event);
   };
 
   render() {
     const { touched, error } = this.state;
-    const { validators, ...inputProps } = this.props;
+    const { validators, blurValidators, ...inputProps } = this.props;
 
     return (
       <FormControl variant="outlined" fullWidth margin="normal">
         <TextField
           {...inputProps}
           error={!!(error) && touched}
-          helperText={(touched && (error)) || ''}
+          helperText={(touched && !!error && (<span dangerouslySetInnerHTML={{ __html: error }} />)) || ''}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
         />

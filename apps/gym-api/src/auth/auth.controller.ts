@@ -1,6 +1,6 @@
-import { Body, Controller, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, ValidationPipe } from '@nestjs/common';
 import { User } from '../user/user.model';
-import { ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -9,22 +9,38 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login(@Body(new ValidationPipe()) loginData: LoginDto) {
-    return `login ${loginData.email} ${loginData.password}`;
+  @HttpCode(HttpStatus.OK)
+  async login(@Body(new ValidationPipe()) data: LoginDto) {
+    return this.authService.login(data);
   }
 
   @Post('signup')
-  async signup(@Body() signupDto: SignupDto): Promise<User> {
-    return this.authService.signup(signupDto);
+  @HttpCode(HttpStatus.CREATED)
+  async signup(@Body() data: SignupDto): Promise<User> {
+    return this.authService.signup(data);
   }
 
   @Post('forgot-password')
-  async forgotPassword(@Body(new ValidationPipe()) forgotPasswordData: ForgotPasswordDto) {
-    return `forgotPasswordData ${forgotPasswordData.email}`;
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body(new ValidationPipe()) data: ForgotPasswordDto) {
+    return this.authService.forgotPassword(data);
   }
 
   @Post('confirm-recover')
-  async confirmRecover(@Body(new ValidationPipe()) confirmRecoverData: ConfirmRecoverPasswordDto) {
-    return `confirmRecover ${confirmRecoverData.email}`;
+  @HttpCode(HttpStatus.OK)
+  async confirmRecover(@Body(new ValidationPipe()) data: ConfirmRecoverPasswordDto) {
+    return this.authService.confirmRecover(data);
   }
+
+  @Post('checkEmail')
+  @HttpCode(HttpStatus.OK)
+  async checkEmail(@Body(new ValidationPipe()) data: CheckEmailDto) {
+    console.log('Check email', data);
+    const result = this.authService.checkEmail(data);
+    if (!result) {
+      throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
+    }
+    return;
+  }
+
 }

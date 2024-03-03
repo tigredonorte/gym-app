@@ -32,6 +32,15 @@ export class LoginDto implements Login {
   password: string;
 }
 
+interface CheckEmail {
+  email: string;
+}
+
+export class CheckEmailDto implements CheckEmail {
+  @IsEmail()
+  email: string;
+}
+
 interface ForgotPassword {
   email: string;
 }

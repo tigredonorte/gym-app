@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import React, { Component } from 'react';
 import { FormContext, FormContextType, FormProvider } from './FormContext';
 import { Snackbar, Alert } from '@mui/material';
-import { FormError } from './FormError';
+import { FormError } from './FormErrorException';
 import FormErrorSnackbar from './FormErrorSnackbar';
 
 interface FormContainerProps<FormProps> extends React.HTMLProps<HTMLFormElement> {
@@ -37,8 +37,9 @@ export class FormContainer<FormProps extends FormContainerType> extends Componen
         return;
       }
       console.error('Error during fetch operation', error);
+    } finally {
+      setRequesting(false);
     }
-    setRequesting(false);
   };
 
   render() {

@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { Component } from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
@@ -9,7 +9,6 @@ import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { NameField } from '../components/fields/NameField';
 import { PasswordField } from '../components/fields/PasswordField';
-import { FormProvider } from '../components/FormModule/FormContext';
 
 interface SignupState {
   isFormValid: boolean;
@@ -32,11 +31,6 @@ export default class Signup extends Component<{}, SignupState> {
     this.setState(updatedValue as SignupState);
   };
 
-  handleValidityChange = (isFormValid: boolean) => {
-    console.log(isFormValid);
-    this.setState({ isFormValid });
-  }
-
   handleSignup = async (formData: FormType) => {
     try {
       console.log('Signup form data', formData);
@@ -49,16 +43,35 @@ export default class Signup extends Component<{}, SignupState> {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         return this.setState({ errorMessage: data.message || 'Signup failed' });
       }
 
       localStorage.setItem('userData', JSON.stringify(data));
+      window.location.href = '/';
     } catch (error) {
       console.error('Error during fetch operation', error);
       this.setState({ errorMessage: 'Error during signup' });
     }
+  };
+
+  checkEmailExists = async (email: string): Promise<string | null> => {
+    try {
+      const response = await fetch(`${environment.backendEndpoint}/auth/checkEmail`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      if (response.status === 200) {
+        return "Email already exists. Do you wan't to make <a href='/auth'>Login</a>?";
+      }
+    } catch (error) {
+      console.error('Error during fetch operation', error);
+    } 
+
+    return null;
   };
 
   handleCloseSnackbar = () => {
@@ -66,23 +79,20 @@ export default class Signup extends Component<{}, SignupState> {
   };
 
   render() {
-    const { errorMessage, isFormValid } = this.state;
-    console.log({ errorMessage, isFormValid });
+    const { errorMessage } = this.state;
 
     return (
       <Box className='auth-page'>
-        <FormProvider>
-          <Form.Container className="auth-form box" onSave={this.handleSignup} onValidityChange={this.handleValidityChange}>
+        <Form.Provider>
+          <Form.Container className="auth-form box" onSave={this.handleSignup}>
             {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
             <Form.Title title="Signup" />
             <NameField name='name'/>
-            <EmailField name='email'/>
+            <EmailField name='email' blurValidators={this.checkEmailExists}/>
             <PasswordField name='password'/>
-            <Form.Button.Submit fullWidth>
-              Signup
-            </Form.Button.Submit>
+            <Form.Button.Submit fullWidth title='Signup' />
           </Form.Container>
-        </FormProvider>
+        </Form.Provider>
         <LoginLink />
       </Box>
     );
