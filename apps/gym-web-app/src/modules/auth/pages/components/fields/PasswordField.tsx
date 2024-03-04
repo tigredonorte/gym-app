@@ -1,5 +1,5 @@
 import React from 'react';
-import { InputField, InputFieldProps, mergeValidators } from '../FormModule/InputField';
+import { InputField, InputFieldProps, mergeValidators } from '@gym-app/total-form';
 import { isPasswordValid } from './validateInput';
 
 interface PasswordFieldProps extends InputFieldProps<string> {}

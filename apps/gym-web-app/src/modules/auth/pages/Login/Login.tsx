@@ -2,9 +2,7 @@ import { Box } from '@mui/material';
 import React from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
-import Form from '../components/FormModule';
-import { FormContainerType } from '../components/FormModule/FormContainer';
-import { FormError } from '../components/FormModule/FormErrorException';
+import Form, { FormContainerType } from '@gym-app/total-form';
 import { ForgotLink, SignupLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { PasswordField } from '../components/fields/PasswordField';
@@ -35,15 +33,15 @@ export default class Login extends React.Component<IProps, LoginState> {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new FormError(data.message, 'Login Error');
+        throw new Form.Error(data.message, 'Login Error');
       }
 
       localStorage.setItem('userData', JSON.stringify(data));
       window.location.href = '/';
     } catch (error) {
-      if (!(error instanceof FormError)) {
+      if (!(error instanceof Form.Error)) {
         const message = (error instanceof Error) ? error.message : (error as string);
-        throw new FormError(message || 'Unkown login error', 'Login Error');
+        throw new Form.Error(message || 'Unkown login error', 'Login Error');
       }
       throw error;
     }

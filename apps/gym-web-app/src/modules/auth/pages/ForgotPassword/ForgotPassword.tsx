@@ -3,8 +3,7 @@ import { Component } from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { ErrorAlert } from '../components/ErrorAlert';
-import Form from '../components/FormModule';
-import { FormContainerType } from '../components/FormModule/FormContainer';
+import Form, { FormContainerType } from '@gym-app/total-form';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 

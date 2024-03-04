@@ -1,16 +1,16 @@
 import React from 'react';
-import { InputField, InputFieldProps, mergeValidators } from '../FormModule/InputField';
+import Form, { InputFieldProps } from '@gym-app/total-form';
 import { isEmailValid } from './validateInput';
 
 interface EmailFieldProps extends InputFieldProps<string> {}
 
 export const EmailField: React.FC<EmailFieldProps> = ({ value, validators, ...props }: EmailFieldProps) => (
-  <InputField
+  <Form.Input
     {...props}
     type="email"
     label="Email"
     name="email"
     value={value}
-    validators={mergeValidators(isEmailValid, validators)}
+    validators={Form.mergeValidators(isEmailValid, validators)}
   />
 )

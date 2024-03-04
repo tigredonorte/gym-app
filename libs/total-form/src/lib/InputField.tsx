@@ -25,6 +25,10 @@ export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'o
   initialValue?: T;
 }
 
+export interface foo {
+  bar: string;
+}
+
 interface InputFieldState {
   touched: boolean;
   error: string | null;
