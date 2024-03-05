@@ -8,8 +8,6 @@ import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 
 interface ForgotPasswordState {
-  isFormValid: boolean;
-  errorMessage: string;
 }
 
 interface FormType extends FormContainerType {
@@ -18,8 +16,6 @@ interface FormType extends FormContainerType {
 
 export default class ForgotPassword extends Component<{}, ForgotPasswordState> {
   state = {
-    isFormValid: false,
-    errorMessage: '',
   };
   handleSubmit = async (formData: FormType) => {
     try {
@@ -49,20 +45,18 @@ export default class ForgotPassword extends Component<{}, ForgotPasswordState> {
   };
 
   render() {
-    const { errorMessage, isFormValid } = this.state;
-    console.log(errorMessage);
+    const queryParams = new URLSearchParams(location.search);
+    const email = queryParams.get('email');
 
     return (
       <Box className='auth-page'>
-        <Form.Container onSave={(data) => console.log(data)} className="auth-form box">
-          {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
-          <Form.Title title="Forgot Password" />
-          <EmailField name='email'/>
-          <Button type="submit" variant="contained" color="primary" disabled={!isFormValid} fullWidth>
-            Forgot Password
-          </Button>
-        </Form.Container>
-
+        <Form.Provider>
+          <Form.Container onSave={(data) => console.log(data)} className="auth-form box">
+            <Form.Title title="Forgot Password" />
+            <EmailField name='email' value={email || ''} />
+            <Form.Button.Submit fullWidth title='Forgot Password' />
+          </Form.Container>
+        </Form.Provider>
         <LoginLink />
       </Box>
     );

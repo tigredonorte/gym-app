@@ -37,6 +37,10 @@ export const SignupLink = ({ includeSubTitle = true }: SimpleLinkCompProps) => (
   <LinkComp subTitle={includeSubTitle ? "Don't have an account?" : ''} content='Create Account' url='/auth/signup' />
 )
 
-export const ForgotLink = ({ includeSubTitle = true }: SimpleLinkCompProps) => (
-  <LinkComp subTitle={includeSubTitle ? "Don't know your account?" : ''} content='Forgot Password' url='/auth/forgot-password' />
+export const ForgotLink = ({ includeSubTitle = true, email = '' }: SimpleLinkCompProps & { email?: string }) => (
+  <LinkComp 
+    subTitle={includeSubTitle ? "Don't know your account?" : ''} 
+    content='Forgot Password' 
+    url={`/auth/forgot-password${email &&`?email=${email}`}`} 
+  />
 )
