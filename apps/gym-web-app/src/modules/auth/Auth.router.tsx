@@ -6,14 +6,12 @@ import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import Login from './pages/Login/Login';
 import Signup from './pages/Signup/Signup';
 
-const base = '/auth';
-const AuthRouter: React.FC = () => (
+export const AuthPath = 'auth';
+export const AuthRouter: React.FC = () => (
   <Routes>
-    <Route path={base} Component={Login} />
-    <Route path={`${base}/forgot-password`} Component={ForgotPassword} />
-    <Route path={`${base}/confirm-recover`} Component={ConfirmRecoverPassword} />
-    <Route path={`${base}/signup`} Component={Signup} />
+    <Route index Component={Login} />
+    <Route path='forgot-password' Component={ForgotPassword} />
+    <Route path='confirm-recover' Component={ConfirmRecoverPassword} />
+    <Route path='signup' Component={Signup} />
   </Routes>
 )
-
-export default AuthRouter;
