@@ -1,4 +1,4 @@
-import { FormControl, TextField, TextFieldProps } from '@mui/material';
+import { FormControl, FormHelperText, TextField, TextFieldProps } from '@mui/material';
 import React from 'react';
 import { FormContext } from './FormContext';
 
@@ -54,7 +54,7 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
 
   getValidators = (isBlur = false) => {
     const { validators, blurValidators } = this.props;
-    const current = isBlur ? blurValidators : validators;
+    const current = isBlur ? mergeValidators(blurValidators, validators) : validators;
     if (!current) return [];
     return Array.isArray(current) ? current : [current];
   }
@@ -94,8 +94,10 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const { touched, error } = this.state;
     const { validators, blurValidators, ...inputProps } = this.props;
 
+    const isHidden = inputProps.type === 'hidden';
+    const style = isHidden ? { display: 'none' } : {};
     return (
-      <FormControl variant="outlined" fullWidth margin="normal">
+      <FormControl variant="outlined" fullWidth margin="normal" style={style}>
         <TextField
           {...inputProps}
           error={!!(error) && touched}
