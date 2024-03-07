@@ -1,9 +1,8 @@
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import { Component } from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
-import { ErrorAlert } from '../components/ErrorAlert';
-import Form, { FormContainerType } from '@gym-app/total-form';
+import { Form, FormContainerType } from '@gym-app/total-form';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 

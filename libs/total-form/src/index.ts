@@ -1,25 +1,29 @@
+import { Fields } from './lib/Fields';
+import { FormContainer } from './lib/FormContainer';
 import { FormProvider } from './lib/FormContext';
+import { FormError } from './lib/FormErrorException';
+import { FormText } from './lib/FormText';
 import { FormTitle } from './lib/FormTitle';
 import { SubmitButton } from './lib/SubmitButton';
-import { FormError } from './lib/FormErrorException';
-import { FormContainer } from './lib/FormContainer';
-import { InputField, mergeValidators } from './lib/InputField';
-import { Fields } from './lib/Fields';
+import { executeRequest } from './lib/executeRequest';
+import { validators, mergeValidators } from './lib/validators';
 
-export * from './lib/InputField';
+export * from './lib/Fields/InputField';
 export * from './lib/FormContainer';
+export {
+  mergeValidators,
+}
 
-const TotalForm = {
+export const Form = {
   Provider: FormProvider,
   Container: FormContainer,
   Title: FormTitle,
+  Text: FormText,
   Button: {
     Submit: SubmitButton
   },
   Fields,
-  Input: InputField,
   Error: FormError,
-  mergeValidators,
+  validators,
+  executeRequest,
 };
-
-export default TotalForm;

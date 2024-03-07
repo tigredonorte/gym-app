@@ -4,12 +4,12 @@ import { isPasswordValid } from './validateInput';
 
 interface PasswordFieldProps extends InputFieldProps<string> {}
 
-export const PasswordField: React.FC<PasswordFieldProps> = ({ validators, ...props }: PasswordFieldProps) => (
+export const PasswordField: React.FC<PasswordFieldProps> = ({ validators, name, ...props }: PasswordFieldProps) => (
   <InputField
-    {...props}
     type="password"
     label="Password"
-    name="password"
-    validators={mergeValidators(isPasswordValid, validators)}
+    name={name || 'password'}
+    {...props}
+    validators={mergeValidators(validators, isPasswordValid)}
   />
 );

@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import React from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
-import Form, { FormContainerType } from '@gym-app/total-form';
+import { Form, FormContainerType } from '@gym-app/total-form';
 import { ForgotLink, SignupLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { PasswordField } from '../components/fields/PasswordField';

@@ -1,18 +1,13 @@
-import { FormControl, FormHelperText, TextField, TextFieldProps } from '@mui/material';
+import { FormControl, TextField, TextFieldProps } from '@mui/material';
 import React from 'react';
-import { FormContext } from './FormContext';
-
-type ValidatorFunction<T> = (value: T) => Promise<string | null> | string | null;
-type ValidatorType<T> = ValidatorFunction<T> | ValidatorFunction<T>[] | undefined;
+import { FormContext } from '../FormContext';
+import { ValidatorFunction, ValidatorType, mergeValidators } from '../validators';
 
 type InputElements = HTMLInputElement | HTMLTextAreaElement;
 
 export type ChangeValue<T> = { value: T, name: string };
 type ChangeFunction<T> = (change: ChangeValue<T>) => void;
 
-export function mergeValidators<T>(...validators: ValidatorType<T>[]): ValidatorFunction<T>[] {
-  return validators.flat().filter((validator) => validator !== null) as ValidatorFunction<T>[];
-}
 
 export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'onBlur' | 'ref'> {
   name: string;
@@ -63,9 +58,11 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const { validators, name } = this.props;
     if (!validators) return null;
 
+    const { formData } = this.context;
+
     let error: string | null = null;
     for (let validator of validatorArray) {
-      const err = await validator?.(value);
+      const err = await validator?.(value, formData);
       if (err) {
         error = err;
         break;
