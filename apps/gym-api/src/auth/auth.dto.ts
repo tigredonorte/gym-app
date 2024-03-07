@@ -58,3 +58,24 @@ export class ConfirmRecoverPasswordDto implements confirmRecoverPassword {
   @MinLength(12)
   token: string;
 }
+
+interface changePassword {
+  email: string;
+  token: string;
+}
+export class changePasswordDto implements changePassword {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(12)
+  token: string;
+
+  @IsString()
+  @MinLength(6)
+  password: string;
+
+  @IsString()
+  @MinLength(6)
+  confirmPassword: string;
+}

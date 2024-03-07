@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, ValidationPipe } from '@nestjs/common';
 import { User } from '../user/user.model';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @Controller('auth')
@@ -30,6 +30,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async confirmRecover(@Body(new ValidationPipe()) data: ConfirmRecoverPasswordDto) {
     return this.authService.confirmRecover(data);
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto) {
+    return this.authService.changePassword(data);
   }
 
   @Post('checkEmail')

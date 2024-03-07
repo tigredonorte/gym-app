@@ -51,4 +51,20 @@ export class AuthService {
     };
   }
 
+  async changePassword(data: changePasswordDto) {
+    if (data.password !== data.confirmPassword) {
+      throw new Error('Passwords do not match');
+    }
+
+    if (!data.email || !data.token) {
+      throw new Error('Invalid request');
+    }
+
+    const changePassword = await this.userService.changePassword(data.email, data.password, data.token);
+    if (!changePassword) {
+      throw new Error('Invalid request');
+    }
+
+    return {};
+  }
 }

@@ -128,4 +128,21 @@ export class UserService {
   
     return changePasswordCode;
   }
+
+  async changePassword(email: string, password: string, token: string): Promise<boolean> {
+    const user = await this.userModel.findOne({
+      email,
+      'recoverCode.changePasswordCode': token
+    }).exec();
+  
+    if (!user) {
+      return false;
+    }
+  
+    user.password = await this.hashPassword(password);
+    user.recoverCode = undefined;
+    await user.save();
+  
+    return true;
+  }
 }
