@@ -5,7 +5,6 @@ interface Signup {
   password: string;
   name: string;
 }
-
 export class SignupDto implements Signup {
   @IsEmail()
   email: string;
@@ -22,7 +21,6 @@ interface Login {
   email: string;
   password: string;
 }
-
 export class LoginDto implements Login {
   @IsEmail()
   email: string;
@@ -35,7 +33,6 @@ export class LoginDto implements Login {
 interface CheckEmail {
   email: string;
 }
-
 export class CheckEmailDto implements CheckEmail {
   @IsEmail()
   email: string;
@@ -44,7 +41,6 @@ export class CheckEmailDto implements CheckEmail {
 interface ForgotPassword {
   email: string;
 }
-
 export class ForgotPasswordDto implements ForgotPassword {
   @IsEmail()
   email: string;
@@ -53,22 +49,12 @@ export class ForgotPasswordDto implements ForgotPassword {
 interface confirmRecoverPassword {
   email: string;
   token: string;
-  password: string;
-  confirmPassword: string;
 }
-
 export class ConfirmRecoverPasswordDto implements confirmRecoverPassword {
   @IsEmail()
   email: string;
 
   @IsString()
+  @MinLength(12)
   token: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @IsString()
-  @MinLength(6)
-  confirmPassword: string;
 }

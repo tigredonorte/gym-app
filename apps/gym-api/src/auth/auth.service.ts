@@ -39,4 +39,16 @@ export class AuthService {
 
     return {};
   }
+
+  async confirmRecover({ email, token }: ConfirmRecoverPasswordDto) {
+    const resetPasswordToken = await this.userService.checkRecoverCode(email, token);
+    if (!resetPasswordToken) {
+      throw new Error('Invalid code');
+    }
+    
+    return {
+      resetPasswordToken
+    };
+  }
+
 }
