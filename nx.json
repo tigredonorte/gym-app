@@ -55,8 +55,12 @@
       },
       "library": {
         "style": "scss",
-        "linter": "eslint"
+        "linter": "eslint",
+        "unitTestRunner": "vitest"
       }
     }
+  },
+  "nxCloud": {
+    "enabled": false
   }
 }

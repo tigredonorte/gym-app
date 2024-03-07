@@ -59,5 +59,22 @@ fi
 
 pnpm install
 
-docker-compose build
+# Check if .env file exists
+if [[ ! -f .env ]]; then
+    # If not, copy .env.sample to .env
+    cp .env.sample .env
+fi
+
+# Create mongo-init.js
+./create-mongo-init.sh
+
+# Check if mongo-init.js was just created by checking the exit status of the previous command
+if [[ $? -eq 0 ]]; then
+    # If mongo-init.js was just created, build the Docker images
+    docker-compose build
+fi
+
+# Run docker-compose to start up MongoDB container
+docker-compose up -d mongo
+
 docker ps

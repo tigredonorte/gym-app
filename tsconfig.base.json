@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@gym-app/total-form": ["libs/total-form/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

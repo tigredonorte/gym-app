@@ -1,16 +1,10 @@
 import React from 'react';
-import AuthRouter from '../modules/auth/Auth.router';
+import { AppRouter } from './app.router';
 
 const App: React.FC = () => {
-  if (!localStorage.getItem('token')) {
-    return (<AuthRouter />);
-  }
-
   return (
-    <>
-      User logged in
-    </>
-  );
+    <AppRouter />
+  )
 }
 
 export default App;
