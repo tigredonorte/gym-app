@@ -1,24 +1,19 @@
+import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import { Component } from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
-import { Form, FormContainerType } from '@gym-app/total-form';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
-
-interface ForgotPasswordState {
-}
 
 interface FormType extends FormContainerType {
   email: string;
 }
 
-export default class ForgotPassword extends Component<{}, ForgotPasswordState> {
-  state = {
-  };
-  handleSubmit = async (formData: FormType) => {
+export default class ForgotPassword extends Component<{}> {
+  recoverPassword = async (formData: FormType) => {
     try {
-      const response = await fetch(`${environment.backendEndpoint}/auth/ForgotPassword`, {
+      const response = await fetch(`${environment.backendEndpoint}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,15 +27,11 @@ export default class ForgotPassword extends Component<{}, ForgotPasswordState> {
         return this.setState({ errorMessage: data.message || 'ForgotPassword failed' });
       }
 
-      localStorage.setItem('userData', JSON.stringify(data));
+      location.href = `/auth/confirm-recover?email=${formData.email}`;
     } catch (error) {
       console.error('Error during fetch operation', error);
       this.setState({ errorMessage: 'Error during ForgotPassword' });
     }
-  };
-
-  handleCloseSnackbar = () => {
-    this.setState({ errorMessage: '' });
   };
 
   render() {
@@ -50,10 +41,11 @@ export default class ForgotPassword extends Component<{}, ForgotPasswordState> {
     return (
       <Box className='auth-page'>
         <Form.Provider>
-          <Form.Container onSave={(data) => console.log(data)} className="auth-form box">
+          <Form.Container onSave={this.recoverPassword} className="auth-form box">
             <Form.Title title="Forgot Password" />
-            <EmailField name='email' value={email || ''} />
-            <Form.Button.Submit fullWidth title='Forgot Password' />
+            <Form.Text text="You will receive a code on your email in order to recover your account" />
+            <EmailField name='email' defaultValue={email || ''} />
+            <Form.Button.Submit fullWidth title='Send me the code on my email' />
           </Form.Container>
         </Form.Provider>
         <LoginLink />

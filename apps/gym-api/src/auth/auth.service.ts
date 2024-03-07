@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../user/user.model';
 import { UserService } from '../user/user.service';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,10 +32,11 @@ export class AuthService {
   }
 
   async forgotPassword(data: ForgotPasswordDto) {
-    return data;
-  }
+    const recoverCode = await this.userService.createRecoverCode(data.email);
 
-  async confirmRecover(data: ConfirmRecoverPasswordDto) {
-    return data;
+    // @TODO: Send email with recover code
+    console.log('Recover code', recoverCode);
+
+    return {};
   }
 }

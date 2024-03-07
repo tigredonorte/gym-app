@@ -1,8 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Exclude } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 
-export type UserDocument = User & Document;
+class RecoverCode {
+  @Prop()
+  code: string;
+
+  @Prop()
+  expiresAt: Date;
+
+  @Prop()
+  createdAt: Date;
+
+  @Prop()
+  changePasswordCode?: string;
+}
 
 @Schema()
 export class User {
@@ -15,6 +27,13 @@ export class User {
   @Exclude()
   @Prop({ required: true, minlength: 10, select: false })
   password: string;
+
+  @Exclude()
+  @Type(() => RecoverCode)
+  @Prop({ type: RecoverCode, required: false, select: false })
+  recoverCode: RecoverCode;
 }
+
+export type UserDocument = User & Document;
 
 export const UserSchema = SchemaFactory.createForClass(User);

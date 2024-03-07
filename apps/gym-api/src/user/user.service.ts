@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.model';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class UserService {
@@ -18,8 +19,6 @@ export class UserService {
 
   private async decryptPassword(password: string, hash: string): Promise<boolean> {
     try {
-      console.log('password', password);
-      console.log('hash', hash);
       return await bcrypt.compare(password, hash);
     } catch (error) {
       return false;
@@ -71,5 +70,62 @@ export class UserService {
     const result = user.toObject();
     delete result.password;
     return result;
+  }
+
+  private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date, changePasswordCode: string } {
+    const recoverCode = crypto.randomBytes(12).toString('base64');
+    const expiresAt = new Date(new Date().getTime() + 30*60000); // 30 minutes from now
+  
+    return {
+      code: recoverCode,
+      expiresAt: expiresAt,
+      createdAt: new Date(),
+      changePasswordCode: undefined
+    };
+  }
+
+  async createRecoverCode(email: string): Promise<{ recoverCode: string, exists: boolean }> {
+    const user = await this.userModel.findOne({ email }).select('+recoverCode').exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    if (user.recoverCode && user.recoverCode.expiresAt > new Date()) {
+      return {
+        recoverCode: user.recoverCode.code,
+        exists: true
+      };
+    }
+
+    user.recoverCode = this.getRecoverCode();
+    await user.save();
+
+    return {
+      recoverCode: user.recoverCode.code,
+      exists: false
+    };
+  }
+
+  async checkRecoverCode(email: string, code: string): Promise<false | string> {
+    const user = await this.userModel.findOne({
+      email,
+      'recoverCode.code': code,
+      'recoverCode.expiresAt': { $gt: new Date() }
+    }).exec();
+  
+    if (!user) {
+      return false;
+    }
+  
+    const changePasswordCode = crypto.randomBytes(12).toString('base64');
+    user.recoverCode = {
+      code: undefined,
+      expiresAt: undefined,
+      createdAt: undefined,
+      changePasswordCode,
+    };
+    await user.save();
+  
+    return changePasswordCode;
   }
 }
