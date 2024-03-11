@@ -1,9 +1,10 @@
+import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import { Component } from 'react';
+import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { ErrorAlert } from '../components/ErrorAlert';
-import { Form, FormContainerType } from '@gym-app/total-form';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { NameField } from '../components/fields/NameField';
@@ -12,6 +13,7 @@ import { PasswordField } from '../components/fields/PasswordField';
 interface SignupState {
   isFormValid: boolean;
   errorMessage: string;
+  navigate: string;
 }
 
 interface FormType extends FormContainerType {
@@ -24,6 +26,7 @@ export default class Signup extends Component<{}, SignupState> {
   state = {
     isFormValid: false,
     errorMessage: '',
+    navigate: '',
   };
   handleInputChange = ({ name, value }: { name: string, value: unknown }) => {
     const updatedValue: Partial<SignupState> = { [name]: value };
@@ -47,7 +50,7 @@ export default class Signup extends Component<{}, SignupState> {
       }
 
       localStorage.setItem('userData', JSON.stringify(data));
-      window.location.href = '/';
+      this.setState({ navigate: '/' });
     } catch (error) {
       console.error('Error during fetch operation', error);
       this.setState({ errorMessage: 'Error during signup' });
@@ -63,8 +66,9 @@ export default class Signup extends Component<{}, SignupState> {
         },
         body: JSON.stringify({ email }),
       });
-      if (response.status === 200) {
-        return "Email already exists. Do you wan't to make <a href='/auth'>Login</a>?";
+
+      if (response.status !== 200) {
+        return "Email already exists. Do you wan't to <a href='/auth'>Login</a>?";
       }
     } catch (error) {
       console.error('Error during fetch operation', error);
@@ -78,7 +82,10 @@ export default class Signup extends Component<{}, SignupState> {
   };
 
   render() {
-    const { errorMessage } = this.state;
+    const { errorMessage, navigate } = this.state;
+    if (navigate) {
+      return (<Navigate to={navigate} replace={true}/>);
+    }
 
     return (
       <Box className='auth-page'>

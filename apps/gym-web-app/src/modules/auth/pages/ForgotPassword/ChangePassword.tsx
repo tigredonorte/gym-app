@@ -4,12 +4,13 @@ import { Component } from 'react';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { PasswordField } from '../components/fields/PasswordField';
+import { Navigate } from 'react-router-dom';
 
 interface FormType extends FormContainerType {
   email: string;
 }
 
-export default class ChangePassword extends Component<{}> {
+export default class ChangePassword extends Component<{}, { navigate: string }> {
   changePassword = async (formData: FormType) => {
     const data = await Form.executeRequest<FormType>({
       formData,
@@ -21,10 +22,14 @@ export default class ChangePassword extends Component<{}> {
       return alert(data.errorMessage);
     }
     alert('Password changed successfully');
-    location.href = '/auth';
+    this.setState({ navigate: '/auth' });
   };
 
   render() {
+    const { navigate } = this.state;
+    if (navigate) {
+      return (<Navigate to={navigate} replace={true}/>);
+    }
 
     const queryParams = new URLSearchParams(location.search);
     const email = queryParams.get('email') || '';
