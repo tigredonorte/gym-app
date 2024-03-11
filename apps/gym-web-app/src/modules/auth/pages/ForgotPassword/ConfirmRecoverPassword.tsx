@@ -1,6 +1,7 @@
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import { Component } from 'react';
+import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 
@@ -9,7 +10,7 @@ interface FormType extends FormContainerType {
   token: string;
 }
 
-export default class ConfirmRecoverPassword extends Component<{}> {
+export default class ConfirmRecoverPassword extends Component<{}, { navigate: string }> {
   confirmCode = async (formData: FormType) => {
     const data = await Form.executeRequest<FormType>({
       formData,
@@ -26,10 +27,15 @@ export default class ConfirmRecoverPassword extends Component<{}> {
       return alert('Invalid code');
     }
 
-    location.href = `/auth/change-password?email=${formData.email}&token=${resetPasswordToken}`;
+    this.setState({ navigate: '/auth/change-password?email=' + formData.email + '&token=' + resetPasswordToken });
   };
 
   render() {
+
+    const { navigate } = this.state;
+    if (navigate) {
+      return (<Navigate to={navigate} replace={true}/>);
+    }
 
     const queryParams = new URLSearchParams(location.search);
     const email = queryParams.get('email') || '';

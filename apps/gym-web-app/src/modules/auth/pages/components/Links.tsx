@@ -1,4 +1,5 @@
 import { Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 
 interface LinkCompProps {
   subTitle: string;
@@ -12,7 +13,7 @@ interface SimpleLinkCompProps {
 
 const LinkComp = ({ subTitle, content, url }: LinkCompProps) => {
   const LinkType = (
-    <Link href={url} variant="body2" className='link'>
+    <Link component={RouterLink} to={url} variant="body2" className='link'>
       {content}
     </Link>
   )

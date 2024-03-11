@@ -6,9 +6,11 @@ import { Form, FormContainerType } from '@gym-app/total-form';
 import { ForgotLink, SignupLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { PasswordField } from '../components/fields/PasswordField';
+import { Navigate } from 'react-router-dom';
 
 interface LoginState {
   email: string;
+  navigate: string;
 }
 
 interface FormType extends FormContainerType {
@@ -16,15 +18,12 @@ interface FormType extends FormContainerType {
   password: string;
 }
 
-interface IProps {}
 
-export default class Login extends React.Component<IProps, LoginState> {
+export default class Login extends React.Component<{}, LoginState> {
   state = {
     email: '',
+    navigate: '',
   };
-  constructor(props: IProps) {
-    super(props);
-  }
 
   handleLogin = async (formData: FormType) => {
     try {
@@ -42,7 +41,9 @@ export default class Login extends React.Component<IProps, LoginState> {
       }
 
       localStorage.setItem('userData', JSON.stringify(data));
-      window.location.href = '/';
+
+      this.setState({ navigate: '/' });
+  
     } catch (error) {
       if (!(error instanceof Form.Error)) {
         const message = (error instanceof Error) ? error.message : (error as string);
@@ -53,6 +54,12 @@ export default class Login extends React.Component<IProps, LoginState> {
   };
 
   render() {
+
+    const { navigate } = this.state;
+    if (navigate) {
+      return (<Navigate to={navigate} replace={true}/>);
+    }
+
     const { email } = this.state;
     return (
       <Box className='auth-page'>

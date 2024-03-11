@@ -1,6 +1,7 @@
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import { Component } from 'react';
+import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { LoginLink } from '../components/Links';
@@ -10,7 +11,11 @@ interface FormType extends FormContainerType {
   email: string;
 }
 
-export default class ForgotPassword extends Component<{}> {
+export default class ForgotPassword extends Component<{}, { navigate?: string; errorMessage?: string }> {
+  state = {
+    navigate: undefined,
+    errorMessage: undefined,
+  };
   recoverPassword = async (formData: FormType) => {
     try {
       const response = await fetch(`${environment.backendEndpoint}/auth/forgot-password`, {
@@ -24,19 +29,26 @@ export default class ForgotPassword extends Component<{}> {
       const data = await response.json();
 
       if (!response.ok) {
-        return this.setState({ errorMessage: data.message || 'ForgotPassword failed' });
+        throw new Form.Error(data.message || 'ForgotPassword failed', 'ForgotPassword Error');
       }
 
-      location.href = `/auth/confirm-recover?email=${formData.email}`;
+      this.setState({ navigate: '/auth/confirm-recover?email=' + formData.email });
     } catch (error) {
-      console.error('Error during fetch operation', error);
-      this.setState({ errorMessage: 'Error during ForgotPassword' });
+      if (error instanceof Form.Error) {
+        throw error;
+      }
+      throw new Form.Error('Error during fetch operation', 'ForgotPassword Error');
     }
   };
 
   render() {
     const queryParams = new URLSearchParams(location.search);
     const email = queryParams.get('email');
+
+    const { navigate } = this.state;
+    if (navigate) {
+      return (<Navigate to={navigate} replace={true}/>);
+    }
 
     return (
       <Box className='auth-page'>
