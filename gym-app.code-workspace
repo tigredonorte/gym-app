@@ -2,9 +2,6 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../clickpart/clickpart-backend"
 		}
 	],
 	"settings": {}
