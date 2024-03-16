@@ -2,8 +2,8 @@ import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
+import { EnvContext } from '@gym-app/shared/web';
 
 interface FormType extends FormContainerType {
   email: string;
@@ -11,6 +11,8 @@ interface FormType extends FormContainerType {
 }
 
 export default class ConfirmRecoverPassword extends React.Component< object,{ navigate?: string }> {
+  static contextType = EnvContext;
+  declare context: React.ContextType<typeof EnvContext>;
   state = {
     navigate: undefined,
   };
@@ -19,7 +21,7 @@ export default class ConfirmRecoverPassword extends React.Component< object,{ na
     const data = await Form.executeRequest<FormType>({
       formData,
       errorMessage: 'Error confirming code',
-      url: `${environment.backendEndpoint}/auth/confirm-recover`,
+      url: `${this.context.backendEndpoint}/auth/confirm-recover`,
     });
 
     if (data.errorMessage) {

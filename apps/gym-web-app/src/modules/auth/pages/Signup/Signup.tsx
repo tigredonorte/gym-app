@@ -1,8 +1,8 @@
+import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import { Component } from 'react';
 import { Navigate } from 'react-router-dom';
-import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { ErrorAlert } from '../components/ErrorAlert';
 import { LoginLink } from '../components/Links';
@@ -23,6 +23,8 @@ interface FormType extends FormContainerType {
 }
 
 export default class Signup extends Component<object, SignupState> {
+  static contextType = EnvContext;
+  declare context: React.ContextType<typeof EnvContext>;
   state = {
     isFormValid: false,
     errorMessage: '',
@@ -35,8 +37,7 @@ export default class Signup extends Component<object, SignupState> {
 
   handleSignup = async (formData: FormType) => {
     try {
-      console.log('Signup form data', formData);
-      const response = await fetch(`${environment.backendEndpoint}/auth/signup`, {
+      const response = await fetch(`${this.context.backendEndpoint}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,7 +60,7 @@ export default class Signup extends Component<object, SignupState> {
 
   checkEmailExists = async (email: string): Promise<string | null> => {
     try {
-      const response = await fetch(`${environment.backendEndpoint}/auth/checkEmail`, {
+      const response = await fetch(`${this.context.backendEndpoint}/auth/checkEmail`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
