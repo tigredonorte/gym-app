@@ -3,7 +3,7 @@ import { Document, SchemaTypes } from 'mongoose';
 
 @Schema()
 export class EmailLogger {
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   template!: string;
 
   @Prop({ required: true, minlength: 3 })
