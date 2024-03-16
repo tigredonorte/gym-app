@@ -89,14 +89,17 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
 
   render() {
     const { touched, error } = this.state;
-    const { validators, blurValidators, ...inputProps } = this.props;
+    const { validators, blurValidators, initialValue, ...inputProps } = this.props;
 
     const isHidden = inputProps.type === 'hidden';
     const style = isHidden ? { display: 'none' } : {};
+    const currentValue = this.context.formData[this.props.name];
+
     return (
       <FormControl variant="outlined" fullWidth margin="normal" style={style}>
         <TextField
           {...inputProps}
+          value={currentValue || ''}
           error={!!(error) && touched}
           helperText={(touched && !!error && (<span dangerouslySetInnerHTML={{ __html: error }} />)) || ''}
           onChange={this.handleChange}
