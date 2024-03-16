@@ -1,0 +1,9 @@
+<%- include('header') %>
+<table class="email-container" role="module" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <h1>New Login Alert</h1>
+  <p>We detected a new login to your account from a new device or location.</p>
+  <%- include('helpers/accessDetails') %>
+  <p>If this was you, you can safely ignore this email. If you don't recognize this activity, please change your password immediately.</p>
+  <a href="<%= securitySettingsLink %>" class="button" style="margin-top: 15px;">Manage Security Settings</a>
+</table>
+<%- include('footer') %>

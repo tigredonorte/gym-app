@@ -1,5 +1,7 @@
 import { IRenderedEmail } from "@gym-app/email";
 
+const enableEmailLogin = true;
+
 interface IBaseEmailData {
   title: string;
 }
@@ -21,7 +23,17 @@ export const getRecoverPasswordEmail = getEmailTemplate<IRecoverPasswordEmailDat
   { title: 'Password Recovery'}
 );
 
-function getEmailTemplate<EmailData = IRecoverPasswordEmailData>(
+interface ILoginEmailData extends IUserDataInfo {
+  securitySettingsLink: string,
+}
+export const getEmailLoginTemplate = getEmailTemplate<ILoginEmailData>(
+  'login.email',
+  'New login on your account', 
+  { title: 'New Login Alert' }, 
+  enableEmailLogin
+);
+ 
+function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailData>(
   ejsFile: string,
   subject: string,
   emailDefaultData: IBaseEmailData,
