@@ -1,6 +1,6 @@
 import React from 'react';
-import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { AuthRouter, AuthPath } from '../modules/auth/Auth.router';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { AuthPath, AuthRouter } from '@gym-app/auth/web';
 import { UserPath, UserRouter } from '../modules/user/User.router';
 
 const isAuthenticated = () => {
@@ -9,7 +9,7 @@ const isAuthenticated = () => {
 };
 
 export const AppRouter: React.FC = () => {
-  const location = useLocation();
+  useLocation();
 
   if (!isAuthenticated()) {
     return (
