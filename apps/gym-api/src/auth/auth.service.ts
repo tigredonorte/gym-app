@@ -22,19 +22,20 @@ export class AuthService {
     return this.userService.emailExists(data.email);
   }
 
-  async login({ email, password }: LoginDto) {
-    const [result, emailExists] = await Promise.all([
-      this.userService.findByEmailAndPassword(email, password),
-      this.userService.emailExists(email)
-    ]);
-    if (result) {
-      return result;
+  async login({ email, password }: LoginDto, userData: IRequestInfo['userData']) {
+    const result = await this.userService.findByEmailAndPassword(email, password);
+
+    if (!result) {
+      throw new Error('Invalid email or password');
     }
 
-    if (!emailExists) {
-      throw new Error('Email does not exist');
-    }
-    throw new Error('Invalid password');
+    const emailData = this.getUserAccessData(userData);
+    await this.emailService.sendRenderedEmail(getEmailLoginTemplate(email, {
+      ...emailData,
+      securitySettingsLink: `${process.env.FRONTEND_URL}/user/security`,
+    }));
+
+    return result;
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfo['userData']) {

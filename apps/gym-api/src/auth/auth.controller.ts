@@ -11,8 +11,8 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() data: LoginDto) {
-    return this.authService.login(data);
+  async login(@Body() data: LoginDto, @Req() req: IRequestInfo) {
+    return this.authService.login(data, req.userData);
   }
 
   @Post('signup')
