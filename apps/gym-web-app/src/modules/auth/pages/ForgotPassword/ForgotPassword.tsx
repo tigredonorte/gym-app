@@ -1,17 +1,21 @@
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
-import { Component } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 
+interface ForgotPassowordState {
+  navigate?: string;
+  errorMessage?: string;
+}
 interface FormType extends FormContainerType {
   email: string;
 }
 
-export default class ForgotPassword extends Component<{}, { navigate?: string; errorMessage?: string }> {
+export default class ForgotPassword extends React.Component<object, ForgotPassowordState> {
   state = {
     navigate: undefined,
     errorMessage: undefined,
@@ -47,17 +51,17 @@ export default class ForgotPassword extends Component<{}, { navigate?: string; e
 
     const { navigate } = this.state;
     if (navigate) {
-      return (<Navigate to={navigate} replace={true}/>);
+      return (<Navigate to={navigate} replace={true} />);
     }
 
     return (
-      <Box className='auth-page'>
+      <Box className="auth-page">
         <Form.Provider>
           <Form.Container onSave={this.recoverPassword} className="auth-form box">
             <Form.Title title="Forgot Password" />
             <Form.Text text="You will receive a code on your email in order to recover your account" />
-            <EmailField name='email' defaultValue={email || ''} />
-            <Form.Button.Submit fullWidth title='Send me the code on my email' />
+            <EmailField name="email" initialValue={email || ''} />
+            <Form.Button.Submit fullWidth title="Send me the code on my email" />
           </Form.Container>
         </Form.Provider>
         <LoginLink />
