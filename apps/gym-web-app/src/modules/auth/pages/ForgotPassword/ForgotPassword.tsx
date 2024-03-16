@@ -2,10 +2,10 @@ import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
+import { EnvContext } from '@gym-app/shared/web';
 
 interface ForgotPassowordState {
   navigate?: string;
@@ -16,13 +16,15 @@ interface FormType extends FormContainerType {
 }
 
 export default class ForgotPassword extends React.Component<object, ForgotPassowordState> {
+  static contextType = EnvContext;
+  declare context: React.ContextType<typeof EnvContext>;
   state = {
     navigate: undefined,
     errorMessage: undefined,
   };
   recoverPassword = async (formData: FormType) => {
     try {
-      const response = await fetch(`${environment.backendEndpoint}/auth/forgot-password`, {
+      const response = await fetch(`${this.context.backendEndpoint}/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

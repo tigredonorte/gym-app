@@ -2,15 +2,17 @@ import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { PasswordField } from '../components/fields/PasswordField';
+import { EnvContext } from '@gym-app/shared/web';
 
 interface FormType extends FormContainerType {
   email: string;
 }
 
 export default class ChangePassword extends React.Component<object, { navigate?: string }> {
+  static contextType = EnvContext;
+  declare context: React.ContextType<typeof EnvContext>;
   state = {
     navigate: '',
   };
@@ -18,7 +20,7 @@ export default class ChangePassword extends React.Component<object, { navigate?:
     const data = await Form.executeRequest<FormType>({
       formData,
       errorMessage: 'Error changing password',
-      url: `${environment.backendEndpoint}/auth/change-password`,
+      url: `${this.context.backendEndpoint}/auth/change-password`,
     });
 
     if (data.errorMessage) {
