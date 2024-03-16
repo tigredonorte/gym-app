@@ -1,12 +1,12 @@
+import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
-import { Form, FormContainerType } from '@gym-app/total-form';
 import { ForgotLink, SignupLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
 import { PasswordField } from '../components/fields/PasswordField';
-import { Navigate } from 'react-router-dom';
 
 interface LoginState {
   email: string;
@@ -19,7 +19,7 @@ interface FormType extends FormContainerType {
 }
 
 
-export default class Login extends React.Component<{}, LoginState> {
+export default class Login extends React.Component<object, LoginState> {
   state = {
     email: '',
     navigate: '',

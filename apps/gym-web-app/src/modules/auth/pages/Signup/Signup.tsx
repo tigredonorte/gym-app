@@ -22,7 +22,7 @@ interface FormType extends FormContainerType {
   password: string;
 }
 
-export default class Signup extends Component<{}, SignupState> {
+export default class Signup extends Component<object, SignupState> {
   state = {
     isFormValid: false,
     errorMessage: '',

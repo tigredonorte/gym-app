@@ -1,8 +1,8 @@
-import React from 'react';
 import { InputField, InputFieldProps, mergeValidators } from '@gym-app/total-form';
+import React from 'react';
 import { isPasswordValid } from './validateInput';
 
-interface PasswordFieldProps extends InputFieldProps<string> {}
+type PasswordFieldProps = InputFieldProps<string>
 
 export const PasswordField: React.FC<PasswordFieldProps> = ({ validators, name, ...props }: PasswordFieldProps) => (
   <InputField
