@@ -1,7 +1,8 @@
-import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
 import { User } from '../user/user.model';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
+import { IRequestInfo } from './request-info-middleware';
 
 @Controller('auth')
 export class AuthController {
@@ -10,7 +11,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body(new ValidationPipe()) data: LoginDto) {
+  async login(@Body() data: LoginDto) {
     return this.authService.login(data);
   }
 
@@ -22,8 +23,8 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(new ValidationPipe()) data: ForgotPasswordDto) {
-    return this.authService.forgotPassword(data);
+  async forgotPassword(@Body(new ValidationPipe()) data: ForgotPasswordDto, @Req() req: IRequestInfo) {
+    return this.authService.forgotPassword(data, req.userData);
   }
 
   @Post('confirm-recover')
@@ -41,12 +42,11 @@ export class AuthController {
   @Post('checkEmail')
   @HttpCode(HttpStatus.OK)
   async checkEmail(@Body(new ValidationPipe()) data: CheckEmailDto) {
-    console.log('Check email', data);
-    const result = this.authService.checkEmail(data);
-    if (!result) {
+    const result = await this.authService.checkEmail(data);
+    if (result) {
       throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
     }
-    return;
+    return {};
   }
 
 }

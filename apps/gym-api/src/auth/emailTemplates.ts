@@ -4,7 +4,14 @@ interface IBaseEmailData {
   title: string;
 }
 
-interface IRecoverPasswordEmailData {
+interface IUserDataInfo {
+  browser: string;
+  location: string;
+  os: string;
+  device: string;
+}
+
+interface IRecoverPasswordEmailData extends IUserDataInfo {
   recoverCode: string;
   recoverLink: string;
 }
@@ -13,9 +20,12 @@ export const getRecoverPasswordEmail = getEmailTemplate<IRecoverPasswordEmailDat
   'Attempt to recover your password',
   { title: 'Password Recovery'}
 );
- 
-function getEmailTemplate<EmailData extends IRenderedEmail['emailData']>(
-  ejsFile: string, subject: string, emailDefaultData: IBaseEmailData, featureFlag = true
+
+function getEmailTemplate<EmailData = IRecoverPasswordEmailData>(
+  ejsFile: string,
+  subject: string,
+  emailDefaultData: IBaseEmailData,
+  featureFlag = true
 ) {
   if (!featureFlag) {
     console.warn(`Feature flag for ${ejsFile} is disabled`);
