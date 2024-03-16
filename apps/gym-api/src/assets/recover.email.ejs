@@ -1,16 +1,17 @@
-<%- include('header') %>
+<%- include('helpers/header') %>
 <table class="email-container" role="module" border="0" cellpadding="0" cellspacing="0" width="100%">
   <tr>
     <td style="padding: 40px; text-align: center; background-color: #ffffff;">
       <h1 style="color: #102A43; margin-bottom: 20px;">Password Recovery</h1>
       <p style="color: #333333; font-size: 16px;">An attempt to recover your password has been made.</p>
+      <%- include('helpers/accessDetails') %>
       <p style="color: #333333; font-size: 16px; margin-top: 20px;">If it wasn't you, please ignore this email.</p>
       <div style="margin-top: 30px;">
         <p style="color: #102A43; font-size: 20px;">Your Recovery Code:</p>
         <p class="recovery-code"><%= recoverCode %></p>
       </div>
-      <a href="<%= recoverLink %>" class="button">Recover Password</a>
+      <a href="<%= recoverLink %>" class="button" style="margin-top: 15px;">Recover Password</a>
     </td>
   </tr>
 </table>
-<%- include('footer') %>
+<%- include('helpers/footer') %>

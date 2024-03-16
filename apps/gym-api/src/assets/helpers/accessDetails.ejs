@@ -1,0 +1,18 @@
+<div style="margin: 20px 0;">
+  <p><strong>Date & Time:</strong> <%= new Date().toLocaleString() %></p>
+  <% if (location) { %>
+    <p><strong>Location:</strong> <%= location %></p>
+  <% } %>
+  
+  <% if (device) { %>
+    <p><strong>Device:</strong> <%= device %></p>
+  <% } %>
+  
+  <% if (browser) { %>
+    <p><strong>Browser:</strong> <%= browser %></p>
+  <% } %>
+  
+  <% if (os) { %>
+    <p><strong>System:</strong> <%= os %></p>
+  <% } %>
+</div>
