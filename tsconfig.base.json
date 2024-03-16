@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@gym-app/auth/web": ["libs/auth/web/src/index.ts"],
       "@gym-app/email": ["libs/email/src/index.ts"],
       "@gym-app/shared/web": ["libs/shared/web/src/index.ts"],
       "@gym-app/total-form": ["libs/total-form/src/index.ts"]

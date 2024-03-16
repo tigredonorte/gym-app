@@ -18,7 +18,6 @@ interface FormType extends FormContainerType {
   password: string;
 }
 
-
 export default class Login extends React.Component<object, LoginState> {
   static contextType = EnvContext;
   declare context: React.ContextType<typeof EnvContext>;
