@@ -1,16 +1,19 @@
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { Box } from '@mui/material';
-import { Component } from 'react';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { environment } from '../../../../environments/environment';
 import '../Auth.scss';
 import { PasswordField } from '../components/fields/PasswordField';
-import { Navigate } from 'react-router-dom';
 
 interface FormType extends FormContainerType {
   email: string;
 }
 
-export default class ChangePassword extends Component<{}, { navigate: string }> {
+export default class ChangePassword extends React.Component<object, { navigate?: string }> {
+  state = {
+    navigate: '',
+  };
   changePassword = async (formData: FormType) => {
     const data = await Form.executeRequest<FormType>({
       formData,
@@ -19,7 +22,7 @@ export default class ChangePassword extends Component<{}, { navigate: string }> 
     });
 
     if (data.errorMessage) {
-      return alert(data.errorMessage);
+      throw new Form.Error(data.errorMessage, 'ChangePassword Error');
     }
     alert('Password changed successfully');
     this.setState({ navigate: '/auth' });
@@ -28,7 +31,7 @@ export default class ChangePassword extends Component<{}, { navigate: string }> 
   render() {
     const { navigate } = this.state;
     if (navigate) {
-      return (<Navigate to={navigate} replace={true}/>);
+      return (<Navigate to={navigate} replace={true} />);
     }
 
     const queryParams = new URLSearchParams(location.search);
@@ -36,17 +39,17 @@ export default class ChangePassword extends Component<{}, { navigate: string }> 
     const token = queryParams.get('token') || '';
 
     return (
-      <Box className='auth-page'>
+      <Box className="auth-page">
         <Form.Provider>
           <Form.Container onSave={this.changePassword} className="auth-form box">
             <Form.Title title="Change Password" />
             <Form.Text text="Your code has been confirmed!" />
-            <Form.Fields.ConfirmField confirmLabel="Confirm Password" confirmName='confirmPassword'>
-              <PasswordField name='password' />
+            <Form.Fields.ConfirmField confirmLabel="Confirm Password" confirmName="confirmPassword">
+              <PasswordField name="password" />
             </Form.Fields.ConfirmField>
             <Form.Fields.TextField type="hidden" name="email" value={email} />
             <Form.Fields.TextField type="hidden" name="token" value={token} />
-            <Form.Button.Submit fullWidth title='Change Password' />
+            <Form.Button.Submit fullWidth title="Change Password" />
           </Form.Container>
         </Form.Provider>
       </Box>
