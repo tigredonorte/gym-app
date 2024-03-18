@@ -62,6 +62,9 @@ dependencies:
   expo-status-bar:
     specifier: ~1.6.0
     version: 1.6.0
+  express:
+    specifier: ^4.18.3
+    version: 4.18.3
   geoip-lite:
     specifier: ^1.4.10
     version: 1.4.10
@@ -205,6 +208,12 @@ devDependencies:
   '@types/ejs':
     specifier: ^3.1.5
     version: 3.1.5
+  '@types/express':
+    specifier: ^4.17.21
+    version: 4.17.21
+  '@types/geoip-lite':
+    specifier: ^1.4.4
+    version: 1.4.4
   '@types/jest':
     specifier: ^29.5.12
     version: 29.5.12
@@ -226,6 +235,9 @@ devDependencies:
   '@types/react-dom':
     specifier: 18.2.9
     version: 18.2.9
+  '@types/ua-parser-js':
+    specifier: ^0.7.39
+    version: 0.7.39
   '@typescript-eslint/eslint-plugin':
     specifier: ^5.62.0
     version: 5.62.0(@typescript-eslint/parser@5.62.0)(eslint@8.46.0)(typescript@5.1.6)
@@ -5869,6 +5881,10 @@ packages:
       '@types/serve-static': 1.15.5
     dev: true
 
+  /@types/geoip-lite@1.4.4:
+    resolution: {integrity: sha512-2uVfn+C6bX/H356H6mjxsWUA5u8LO8dJgSBIRO/NFlpMe4DESzacutD/rKYrTDKm1Ugv78b4Wz1KvpHrlv3jSw==}
+    dev: true
+
   /@types/graceful-fs@4.1.9:
     resolution: {integrity: sha512-olP3sd1qOEe5dXTSaFvQG+02VdRXcdytWLAZsAq1PecU8uqQAhkrnbli7DagjtXKW/Bl7YJbUsa8MPcuc8LHEQ==}
     dependencies:
@@ -6069,6 +6085,10 @@ packages:
 
   /@types/tough-cookie@4.0.5:
     resolution: {integrity: sha512-/Ad8+nIOV7Rl++6f1BdKxFSMgmoqEoYbHRpPcx3JEfv8VRsQe9Z4mCXeJBzxs7mbHY/XOZZuXlRNfhpVPbs6ZA==}
+    dev: true
+
+  /@types/ua-parser-js@0.7.39:
+    resolution: {integrity: sha512-P/oDfpofrdtF5xw433SPALpdSchtJmY7nsJItf8h3KXqOslkbySh8zq4dSWXH2oTjRvJ5PczVEoCZPow6GicLg==}
     dev: true
 
   /@types/validator@13.11.9:
@@ -10045,7 +10065,6 @@ packages:
       vary: 1.1.2
     transitivePeerDependencies:
       - supports-color
-    dev: true
 
   /ext-list@2.2.2:
     resolution: {integrity: sha512-u+SQgsubraE6zItfVA0tBuCBhfU9ogSRnsvygI7wht9TS510oLkBRXBsqopeUG/GBOIQyKZO9wjTqIu/sf5zFA==}

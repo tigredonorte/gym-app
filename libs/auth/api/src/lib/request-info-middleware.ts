@@ -1,10 +1,11 @@
-import { Injectable, NestMiddleware, Next, Request } from '@nestjs/common';
+import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Response, Request } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 
-export interface IRequestInfo extends Request {
+export interface IRequestInfo {
+  ip: string;
   clientIp?: string;
-  ip?: string;
   userData: {
     deviceInfo?: {
       browser: { name?: string; version?: string; major?: string; };
@@ -21,17 +22,18 @@ export interface IRequestInfo extends Request {
       ll?: [number, number];
       metro?: number;
       area?: number;
-    };
+    } | null;
     ip?: string;
   }
 }
 
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
-  use(req: IRequestInfo, res: Response, next: Function) {
-    const ua = new UAParser(req.headers['user-agent']).getResult();
-    const ip = req.clientIp || req.headers['x-forwarded-for']?.split(',')[0] || req.ip;
-    const geo = geoip.lookup(ip);
+  use(req: IRequestInfo & Request, res: Response, next: () => void) {
+    const temp = req.headers['user-agent'] || undefined; 
+    const ua = new UAParser(temp).getResult();
+    const ip = getIp(req);
+    const geo = ip ? geoip.lookup(`${ip}`) : null;
 
     req.userData = {
       deviceInfo: {
@@ -44,4 +46,24 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
     }
     next();
   }
+}
+
+function getIp(req: Request & IRequestInfo): string | undefined {
+  if (req.clientIp) {
+    return req.clientIp;
+  }
+
+  if (req.ip) {
+    return req.ip;
+  }
+  
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    const ips = forwarded.split(',');
+    return ips[0];
+  } else if (Array.isArray(forwarded)) {
+    return forwarded[0];
+  }
+
+  return undefined;
 }

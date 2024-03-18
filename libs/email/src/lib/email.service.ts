@@ -71,7 +71,11 @@ export class EmailService {
     }
   }
 
-  public async sendRenderedEmail(data: IRenderedEmail) {
+  public async sendRenderedEmail(data: IRenderedEmail | null) {
+    if (!data) {
+      return;
+    }
+
     const html = await this.renderEmail(data);
     const from = process.env['SENDGRID_FROM_EMAIL'];
 

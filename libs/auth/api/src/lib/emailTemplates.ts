@@ -1,7 +1,5 @@
 import { IRenderedEmail } from "@gym-app/email";
 
-const enableEmailLogin = true;
-
 interface IBaseEmailData {
   title: string;
 }
@@ -30,7 +28,7 @@ export const getEmailLoginTemplate = getEmailTemplate<ILoginEmailData>(
   'login.email',
   'New login on your account', 
   { title: 'New Login Alert' }, 
-  enableEmailLogin
+  process.env['ENABLE_LOGIN_EMAIL'] === 'true'
 );
  
 function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailData>(
@@ -39,12 +37,13 @@ function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailDat
   emailDefaultData: IBaseEmailData,
   featureFlag = true
 ) {
+  const path = `${__dirname}/assets/${ejsFile}.ejs`;
+  console.log({ path });
   if (!featureFlag) {
     console.warn(`Feature flag for ${ejsFile} is disabled`);
-    return;
+    return () => null;
   }
 
-  const path = `${__dirname}/assets/${ejsFile}.ejs`;
   return (email: string, emailData: EmailData): IRenderedEmail => ({
     to: email,
     subject,

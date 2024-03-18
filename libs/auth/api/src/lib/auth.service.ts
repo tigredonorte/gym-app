@@ -1,7 +1,7 @@
 import { EmailService } from '@gym-app/email';
 import { Injectable } from '@nestjs/common';
-import { User } from '../user/user.model';
-import { UserService } from '../user/user.service';
+import { User } from '../../../../../apps/gym-api/src/user/user.model';
+import { UserService } from '../../../../../apps/gym-api/src/user/user.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 import { getEmailLoginTemplate, getRecoverPasswordEmail } from './emailTemplates';
 import { IRequestInfo } from './request-info-middleware';
@@ -32,7 +32,7 @@ export class AuthService {
     const emailData = this.getUserAccessData(userData);
     await this.emailService.sendRenderedEmail(getEmailLoginTemplate(email, {
       ...emailData,
-      securitySettingsLink: `${process.env.FRONTEND_URL}/user/security`,
+      securitySettingsLink: `${process.env['FRONTEND_URL']}/user/security`,
     }));
 
     return result;
@@ -45,7 +45,7 @@ export class AuthService {
       getRecoverPasswordEmail(data.email, {
         ...emailData,
         recoverCode: this.toBase64(response.recoverCode),
-        recoverLink: `${process.env.FRONTEND_URL}/auth/confirm-recover?email=${data.email}&token=${this.toBase64(response.recoverCode)}`,
+        recoverLink: `${process.env['FRONTEND_URL']}/auth/confirm-recover?email=${data.email}&token=${this.toBase64(response.recoverCode)}`,
       })
     );
     return {};
