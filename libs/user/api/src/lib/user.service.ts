@@ -1,9 +1,10 @@
-import { ConflictException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from './user.model';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './user.model';
+import _ = require('lodash');
 
 @Injectable()
 export class UserService {
@@ -25,7 +26,7 @@ export class UserService {
     }
   }
 
-  async create(userData: Partial<User>): Promise<User> {
+  async create(userData: Partial<User>): Promise<Omit<User, 'password'>> {
     try {
       if (userData?.password) {
         userData.password = await this.hashPassword(userData.password);
@@ -34,13 +35,11 @@ export class UserService {
       const createdUser = new this.userModel(userData);
       await createdUser.save();
       const plain = createdUser.toObject();
-      delete plain.password;
-      delete plain.__v;
       plain.id = createdUser._id.toString();
       delete plain._id;
-      return plain;
+      return _.omit(plain, ['password', '__v']);
     } catch (error) {
-      if (error.code === 11000) {  // MongoDB duplicate key error code
+      if (_.get(error, 'code') === 11000) {
         throw new ConflictException('Email already exists');
       }
       throw error; // Re-throw the error if it's not a duplicate key error
@@ -52,7 +51,7 @@ export class UserService {
     return !!user;
   }
 
-  async findByEmailAndPassword(email: string, password: string): Promise<User | null> {
+  async findByEmailAndPassword(email: string, password: string): Promise<Omit<User, 'password'> | null> {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
     }
@@ -68,11 +67,11 @@ export class UserService {
     }
 
     const result = user.toObject();
-    delete result.password;
-    return result;
+    result.id = user._id.toString();
+    return _.omit(result, ['password', '__v', '_id']);
   }
 
-  private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date, changePasswordCode: string } {
+  private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date } {
     const recoverCode = crypto.randomBytes(12).toString('base64');
     const expiresAt = new Date(new Date().getTime() + 30*60000); // 30 minutes from now
   
@@ -80,7 +79,6 @@ export class UserService {
       code: recoverCode,
       expiresAt: expiresAt,
       createdAt: new Date(),
-      changePasswordCode: undefined
     };
   }
 
@@ -90,18 +88,19 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
   
-    if (user.recoverCode && user.recoverCode.expiresAt > new Date()) {
+    if (user.recoverCode && user.recoverCode.code && user.recoverCode.expiresAt > new Date()) {
       return {
         recoverCode: user.recoverCode.code,
         exists: true
       };
     }
 
-    user.recoverCode = this.getRecoverCode();
+    const recoverCode = this.getRecoverCode();
+    user.recoverCode = recoverCode;
     await user.save();
 
     return {
-      recoverCode: user.recoverCode.code,
+      recoverCode: recoverCode.code,
       exists: false
     };
   }
@@ -117,22 +116,23 @@ export class UserService {
       return false;
     }
   
-    const changePasswordCode = crypto.randomBytes(12).toString('base64');
-    user.recoverCode = {
+    const recoverCode = this.getRecoverCode();
+    user.recoverCode = { 
       code: undefined,
-      expiresAt: undefined,
-      createdAt: undefined,
-      changePasswordCode,
-    };
+      expiresAt: recoverCode.expiresAt,
+      createdAt: recoverCode.createdAt,
+      changePasswordCode: recoverCode.code
+    }
     await user.save();
   
-    return changePasswordCode;
+    return recoverCode.code;
   }
 
   async changePassword(email: string, password: string, token: string): Promise<boolean> {
     const user = await this.userModel.findOne({
       email,
-      'recoverCode.changePasswordCode': token
+      'recoverCode.changePasswordCode': token,
+      'recoverCode.expiresAt': { $gt: new Date() }
     }).exec();
   
     if (!user) {
