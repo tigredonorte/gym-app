@@ -1,7 +1,6 @@
 import { EmailService } from '@gym-app/email';
+import { User, UserService } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
-import { User } from '../../../../../apps/gym-api/src/user/user.model';
-import { UserService } from '../../../../../apps/gym-api/src/user/user.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 import { getEmailLoginTemplate, getRecoverPasswordEmail } from './emailTemplates';
 import { IRequestInfo } from './request-info-middleware';
@@ -14,7 +13,7 @@ export class AuthService {
     private emailService: EmailService,
   ) {}
 
-  async signup(data: SignupDto): Promise<User> {
+  async signup(data: SignupDto): Promise<Omit<User, 'password'>> {
     return this.userService.create(data);
   }
 

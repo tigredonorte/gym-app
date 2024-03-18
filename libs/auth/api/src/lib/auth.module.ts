@@ -1,6 +1,6 @@
 import { EmailModule } from '@gym-app/email';
+import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
-import { UserModule } from '../../../../../apps/gym-api/src/user/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
