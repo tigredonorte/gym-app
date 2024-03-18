@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
-import { User } from '../user/user.model';
+import { User } from '../../../../../apps/gym-api/src/user/user.model';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { IRequestInfo } from './request-info-middleware';

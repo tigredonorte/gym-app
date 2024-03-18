@@ -1,13 +1,8 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
+import { CustomRequestInfoMiddleware } from '@gym-app/auth/api';
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import * as requestIp from 'request-ip';
 import { AppModule } from './app/app.module';
-import { CustomRequestInfoMiddleware } from './auth/request-info-middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
