@@ -5,11 +5,15 @@ import * as crypto from 'crypto';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
+import { UserEventsService } from './user-events.service';
+
+type UserReturnType = Omit<User, 'password'> & { id?: string };
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private userEventService: UserEventsService,
   ) {}
 
   private async hashPassword(password: string): Promise<string> {
@@ -26,7 +30,7 @@ export class UserService {
     }
   }
 
-  async create(userData: Partial<User>): Promise<Omit<User, 'password'>> {
+  async create(userData: Partial<User>): Promise<UserReturnType> {
     try {
       if (userData?.password) {
         userData.password = await this.hashPassword(userData.password);
@@ -37,12 +41,18 @@ export class UserService {
       const plain = createdUser.toObject();
       plain.id = createdUser._id.toString();
       delete plain._id;
-      return _.omit(plain, ['password', '__v']);
+      const plainUser = _.omit(plain, ['password', '__v']);
+      this.userEventService.emitUserCreated({
+        name: plainUser.name,
+        email: plainUser.email,
+        id: plainUser.id,
+      })
+      return plainUser;
     } catch (error) {
       if (_.get(error, 'code') === 11000) {
         throw new ConflictException('Email already exists');
       }
-      throw error; // Re-throw the error if it's not a duplicate key error
+      throw error;
     }
   }
 
@@ -51,7 +61,7 @@ export class UserService {
     return !!user;
   }
 
-  async findByEmailAndPassword(email: string, password: string): Promise<Omit<User, 'password'> | null> {
+  async findByEmailAndPassword(email: string, password: string): Promise<UserReturnType | null> {
     if (!email || !password) {
       throw new BadRequestException('Email and password are required');
     }

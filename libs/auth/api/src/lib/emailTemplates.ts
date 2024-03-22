@@ -38,7 +38,6 @@ function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailDat
   featureFlag = true
 ) {
   const path = `${__dirname}/assets/${ejsFile}.ejs`;
-  console.log({ path });
   if (!featureFlag) {
     console.warn(`Feature flag for ${ejsFile} is disabled`);
     return () => null;
