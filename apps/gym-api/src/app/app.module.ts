@@ -22,9 +22,10 @@ import { AppService } from './app.service';
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
-        uri: `mongodb://${config.get('MONGO_USER')}:${config.get('MONGO_PASSWORD')}@localhost:27017/${config.get('MONGO_DB')}`,
+        uri: `mongodb://${config.get('MONGO_USER')}:${config.get('MONGO_PASSWORD')}@${config.get('MONGO_HOST')}:27017/${config.get('MONGO_DB')}?replicaSet=rs0&directConnection=true`,
         useNewUrlParser: true,
         useUnifiedTopology: true,
+        replicaSet: 'rs0',
        }),
       inject: [ConfigService],
     }),
