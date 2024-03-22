@@ -17,8 +17,8 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() data: SignupDto): Promise<Omit<User, 'password'>> {
-    return this.authService.signup(data);
+  async signup(@Body() data: SignupDto, @Req() req: IRequestInfo): Promise<Omit<User, 'password'>> {
+    return this.authService.signup(data, req.userData);
   }
 
   @Post('forgot-password')

@@ -1,8 +1,10 @@
 import { EmailService } from '@gym-app/email';
 import { User, UserService } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
+import { getUserAccessData } from './auth-event-listener.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
-import { getEmailLoginTemplate, getRecoverPasswordEmail } from './emailTemplates';
+import { AuthEventsService } from './auth.events';
+import { getRecoverPasswordEmail } from './emailTemplates';
 import { IRequestInfo } from './request-info-middleware';
 
 @Injectable()
@@ -11,10 +13,14 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private emailService: EmailService,
+    private authEventsService: AuthEventsService,
   ) {}
 
-  async signup(data: SignupDto): Promise<Omit<User, 'password'>> {
-    return this.userService.create(data);
+  async signup(data: SignupDto, userData: IRequestInfo['userData']): Promise<Omit<User, 'password'>> {
+    const result = await this.userService.create(data);
+    const { name, id, email } = result;
+    await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
+    return result;
   }
 
   async checkEmail(data: CheckEmailDto): Promise<boolean> {
@@ -28,18 +34,14 @@ export class AuthService {
       throw new Error('Invalid email or password');
     }
 
-    const emailData = this.getUserAccessData(userData);
-    await this.emailService.sendRenderedEmail(getEmailLoginTemplate(email, {
-      ...emailData,
-      securitySettingsLink: `${process.env['FRONTEND_URL']}/user/security`,
-    }));
-
+    const { name, id } = result;
+    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData });
     return result;
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfo['userData']) {
     const response = await this.userService.createRecoverCode(data.email);
-    const emailData = this.getUserAccessData(userData);
+    const emailData = getUserAccessData(userData);
     await this.emailService.sendRenderedEmail(
       getRecoverPasswordEmail(data.email, {
         ...emailData,
@@ -84,13 +86,5 @@ export class AuthService {
 
   private fromBase64(value: string) {
     return Buffer.from(value, 'base64').toString();
-  }
-
-  private getUserAccessData(userData: IRequestInfo['userData']) {
-    const location = userData.location ? `${userData.location?.city}, ${userData.location?.region}, ${userData.location?.country}`: '';
-    const browser = `${userData.deviceInfo?.browser?.name} ${userData.deviceInfo?.browser?.major }`;
-    const os = `${userData.deviceInfo?.os?.name} ${userData.deviceInfo?.os?.version}`;
-    const device = `${userData.deviceInfo?.device?.vendor} ${userData.deviceInfo?.device?.model}`;
-    return { browser, location, os, device };
   }
 }
