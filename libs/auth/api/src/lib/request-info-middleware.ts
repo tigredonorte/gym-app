@@ -7,22 +7,10 @@ export interface IRequestInfo {
   ip: string;
   clientIp?: string;
   userData: {
-    deviceInfo?: {
-      browser: { name?: string; version?: string; major?: string; };
-      os: { name?: string; version?: string; };
-      device: { model?: string; type?: string; vendor?: string; };
+    deviceInfo?: UAParser.IResult & {
+      isDesktop: boolean;
     };
-    location?: {
-      range?: [number, number];
-      country?: string;
-      region?: string;
-      eu?: "0" | "1";
-      timezone?: string;
-      city?: string;
-      ll?: [number, number];
-      metro?: number;
-      area?: number;
-    } | null;
+    location?: geoip.Lookup | null;
     ip?: string;
   }
 }
@@ -37,9 +25,8 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
 
     req.userData = {
       deviceInfo: {
-        browser: ua.browser,
-        os: ua.os,
-        device: ua.device,
+        ...ua,
+        isDesktop: !temp ? false : isDesktopUserAgent(temp),
       },
       location: geo,
       ip: ip,
@@ -66,4 +53,35 @@ function getIp(req: Request & IRequestInfo): string | undefined {
   }
 
   return undefined;
+}
+
+function isDesktopUserAgent(userAgent: string): boolean {
+  // Patterns that usually indicate a mobile device
+  const mobileIndicators = [
+    'Mobile', 
+    'Android', 
+    'Silk/', 
+    'Kindle', 
+    'BlackBerry', 
+    'Opera Mini', 
+    'Opera Mobi'
+  ];
+  
+  // Simple check for common desktop OS parts in the UA string
+  const desktopIndicators = [
+    'Windows NT', 
+    'Macintosh', 
+    'Mac OS X', 
+    'X11', 
+    'Linux'
+  ];
+  
+  // Check for desktop indicators
+  const isLikelyDesktop = desktopIndicators.some(indicator => userAgent.includes(indicator));
+  
+  // Check for mobile indicators
+  const isLikelyMobile = mobileIndicators.some(indicator => userAgent.includes(indicator));
+  
+  // Considered desktop if likely desktop and not likely mobile
+  return isLikelyDesktop && !isLikelyMobile;
 }
