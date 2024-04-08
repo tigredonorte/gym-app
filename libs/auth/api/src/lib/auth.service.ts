@@ -6,6 +6,8 @@ import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, 
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emailTemplates';
 import { IRequestInfo } from './request-info-middleware';
+import { SessionService } from './session/session.service';
+import { IDeviceInfo, ILocation } from './session';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
     private userService: UserService,
     private emailService: EmailService,
     private authEventsService: AuthEventsService,
+    private sessionService: SessionService,
   ) {}
 
   async signup(data: SignupDto, userData: IRequestInfo['userData']): Promise<Omit<User, 'password'>> {
@@ -33,10 +36,25 @@ export class AuthService {
     if (!result) {
       throw new Error('Invalid email or password');
     }
-
     const { name, id } = result;
-    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData });
-    return result;
+
+    if (!id) {
+      throw new Error('User not found');
+    }
+
+    const session = await this.sessionService.createSession({
+      userId: id,
+      userData: {
+        deviceInfo: userData.deviceInfo as IDeviceInfo,
+        location: userData.location as ILocation,
+        ip: userData.ip || '',
+      },
+    });
+    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}`, session }, userData });
+    return {
+      ...result,
+      sessionId: session.id,
+    };
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfo['userData']) {

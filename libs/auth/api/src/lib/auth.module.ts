@@ -6,9 +6,15 @@ import { AuthEventListenerService } from './auth-event-listener.service';
 import { AuthController } from './auth.controller';
 import { AuthEventsService } from './auth.events';
 import { AuthService } from './auth.service';
+import { SessionModule } from './session/session.module';
 
 @Module({
-  imports: [UserModule, EmailModule, EventModule],
+  imports: [
+    UserModule,
+    EmailModule,
+    EventModule,
+    SessionModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService, AuthEventsService, AuthEventListenerService],
 })
