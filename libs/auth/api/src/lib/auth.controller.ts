@@ -1,6 +1,6 @@
 import { User } from '@gym-app/user/api';
 import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { IRequestInfo } from './request-info-middleware';
 
@@ -46,6 +46,13 @@ export class AuthController {
     if (result) {
       throw new HttpException('Email not found', HttpStatus.NOT_FOUND);
     }
+    return {};
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body(new ValidationPipe()) data: LogoutDto) {
+    await this.authService.logout(data);
     return {};
   }
 

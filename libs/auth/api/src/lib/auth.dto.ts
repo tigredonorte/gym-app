@@ -79,3 +79,16 @@ export class changePasswordDto implements changePassword {
   @MinLength(6)
   confirmPassword!: string;
 }
+
+interface Logout {
+  sessionId: string;
+  email: string;
+}
+
+export class LogoutDto implements Logout {
+  @IsString()
+  sessionId!: string;
+
+  @IsEmail()
+  email!: string;
+}

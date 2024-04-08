@@ -6,6 +6,7 @@ import { IRequestInfo } from './request-info-middleware';
 export const AuthEventTypes = {
   login: 'authLogin',
   signup: 'authSignup',
+  logout: 'authLogout',
 }
 
 @Injectable()
@@ -18,5 +19,9 @@ export class AuthEventsService {
 
   emitSignup(data: { user: UserEventPayload, userData: IRequestInfo['userData'] }) {
     return this.eventService.create(AuthEventTypes.signup, data);
+  }
+
+  emitLogout(data: { user: UserEventPayload }) {
+    return this.eventService.create(AuthEventTypes.logout, data);
   }
 }

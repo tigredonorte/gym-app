@@ -98,6 +98,23 @@ export class AuthService {
     return {};
   }
 
+  async logout({ sessionId, email }: { sessionId: string, email: string }) {
+    const session = await this.sessionService.findSessionById(sessionId);
+    if (!session) {
+      throw new Error('Session not found');
+    }
+
+    const result = await this.userService.findByEmail(email);
+    if (!result) {
+      throw new Error('User not found');
+    }
+
+    await this.sessionService.deleteSessionById(sessionId);
+
+    const { name, id } = result;
+    await this.authEventsService.emitLogout({ user: { email, name, id: `${id}`, session } });
+  }
+
   private toBase64(value: string) {
     return Buffer.from(value).toString('base64');
   }
