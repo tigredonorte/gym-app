@@ -81,6 +81,19 @@ export class UserService {
     return _.omit(result, ['password', '__v', '_id']);
   }
 
+  async findByEmail(email: string): Promise<UserReturnType | null> {
+    const user = await this.userModel
+      .findOne({ email })
+      .lean()
+      .exec();
+    if (!user) {
+      return null;
+    }
+    const result = _.omit(user, ['password', '__v']);
+    result.id = user._id.toString();
+    return result;
+  }
+
   private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date } {
     const recoverCode = crypto.randomBytes(12).toString('base64');
     const expiresAt = new Date(new Date().getTime() + 30*60000); // 30 minutes from now
