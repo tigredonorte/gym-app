@@ -5,7 +5,7 @@ interface FormTitleProps {
 }
 
 export const FormTitle: React.FC<FormTitleProps> = ({ title }) => (
-  <Typography variant="h4" gutterBottom>
+  <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
     {title}
   </Typography>
 );
