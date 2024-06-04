@@ -17,9 +17,8 @@ export const SubmitButton: React.FC<SubmitButtonProps & ButtonOwnProps> = ({
 }) => {
   
   const { isFormValid, isRequesting } = useFormContext();
-
   return (
-    <Button type="submit" color={color} variant={variant} disabled={!isFormValid || isRequesting} {...props}>
+    <Button type="submit" fullWidth color={color} variant={variant} disabled={!isFormValid || isRequesting} sx={{ mt: 3, mb: 2 }} {...props}>
       {children}
       {title}
       {isRequesting && '...'}

@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, BoxProps, CssBaseline } from '@mui/material';
 import React, { Component } from 'react';
 import { FormContext } from './FormContext';
 import { FormError } from './FormErrorException';
@@ -6,6 +6,7 @@ import FormErrorSnackbar from './FormErrorSnackbar';
 
 interface FormContainerProps<FormProps> extends React.HTMLProps<HTMLFormElement> {
   containerClassName?: string;
+  boxProps?: BoxProps;
   children: React.ReactNode[];
   onSave: (state: FormProps) => void;
   onValidityChange?: (isFormValid: boolean) => void;
@@ -42,10 +43,11 @@ export class FormContainer<FormProps extends FormContainerType> extends Componen
   };
 
   render() {
-    const { children, containerClassName, onValidityChange, onSave, ...props } = this.props;
+    const { children, containerClassName, onValidityChange, onSave, boxProps, ...props } = this.props;
 
     return (
-      <Box className={containerClassName}>
+      <Box className={containerClassName} {...boxProps}>
+        <CssBaseline />
         <FormErrorSnackbar />
         <form onSubmit={this.handleSubmit} {...props}>
           {children}

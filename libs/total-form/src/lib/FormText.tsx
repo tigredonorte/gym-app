@@ -5,7 +5,7 @@ interface FormTextProps {
 }
 
 export const FormText: React.FC<FormTextProps> = ({ text }) => (
-  <Typography variant="caption" gutterBottom textAlign='center'>
+  <Typography variant="caption" gutterBottom textAlign='justify' className="box" sx={{ mb: 2, mt: 2 }}>
     {text}
   </Typography>
 );
