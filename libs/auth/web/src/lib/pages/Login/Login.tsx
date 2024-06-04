@@ -1,6 +1,7 @@
 import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { Box } from '@mui/material';
+import { mdiLogin } from '@mdi/js';
+import { Container, Grid } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import '../Auth.scss';
@@ -63,20 +64,26 @@ export default class Login extends React.Component<object, LoginState> {
 
     const { email } = this.state;
     return (
-      <Box className='auth-page'>
+      <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
-          <Form.Container onSave={this.handleLogin} className="auth-form box" noValidate autoComplete="off">
+          <Form.Container onSave={this.handleLogin} className="auth-form" noValidate autoComplete="off" boxProps={{ sx: { mt: 1 } }}>
+            <Form.Icon path={mdiLogin} />
             <Form.Title title="Login" />
             <EmailField name='email' onChange={(ev) => this.setState({ email: ev.value })}/>
-            <PasswordField name='password'/>
+            <PasswordField name='password' />
+
             <Form.Button.Submit fullWidth title='Login' />
-            <Box className='auth-links'>
-              <ForgotLink includeSubTitle={false} email={email} />
-            </Box>
+            <Grid container>
+              <Grid item xs>
+                <ForgotLink includeSubTitle={false} email={email} />
+              </Grid>
+              <Grid item>
+                <SignupLink includeSubTitle={false} /> 
+              </Grid>
+            </Grid>
           </Form.Container>
-          <SignupLink />
         </Form.Provider>
-      </Box>
+      </Container>
     );
   }
 }

@@ -1,4 +1,4 @@
-import { Link } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 interface LinkCompProps {
@@ -22,10 +22,10 @@ const LinkComp = ({ subTitle, content, url }: LinkCompProps) => {
   }
 
   return (
-    <div className='box'>
-      <span className='pad'>{subTitle}</span>
+    <Box component='div'>
+      <Box component='span' sx={{ pr: 1}}>{subTitle}</Box>
       {LinkType}
-    </div>
+    </Box>
   )
 }
 

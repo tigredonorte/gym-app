@@ -1,6 +1,7 @@
 import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { Box } from '@mui/material';
+import { mdiAccountPlus } from '@mdi/js';
+import { Container } from '@mui/material';
 import { Component } from 'react';
 import { Navigate } from 'react-router-dom';
 import '../Auth.scss';
@@ -89,9 +90,10 @@ export default class Signup extends Component<object, SignupState> {
     }
 
     return (
-      <Box className='auth-page'>
+      <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
-          <Form.Container className="auth-form box" onSave={this.handleSignup}>
+          <Form.Container className="auth-form" onSave={this.handleSignup}>
+          <Form.Icon path={mdiAccountPlus} />
             {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
             <Form.Title title="Signup" />
             <NameField name='name'/>
@@ -101,7 +103,7 @@ export default class Signup extends Component<object, SignupState> {
           </Form.Container>
         </Form.Provider>
         <LoginLink />
-      </Box>
+      </Container>
     );
   }
 }

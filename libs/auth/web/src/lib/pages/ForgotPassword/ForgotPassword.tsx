@@ -1,11 +1,12 @@
+import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { Box } from '@mui/material';
+import { mdiFormTextboxPassword } from '@mdi/js';
+import { Container } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import '../Auth.scss';
 import { LoginLink } from '../components/Links';
 import { EmailField } from '../components/fields/EmailField';
-import { EnvContext } from '@gym-app/shared/web';
 
 interface ForgotPassowordState {
   navigate?: string;
@@ -57,9 +58,10 @@ export default class ForgotPassword extends React.Component<object, ForgotPassow
     }
 
     return (
-      <Box className="auth-page">
+      <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
-          <Form.Container onSave={this.recoverPassword} className="auth-form box">
+          <Form.Container onSave={this.recoverPassword} className="auth-form">
+            <Form.Icon path={mdiFormTextboxPassword} />
             <Form.Title title="Forgot Password" />
             <Form.Text text="You will receive a code on your email in order to recover your account" />
             <EmailField name="email" initialValue={email || ''} />
@@ -67,7 +69,7 @@ export default class ForgotPassword extends React.Component<object, ForgotPassow
           </Form.Container>
         </Form.Provider>
         <LoginLink />
-      </Box>
+      </Container>
     );
   }
 }

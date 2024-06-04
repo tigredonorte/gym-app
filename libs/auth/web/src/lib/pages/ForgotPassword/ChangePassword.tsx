@@ -1,10 +1,11 @@
+import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { Box } from '@mui/material';
+import { mdiOnepassword } from '@mdi/js';
+import { Container } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import '../Auth.scss';
 import { PasswordField } from '../components/fields/PasswordField';
-import { EnvContext } from '@gym-app/shared/web';
 
 interface FormType extends FormContainerType {
   email: string;
@@ -41,9 +42,10 @@ export default class ChangePassword extends React.Component<object, { navigate?:
     const token = queryParams.get('token') || '';
 
     return (
-      <Box className="auth-page">
+      <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
-          <Form.Container onSave={this.changePassword} className="auth-form box">
+          <Form.Container onSave={this.changePassword} className="auth-form">
+            <Form.Icon path={mdiOnepassword} />
             <Form.Title title="Change Password" />
             <Form.Text text="Your code has been confirmed!" />
             <Form.Fields.ConfirmField confirmLabel="Confirm Password" confirmName="confirmPassword">
@@ -54,7 +56,7 @@ export default class ChangePassword extends React.Component<object, { navigate?:
             <Form.Button.Submit fullWidth title="Change Password" />
           </Form.Container>
         </Form.Provider>
-      </Box>
+      </Container>
     );
   }
 }
