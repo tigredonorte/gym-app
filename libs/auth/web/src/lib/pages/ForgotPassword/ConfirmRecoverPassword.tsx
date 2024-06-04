@@ -1,9 +1,10 @@
+import { EnvContext } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { Box } from '@mui/material';
+import { mdiCodeTags } from '@mdi/js';
+import { Container } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import '../Auth.scss';
-import { EnvContext } from '@gym-app/shared/web';
 
 interface FormType extends FormContainerType {
   email: string;
@@ -47,9 +48,10 @@ export default class ConfirmRecoverPassword extends React.Component< object,{ na
     const token = queryParams.get('token') || '';
 
     return (
-      <Box className="auth-page">
+      <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
-          <Form.Container onSave={this.confirmCode} className="auth-form box">
+          <Form.Container onSave={this.confirmCode} className="auth-form">
+            <Form.Icon path={mdiCodeTags} />
             <Form.Title title="Confirm Code" />
             <Form.Text text="We've sent a code to your email account" />
             <Form.Fields.TextField
@@ -63,7 +65,7 @@ export default class ConfirmRecoverPassword extends React.Component< object,{ na
             <Form.Button.Submit fullWidth title="Confirm Code" />
           </Form.Container>
         </Form.Provider>
-      </Box>
+      </Container>
     );
   }
 }
