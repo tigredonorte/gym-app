@@ -35,6 +35,10 @@ export class AuthEventListenerService implements OnApplicationBootstrap {
   }
 
   private async loginEventListener(data: LoginEventPayload) {
+    await this.sendEmailWhenUserLoggedIn(data);
+  }
+
+  private async sendEmailWhenUserLoggedIn(data: LoginEventPayload) {
     const emailData = getUserAccessData(data.userData);
     await this.emailService.sendRenderedEmail(getEmailLoginTemplate(data.user.email, {
       ...emailData,

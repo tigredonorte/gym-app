@@ -12,7 +12,11 @@ export const AuthEventTypes = {
 export class AuthEventsService {
   constructor(private eventService: EventService) {}
 
-  emitLogin(data: { user: UserEventPayload, userData: IRequestInfo['userData'] }) {
+  emitLogout(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string }) {
+    return this.eventService.create(AuthEventTypes.login, data);
+  }
+
+  emitLogin(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string}) {
     return this.eventService.create(AuthEventTypes.login, data);
   }
 

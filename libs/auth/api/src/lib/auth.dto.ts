@@ -30,6 +30,15 @@ export class LoginDto implements Login {
   password!: string;
 }
 
+interface Logout {
+  sessionId: string;
+  email: string;
+}
+export class LogoutDto implements Logout {
+  sessionId!: string;
+  email!: string;
+}
+
 interface CheckEmail {
   email: string;
 }

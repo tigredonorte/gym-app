@@ -1,6 +1,6 @@
 import { User } from '@gym-app/user/api';
 import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
 import { IRequestInfo } from './request-info-middleware';
 
@@ -13,6 +13,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(@Body() data: LoginDto, @Req() req: IRequestInfo) {
     return this.authService.login(data, req.userData);
+  }
+
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body() data: LogoutDto, @Req() req: IRequestInfo) {
+    return this.authService.logout(data, req.userData);
   }
 
   @Post('signup')

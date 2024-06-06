@@ -155,4 +155,16 @@ export class UserService {
   
     return true;
   }
+
+  async findByEmail(email: string): Promise<UserReturnType | null> {
+    const user = await this.userModel.findOne({ email }).lean().exec();
+
+    if (!user) {
+      return null;
+    }
+
+    const result = user;
+    result.id = user._id.toString();
+    return _.omit(result, ['password', '__v', '_id']);
+  }
 }
