@@ -21,7 +21,6 @@ export interface LoginEventPayload {
   isFirstTimeOnDevice: boolean;
 }
 
-let counter = 1;
 @Injectable()
 export class AuthEventListenerService implements OnApplicationBootstrap {
   constructor(
@@ -43,7 +42,7 @@ export class AuthEventListenerService implements OnApplicationBootstrap {
 
   private async sendEmailWhenUserLoggedIn(data: LoginEventPayload) {
     if (!data.isFirstTimeOnDevice) {
-      return console.info('Session already exists', { userId: data.user.id, sessionId: data.sessionId, counter: counter++ });
+      return console.info('Session already exists', { userId: data.user.id, sessionId: data.sessionId });
     }
     const emailData = getUserAccessData(data.userData);
     await this.emailService.sendRenderedEmail(getEmailLoginTemplate(data.user.email, {
