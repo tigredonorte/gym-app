@@ -30,6 +30,16 @@ export class AuthService {
     return this.userService.emailExists(data.email);
   }
 
+  async logout({ sessionId }: LogoutDto, userData: IRequestInfo['userData']) {
+    const id = await this.sessionService.removeSession(sessionId);
+    const user = await this.userService.findById(id);
+    if (!user || !user.id) {
+      throw new Error('User not found');
+    }
+    await this.authEventsService.emitLogout({ sessionId, user: { email: user.email, name: user.name, id: `${user.id}` }, userData });
+    return {};
+  }
+
   async login({ email, password }: LoginDto, userData: IRequestInfo['userData']) {
     const result = await this.userService.findByEmailAndPassword(email, password);
 
