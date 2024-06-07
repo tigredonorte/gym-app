@@ -2,10 +2,12 @@ import { EmailService } from '@gym-app/email';
 import { User, UserService } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
 import { getUserAccessData } from './auth-event-listener.service';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, SignupDto, changePasswordDto } from './auth.dto';
+import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emailTemplates';
+import { UnauthorizedError } from './errors/UnauthorizedError';
 import { IRequestInfo } from './request-info-middleware';
+import { SessionService } from './session/session.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
     private userService: UserService,
     private emailService: EmailService,
     private authEventsService: AuthEventsService,
+    private sessionService: SessionService,
   ) {}
 
   async signup(data: SignupDto, userData: IRequestInfo['userData']): Promise<Omit<User, 'password'>> {
@@ -30,13 +33,20 @@ export class AuthService {
   async login({ email, password }: LoginDto, userData: IRequestInfo['userData']) {
     const result = await this.userService.findByEmailAndPassword(email, password);
 
-    if (!result) {
-      throw new Error('Invalid email or password');
+    if (!result || !result.id) {
+      throw new UnauthorizedError();
     }
 
     const { name, id } = result;
-    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData });
-    return result;
+
+    const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
+    const sessionId = await this.sessionService.createSession(id, userData);
+    
+    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
+    return {
+      ...result,
+      sessionId,
+    };
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfo['userData']) {

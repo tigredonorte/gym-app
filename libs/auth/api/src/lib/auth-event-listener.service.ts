@@ -2,9 +2,9 @@ import { EmailService } from '@gym-app/email';
 import { EventService } from '@gym-app/events';
 import { UserEventPayload } from '@gym-app/user/api';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
+import { AuthEventTypes } from './auth.events';
 import { getEmailLoginTemplate } from './emailTemplates';
 import { IRequestInfo } from './request-info-middleware';
-import { AuthEventTypes } from './auth.events';
 
 export function getUserAccessData(userData: IRequestInfo['userData']) {
   const location = userData.location ? `${userData.location?.city}, ${userData.location?.region}, ${userData.location?.country}`: '';
@@ -17,8 +17,11 @@ export function getUserAccessData(userData: IRequestInfo['userData']) {
 export interface LoginEventPayload {
   user: UserEventPayload;
   userData: IRequestInfo['userData'];
+  sessionId: string;
+  isFirstTimeOnDevice: boolean;
 }
 
+let counter = 1;
 @Injectable()
 export class AuthEventListenerService implements OnApplicationBootstrap {
   constructor(
@@ -35,6 +38,13 @@ export class AuthEventListenerService implements OnApplicationBootstrap {
   }
 
   private async loginEventListener(data: LoginEventPayload) {
+    await this.sendEmailWhenUserLoggedIn(data);
+  }
+
+  private async sendEmailWhenUserLoggedIn(data: LoginEventPayload) {
+    if (!data.isFirstTimeOnDevice) {
+      return console.info('Session already exists', { userId: data.user.id, sessionId: data.sessionId, counter: counter++ });
+    }
     const emailData = getUserAccessData(data.userData);
     await this.emailService.sendRenderedEmail(getEmailLoginTemplate(data.user.email, {
       ...emailData,
