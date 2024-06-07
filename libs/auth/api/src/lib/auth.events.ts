@@ -6,13 +6,18 @@ import { IRequestInfo } from './request-info-middleware';
 export const AuthEventTypes = {
   login: 'authLogin',
   signup: 'authSignup',
+  logout: 'authLogout',
 }
 
 @Injectable()
 export class AuthEventsService {
   constructor(private eventService: EventService) {}
 
-  emitLogin(data: { user: UserEventPayload, userData: IRequestInfo['userData'] }) {
+  emitLogout(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string }) {
+    return this.eventService.create(AuthEventTypes.logout, data);
+  }
+
+  emitLogin(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string, isFirstTimeOnDevice: boolean }) {
     return this.eventService.create(AuthEventTypes.login, data);
   }
 

@@ -155,4 +155,30 @@ export class UserService {
   
     return true;
   }
+
+  async findByEmail(email: string): Promise<UserReturnType | null> {
+    const user = await this.userModel.findOne({ email }).lean().exec();
+
+    if (!user) {
+      return null;
+    }
+
+    const result = user;
+    result.id = user._id.toString();
+    return _.omit(result, ['password', '__v', '_id']);
+  }
+
+  async findById(id: string): Promise<UserReturnType | null> {
+    const user = await this.userModel.findById(id).lean().exec();
+    return this.getUserReturnData(user);
+  }
+
+  private getUserReturnData(user: UserDocument | null): UserReturnType | null {
+    if (!user) {
+      return null;
+    }
+
+    user.id = user._id.toString();
+    return _.omit(user, ['password', '__v', '_id']);
+  }
 }
