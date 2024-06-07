@@ -5,6 +5,7 @@ import { Event, EventDocument, EventPayload } from './events.model';
 
 @Injectable()
 export class EventService {
+  private dispatchedEvents: { [key: string]: boolean } = {};
   constructor(@InjectModel(Event.name) private eventModel: Model<EventDocument>) {}
 
   async create(eventType: string, payload: EventPayload): Promise<Event> {
@@ -64,7 +65,11 @@ export class EventService {
     ], { fullDocument: 'updateLookup' });
 
     event.on('change', async (change) => {
-      console.log('ChangeStream event:', change);
+      const id = `${serviceName}-${eventName}-${change.fullDocument._id.toString()}`
+      if (this.dispatchedEvents[id]) {
+        return;
+      }
+      this.dispatchedEvents[id] = true;
       try {
         await fn(change.fullDocument.payload, change.fullDocument._id.toString());
         await this.markEventAsReadById(change.fullDocument._id, serviceName);
