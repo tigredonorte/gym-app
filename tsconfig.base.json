@@ -21,6 +21,7 @@
       "@gym-app/events": ["libs/events/src/index.ts"],
       "@gym-app/shared/web": ["libs/shared/web/src/index.ts"],
       "@gym-app/total-form": ["libs/total-form/src/index.ts"],
+      "@gym-app/ui-menu": ["libs/ui-menu/src/index.ts"],
       "@gym-app/user/api": ["libs/user/api/src/index.ts"]
     }
   },
