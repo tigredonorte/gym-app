@@ -1,5 +1,5 @@
 import { AuthPath, AuthRouter } from '@gym-app/auth/web';
-import { Header } from '@gym-app/ui-menu';
+import { Header } from '@gym-app/ui';
 import React from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { UserPath, UserRouter } from '../modules/user/User.router';
