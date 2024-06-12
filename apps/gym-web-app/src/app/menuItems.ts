@@ -1,4 +1,4 @@
-import { DrawerMenuItem, IMenuItem } from "@gym-app/ui-menu";
+import { DrawerMenuItem, IMenuItem } from "@gym-app/ui";
 // import { mdiAccount, mdiHome } from "@mdi/js";
 
 export const menuItems: IMenuItem[] = [
