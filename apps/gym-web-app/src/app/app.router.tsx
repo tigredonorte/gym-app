@@ -1,8 +1,8 @@
 import { AuthPath, AuthRouter } from '@gym-app/auth/web';
 import { Header } from '@gym-app/ui';
+import { UserPath, UserRouter } from '@gym-app/user/web';
 import React from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { UserPath, UserRouter } from '../modules/user/User.router';
 import { drawerMenuItemList, menuItems } from './menuItems';
 
 const isAuthenticated = () => {

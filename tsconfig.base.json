@@ -1,5 +1,6 @@
 {
   "compileOnSave": false,
+  "composite": true,
   "compilerOptions": {
     "rootDir": ".",
     "sourceMap": true,
@@ -21,8 +22,9 @@
       "@gym-app/events": ["libs/events/src/index.ts"],
       "@gym-app/shared/web": ["libs/shared/web/src/index.ts"],
       "@gym-app/total-form": ["libs/total-form/src/index.ts"],
-      "@gym-app/ui-menu": ["libs/ui-menu/src/index.ts"],
-      "@gym-app/user/api": ["libs/user/api/src/index.ts"]
+      "@gym-app/ui": ["libs/ui/src/index.ts"],
+      "@gym-app/user/api": ["libs/user/api/src/index.ts"],
+      "@gym-app/user/web": ["libs/user/web/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
