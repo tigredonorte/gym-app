@@ -4,12 +4,8 @@ import { mdiAccountPlus } from '@mdi/js';
 import { Container } from '@mui/material';
 import { Component } from 'react';
 import { Navigate } from 'react-router-dom';
+import { EmailField, ErrorAlert, LoginLink, NameField, PasswordField } from '../../components';
 import '../Auth.scss';
-import { ErrorAlert } from '../components/ErrorAlert';
-import { LoginLink } from '../components/Links';
-import { EmailField } from '../components/fields/EmailField';
-import { NameField } from '../components/fields/NameField';
-import { PasswordField } from '../components/fields/PasswordField';
 
 interface SignupState {
   isFormValid: boolean;

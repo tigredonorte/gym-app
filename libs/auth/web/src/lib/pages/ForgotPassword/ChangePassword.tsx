@@ -4,8 +4,8 @@ import { mdiOnepassword } from '@mdi/js';
 import { Container } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { PasswordField } from '../../components';
 import '../Auth.scss';
-import { PasswordField } from '../components/fields/PasswordField';
 
 interface FormType extends FormContainerType {
   email: string;

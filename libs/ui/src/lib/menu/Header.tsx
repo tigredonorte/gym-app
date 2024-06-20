@@ -80,8 +80,8 @@ export function Header({ children, siteTitle, drawerMenuItemList, menuItems }: H
   );
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+    <Box sx={{ flexGrow: 1 }} className='header-menu'>
+      <AppBar position="static" className='appBar'>
         <Toolbar>
           {drawerMenuItemList && drawerMenuItemList?.length > 0 && (
             <IconButton
@@ -98,8 +98,9 @@ export function Header({ children, siteTitle, drawerMenuItemList, menuItems }: H
 
           {siteTitle && (
             <Typography
-              variant="h6"
+              variant="h5"
               noWrap
+              color="inherit"
               component="div"
               sx={{ display: { xs: 'none', sm: 'block' } }}
             >

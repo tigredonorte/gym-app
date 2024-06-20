@@ -1,7 +1,7 @@
 import { Alert, Snackbar } from "@mui/material";
 interface ErrorAlertProps {
   message: string;
-  onClose: () => void;
+  onClose?: () => void;
 }
 export const ErrorAlert = ({ message, onClose }: ErrorAlertProps) => {
   if (!message) {

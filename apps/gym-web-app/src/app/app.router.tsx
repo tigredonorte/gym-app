@@ -25,10 +25,12 @@ export const AppRouter: React.FC = () => {
   return (
     <>
       <Header siteTitle="Gym App" menuItems={menuItems} drawerMenuItemList={drawerMenuItemList} />
-      <Routes>
-        <Route path={`/${UserPath}/*`} element={<UserRouter />} />
-        <Route path="*" element={<Navigate to={`/${UserPath}`} />} />
-      </Routes>
+      <main>
+        <Routes>
+          <Route path={`/${UserPath}/*`} element={<UserRouter />} />
+          <Route path="*" element={<Navigate to={`/${UserPath}`} />} />
+        </Routes>
+      </main>
     </>
   );
 }

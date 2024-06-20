@@ -1,19 +1,17 @@
 import { EnvProvider } from '@gym-app/shared/web';
 import React from 'react';
 import { environment } from '../environments/environment';
-import { AppRouter } from './app.router';
-import { ThemeProvider, createTheme } from '@mui/material';
 import './app.module.scss';
+import { AppRouter } from './app.router';
+import { MUITheme } from './theme';
 
 const App: React.FC = () => {
-  const defaultTheme = createTheme();
-
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <EnvProvider env={environment}>
+    <EnvProvider env={environment}>
+      <MUITheme>
         <AppRouter />
-      </EnvProvider>
-    </ThemeProvider>
+      </MUITheme>
+    </EnvProvider>
   )
 }
 
