@@ -2,3 +2,23 @@
 body {
   margin: 0;
 }
+
+main {
+  padding: 16px 40px;
+}
+header {
+  padding-left: 40px !important;
+  padding-right: 40px !important;
+  border: none;
+}
+
+@media (max-width: 1200px) {
+  main {
+    padding: 16px;
+  }
+
+  .appBar {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}

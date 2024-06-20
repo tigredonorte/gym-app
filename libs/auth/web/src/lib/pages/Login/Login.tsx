@@ -4,10 +4,8 @@ import { mdiLogin } from '@mdi/js';
 import { Container, Grid } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { EmailField, ForgotLink, PasswordField, SignupLink } from '../../components';
 import '../Auth.scss';
-import { ForgotLink, SignupLink } from '../components/Links';
-import { EmailField } from '../components/fields/EmailField';
-import { PasswordField } from '../components/fields/PasswordField';
 
 interface LoginState {
   email: string;

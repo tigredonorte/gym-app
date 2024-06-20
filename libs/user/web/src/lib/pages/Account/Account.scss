@@ -1,0 +1,12 @@
+.general-settings-form {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: 600px) {
+    grid-template-columns: repeat(2, 1fr);
+    &:last-child {
+      grid-column: span 2;
+    }
+  }
+}

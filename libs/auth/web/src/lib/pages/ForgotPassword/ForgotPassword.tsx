@@ -4,9 +4,8 @@ import { mdiFormTextboxPassword } from '@mdi/js';
 import { Container } from '@mui/material';
 import React from 'react';
 import { Navigate } from 'react-router-dom';
+import { EmailField, LoginLink } from '../../components';
 import '../Auth.scss';
-import { LoginLink } from '../components/Links';
-import { EmailField } from '../components/fields/EmailField';
 
 interface ForgotPassowordState {
   navigate?: string;
