@@ -1,5 +1,5 @@
 import { MenuOption, StickyMenu } from '@gym-app/ui';
-import { mdiAccountBoxOutline, mdiAccountOutline, mdiCreditCardOutline, mdiKeyOutline } from '@mdi/js';
+import { mdiAccountOutline, mdiCreditCardOutline, mdiKeyOutline } from '@mdi/js';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 
@@ -9,12 +9,6 @@ const menuOptions: MenuOption[] = [
 		name: 'account',
 		icon: mdiAccountOutline,
 		text: 'Account',
-	},
-	{
-		id: uuid(),
-		name: 'profile',
-		icon: mdiAccountBoxOutline,
-		text: 'Profile',
 	},
 	{
 		id: uuid(),
