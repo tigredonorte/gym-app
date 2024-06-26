@@ -26,7 +26,7 @@ import { AppService } from './app.service';
         useNewUrlParser: true,
         useUnifiedTopology: true,
         replicaSet: 'rs0',
-       }),
+      }),
       inject: [ConfigService],
     }),
   ],

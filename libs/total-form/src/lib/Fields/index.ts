@@ -4,4 +4,4 @@ import { InputField as TextField } from './InputField';
 export const Fields = {
   ConfirmField,
   TextField,
-}
+};

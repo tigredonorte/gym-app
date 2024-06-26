@@ -1,7 +1,7 @@
 import { EmailField, ErrorAlert, NameField } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { CardHeader } from '@gym-app/ui';
-import { mdiAccountBoxEditOutline, mdiUpdate } from '@mdi/js';
+import { mdiAccountBoxEditOutline, mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -65,10 +65,10 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
                 disabled={!isFormValid}
                 variant="contained"
                 color="primary"
-                endIcon={<Icon path={mdiUpdate} size={1}/>}
+                endIcon={<Icon path={mdiContentSaveOutline} size={1}/>}
                 fullWidth={false}
               >
-                Update Account
+                Save
               </Form.Button.Submit>
             </div>
           </Form.Container>

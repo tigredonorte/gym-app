@@ -46,7 +46,7 @@ export class UserService {
         name: plainUser.name,
         email: plainUser.email,
         id: plainUser.id,
-      })
+      });
       return plainUser;
     } catch (error) {
       if (_.get(error, 'code') === 11000) {
@@ -70,7 +70,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     const isPasswordCorrect = await this.decryptPassword(password, user.password);
     if (!isPasswordCorrect) {
       throw new BadRequestException('Incorrect email or password');
@@ -84,7 +84,7 @@ export class UserService {
   private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date } {
     const recoverCode = crypto.randomBytes(12).toString('base64');
     const expiresAt = new Date(new Date().getTime() + 30*60000); // 30 minutes from now
-  
+
     return {
       code: recoverCode,
       expiresAt: expiresAt,
@@ -97,7 +97,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-  
+
     if (user.recoverCode && user.recoverCode.code && user.recoverCode.expiresAt > new Date()) {
       return {
         recoverCode: user.recoverCode.code,
@@ -121,20 +121,20 @@ export class UserService {
       'recoverCode.code': code,
       'recoverCode.expiresAt': { $gt: new Date() }
     }).exec();
-  
+
     if (!user) {
       return false;
     }
-  
+
     const recoverCode = this.getRecoverCode();
-    user.recoverCode = { 
+    user.recoverCode = {
       code: undefined,
       expiresAt: recoverCode.expiresAt,
       createdAt: recoverCode.createdAt,
       changePasswordCode: recoverCode.code
-    }
+    };
     await user.save();
-  
+
     return recoverCode.code;
   }
 
@@ -144,15 +144,15 @@ export class UserService {
       'recoverCode.changePasswordCode': token,
       'recoverCode.expiresAt': { $gt: new Date() }
     }).exec();
-  
+
     if (!user) {
       return false;
     }
-  
+
     user.password = await this.hashPassword(password);
     user.recoverCode = undefined;
     await user.save();
-  
+
     return true;
   }
 

@@ -1,5 +1,5 @@
-import { CardHeader } from "@gym-app/ui";
-import { Button, Stack, Typography } from "@mui/material";
+import { CardHeader } from '@gym-app/ui';
+import { Button, Stack, Typography } from '@mui/material';
 
 interface DeleteAccountProps {
   onDelete(): void

@@ -1,4 +1,4 @@
-import { DrawerMenuItem, IMenuItem } from "@gym-app/ui";
+import { DrawerMenuItem, IMenuItem } from '@gym-app/ui';
 // import { mdiAccount, mdiHome } from "@mdi/js";
 
 export const menuItems: IMenuItem[] = [
@@ -10,7 +10,7 @@ export const menuItems: IMenuItem[] = [
   //   label: "Notifications",
   //   ariaLabel: "show new notifications"
   // }
-]
+];
 
 export const drawerMenuItemList: DrawerMenuItem[] = [
   // { icon: mdiHome, text: 'Home', path: '/' },

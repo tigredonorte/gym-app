@@ -1,7 +1,7 @@
 import Grid from '@mui/material/Grid';
 
 interface UserGridProps {
-	children?: React.ReactNode;
+  children?: React.ReactNode;
   menu?: React.ReactNode;
 }
 export const UserGrid: React.FC<UserGridProps> = ({ children, menu }: UserGridProps) => (

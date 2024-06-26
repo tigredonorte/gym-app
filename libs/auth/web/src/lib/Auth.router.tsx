@@ -15,4 +15,4 @@ export const AuthRouter: React.FC = () => (
     <Route path='change-password' Component={ChangePassword} />
     <Route path='signup' Component={Signup} />
   </Routes>
-)
+);

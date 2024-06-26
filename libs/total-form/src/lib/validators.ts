@@ -1,9 +1,9 @@
-import { FormContainerType } from "./FormContainer";
+import { FormContainerType } from './FormContainer';
 
 const isEqualField = (field: string) => (value: string, formData: FormContainerType) => {
   const otherValue = formData?.[field];
   return otherValue !== value ? 'Fields do not match' : null;
-}
+};
 
 export const validators = {
   minlength: (min: number) => (value: string) => value?.length < min ? `Must be at least ${min} characters` : null,
@@ -17,7 +17,7 @@ export const validators = {
   isInteger: (value: number) => !Number.isInteger(Number(value)) ? 'Must be an integer' : null,
   isNonZero: (value: number) => Number(value) === 0 ? 'Must be non-zero' : null,
   isEqualField,
-}
+};
 
 export type ValidatorFunction<T> = (value: T, formData: FormContainerType) => Promise<string | null> | string | null;
 export type ValidatorType<T> = ValidatorFunction<T> | ValidatorFunction<T>[] | undefined;

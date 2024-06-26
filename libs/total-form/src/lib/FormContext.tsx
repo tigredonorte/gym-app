@@ -26,7 +26,7 @@ export interface FormContextType<FormProps> {
 }
 
 // Create the context with a default value
-export const FormContext = createContext<FormContextType<any>>({ 
+export const FormContext = createContext<FormContextType<unknown>>({
   formData: {},
   isFormValid: false,
   isRequesting: false,
@@ -47,7 +47,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const clearError = () => setError(null);
 
 
-  const updateFormData = useCallback((name: string, value: any) => {
+  const updateFormData = useCallback((name: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   }, []);
 
@@ -55,7 +55,7 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const isFormValid = Object.values(fieldValidity).every(Boolean);
 
   return (
-    <FormContext.Provider value={{ 
+    <FormContext.Provider value={{
       formData, isFormValid, fieldValidity, isRequesting, error,
       updateFormData, updateFieldValidity, setRequesting, setError, clearError,
     }}>
@@ -71,4 +71,4 @@ export function useFormContext<FormProps> () {
     throw new Error('useFormContext must be used within a FormProvider');
   }
   return context as FormContextType<FormProps>;
-};
+}

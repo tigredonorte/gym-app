@@ -20,11 +20,11 @@ module.exports = {
     'react-native/split-platform-components': 0,
     'react/jsx-uses-react': 'off',
     'react/react-in-jsx-scope': 'off',
+    'react/no-unescaped-entities': 'off',
     'indent': ['error', 2, { 'SwitchCase': 1, 'ignoredNodes': ['TemplateLiteral'] }],
     'linebreak-style': ['error', 'unix'],
     'quotes': ['error', 'single'],
     'semi': ['error', 'always'],
-    'no-tabs': ['error'],
     '@typescript-eslint/indent': ['error', 2, {
       'SwitchCase': 1,
       'FunctionDeclaration': { 'parameters': 1, 'body': 1 },
@@ -36,6 +36,7 @@ module.exports = {
       'flatTernaryExpressions': false,
       'ignoreComments': false
     }],
+    '@typescript-eslint/no-unused-vars': ['error', { 'ignoreRestSiblings': true }],
     'no-trailing-spaces': ['error']
   },
   env: {

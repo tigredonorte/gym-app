@@ -13,7 +13,7 @@ export * from './lib/Fields/InputField';
 export * from './lib/FormContainer';
 export {
   mergeValidators,
-}
+};
 
 export const Form = {
   Provider: FormProvider,

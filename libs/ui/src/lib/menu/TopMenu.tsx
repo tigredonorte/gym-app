@@ -1,5 +1,5 @@
-import { HeaderMenuIcon, IMenuItem } from "./MenuIcon";
-import { Profile } from "./Profile";
+import { HeaderMenuIcon, IMenuItem } from './MenuIcon';
+import { Profile } from './Profile';
 
 export interface TopMenuProps {
   menuItems: IMenuItem[];
@@ -22,5 +22,5 @@ export const TopMenu = (props: TopMenuProps) => {
       ))}
       <Profile onClick={(event?: React.MouseEvent<HTMLElement>) => onMenuClick('profile', event)} menuId={profileMenuId} isMobile={isMobile} />
     </>
-  )
-}
+  );
+};

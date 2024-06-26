@@ -3,9 +3,7 @@ import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import { useFormContext } from './FormContext';
 
-interface FormErrorSnackbarProps {}
-
-const FormErrorSnackbar: React.FC<FormErrorSnackbarProps> = () => {
+const FormErrorSnackbar: React.FC = () => {
   const { error, clearError } = useFormContext();
 
   if (!error) return null; // Don't render if there's no error

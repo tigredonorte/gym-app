@@ -1,4 +1,4 @@
-import { IRenderedEmail } from "@gym-app/email";
+import { IRenderedEmail } from '@gym-app/email';
 
 interface IBaseEmailData {
   title: string;
@@ -26,11 +26,11 @@ interface ILoginEmailData extends IUserDataInfo {
 }
 export const getEmailLoginTemplate = getEmailTemplate<ILoginEmailData>(
   'login.email',
-  'New login on your account', 
-  { title: 'New Login Alert' }, 
+  'New login on your account',
+  { title: 'New Login Alert' },
   process.env['ENABLE_LOGIN_EMAIL'] === 'true'
 );
- 
+
 function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailData>(
   ejsFile: string,
   subject: string,
@@ -52,5 +52,5 @@ function getEmailTemplate<EmailData = ILoginEmailData | IRecoverPasswordEmailDat
       now: new Date().toISOString()
     },
     path,
-  })
+  });
 }

@@ -1,5 +1,6 @@
 import { FormControl, TextField, TextFieldProps } from '@mui/material';
 import React from 'react';
+import { FormContainerType } from '../FormContainer';
 import { FormContext } from '../FormContext';
 import { ValidatorFunction, ValidatorType, mergeValidators } from '../validators';
 
@@ -52,7 +53,7 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const current = isBlur ? mergeValidators(blurValidators, validators) : validators;
     if (!current) return [];
     return Array.isArray(current) ? current : [current];
-  }
+  };
 
   validate = async(value: T, validatorArray: ValidatorFunction<T>[]) => {
     const { validators, name } = this.props;
@@ -61,8 +62,8 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     const { formData } = this.context;
 
     let error: string | null = null;
-    for (let validator of validatorArray) {
-      const err = await validator?.(value, formData);
+    for (const validator of validatorArray) {
+      const err = await validator?.(value, formData as FormContainerType);
       if (err) {
         error = err;
         break;
@@ -93,7 +94,7 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
 
     const isHidden = inputProps.type === 'hidden';
     const style = isHidden ? { display: 'none' } : {};
-    const currentValue = this.context.formData[this.props.name];
+    const currentValue = (this.context.formData as FormContainerType)[this.props.name];
 
     return (
       <FormControl variant="outlined" fullWidth margin="normal" style={style}>
