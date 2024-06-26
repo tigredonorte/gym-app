@@ -16,7 +16,7 @@ export interface IRequestInfo {
       range?: [number, number];
       country?: string;
       region?: string;
-      eu?: "0" | "1";
+      eu?: '0' | '1';
       timezone?: string;
       city?: string;
       ll?: [number, number];
@@ -30,7 +30,7 @@ export interface IRequestInfo {
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
   use(req: IRequestInfo & Request, res: Response, next: () => void) {
-    const temp = req.headers['user-agent'] || undefined; 
+    const temp = req.headers['user-agent'] || undefined;
     const ua = new UAParser(temp).getResult();
     const ip = getIp(req);
     const geo = ip ? geoip.lookup(`${ip}`) : null;
@@ -43,7 +43,7 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
       },
       location: geo,
       ip: ip,
-    }
+    };
     next();
   }
 }
@@ -56,7 +56,7 @@ function getIp(req: Request & IRequestInfo): string | undefined {
   if (req.ip) {
     return req.ip;
   }
-  
+
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string') {
     const ips = forwarded.split(',');

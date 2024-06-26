@@ -1,13 +1,16 @@
 import { EmailService } from '@gym-app/email';
 import { User, UserService } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import { getUserAccessData } from './auth-event-listener.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emailTemplates';
 import { UnauthorizedError } from './errors/UnauthorizedError';
-import { IRequestInfo } from './request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 import { SessionService } from './session/session.service';
+
+const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';
 
 @Injectable()
 export class AuthService {
@@ -50,12 +53,19 @@ export class AuthService {
     const { name, id } = result;
 
     const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
-    const sessionId = await this.sessionService.createSession(id, userData);
-    
+
+    const token = jwt.sign(
+      result,
+      JWT_SECRET,
+      { expiresIn: '1h' } // Token expiration time
+    );
+    const sessionId = await this.sessionService.createSession(id, userData, token);
     await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
+
     return {
       ...result,
       sessionId,
+      token,
     };
   }
 
@@ -77,7 +87,7 @@ export class AuthService {
     if (!resetPasswordToken) {
       throw new Error('Invalid code');
     }
-    
+
     return {
       resetPasswordToken: this.toBase64(resetPasswordToken)
     };

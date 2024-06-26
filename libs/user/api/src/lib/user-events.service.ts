@@ -5,6 +5,7 @@ export interface UserEventPayload {
   name: string;
   email: string;
   id: string;
+  token?: string;
 }
 
 @Injectable()

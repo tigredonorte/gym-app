@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { IRequestInfo } from '../request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 import { SessionAlreadyLoggedOut } from './SessionAlreadyLoggedOut';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { AccessLog } from './session.dto';
@@ -20,8 +20,8 @@ export class SessionService {
   constructor(
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
   ) {}
-  
-  async createSession(userId: string, userData: IRequestInfo['userData']): Promise<string> {
+
+  async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<string> {
     const accessData: AccessLog = { ip: userData.ip , location: userData.location } as AccessLog;
     const sessionId = await this.getSessionHash(userData);
     let session = await this.findSessionById(sessionId);
@@ -37,6 +37,7 @@ export class SessionService {
     session = new this.sessionModel({
       userId,
       sessionId,
+      token,
       deviceInfo: userData.deviceInfo || ({} as IRequestInfo['userData']['deviceInfo']),
       access: [accessData],
     });

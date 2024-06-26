@@ -40,10 +40,12 @@ export default class Login extends React.Component<object, LoginState> {
         throw new Form.Error(data.message, 'Login Error');
       }
 
-      localStorage.setItem('userData', JSON.stringify(data));
+      const { token, ...userData } = data;
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('token', token);
 
       this.setState({ navigate: '/' });
-  
+
     } catch (error) {
       if (!(error instanceof Form.Error)) {
         const message = (error instanceof Error) ? error.message : (error as string);
@@ -76,7 +78,7 @@ export default class Login extends React.Component<object, LoginState> {
                 <ForgotLink includeSubTitle={false} email={email} />
               </Grid>
               <Grid item>
-                <SignupLink includeSubTitle={false} /> 
+                <SignupLink includeSubTitle={false} />
               </Grid>
             </Grid>
           </Form.Container>

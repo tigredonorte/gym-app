@@ -1,13 +1,13 @@
 import { EventService } from '@gym-app/events';
 import { UserEventPayload } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
-import { IRequestInfo } from './request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 
 export const AuthEventTypes = {
   login: 'authLogin',
   signup: 'authSignup',
   logout: 'authLogout',
-}
+};
 
 @Injectable()
 export class AuthEventsService {

@@ -1,4 +1,4 @@
-import { IRequestInfo } from '../request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 
 export class AccessLog {
   createdAt!: Date;

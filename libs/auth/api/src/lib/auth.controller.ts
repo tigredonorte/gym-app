@@ -2,7 +2,7 @@ import { User } from '@gym-app/user/api';
 import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthService } from './auth.service';
-import { IRequestInfo } from './request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 
 @Controller('auth')
 export class AuthController {

@@ -4,7 +4,7 @@ import { UserEventPayload } from '@gym-app/user/api';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { AuthEventTypes } from './auth.events';
 import { getEmailLoginTemplate } from './emailTemplates';
-import { IRequestInfo } from './request-info-middleware';
+import { IRequestInfo } from '@gym-app/user/api';
 
 export function getUserAccessData(userData: IRequestInfo['userData']) {
   const location = userData.location ? `${userData.location?.city}, ${userData.location?.region}, ${userData.location?.country}`: '';
