@@ -1,5 +1,5 @@
-import { EnvContext } from "@gym-app/shared/web";
-import React from "react";
+import { EnvContext } from '@gym-app/shared/web';
+import React from 'react';
 
 export const Logout: React.FC = () => {
 
@@ -13,7 +13,7 @@ export const Logout: React.FC = () => {
       }
 
       const sessionId = JSON.parse(userData).sessionId;
-      const data = { sessionId }
+      const data = { sessionId };
       const response = await fetch(`${context.backendEndpoint}/auth/logout`, {
         method: 'POST',
         headers: {
@@ -26,6 +26,7 @@ export const Logout: React.FC = () => {
         throw new Error(result.message);
       }
       localStorage.removeItem('userData');
+      localStorage.removeItem('token');
       window.location.href = '/';
     } catch (error) {
       console.error('Error logging out on server side. Redirecting to login page.', error);
@@ -35,7 +36,7 @@ export const Logout: React.FC = () => {
         window.location.href = '/';
       }, 2000);
     }
-  }
+  };
 
   React.useEffect(() => {
     logout();
@@ -46,4 +47,4 @@ export const Logout: React.FC = () => {
       {errorMessage}
     </div>
   );
-}
+};
