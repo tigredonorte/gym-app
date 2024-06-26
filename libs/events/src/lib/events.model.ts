@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-export type EventPayload = Record<string, never>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type EventPayload = Record<string, any>;
 
 @Schema()
 export class Event {
