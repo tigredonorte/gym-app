@@ -1,5 +1,5 @@
-import { Settings } from "@gym-app/ui"
-import { Button, Switch } from "@mui/material"
+import { Settings } from '@gym-app/ui';
+import { Button, Switch } from '@mui/material';
 
 interface AccountSettingsProps {
   onChange(option: string, value: boolean): void
@@ -7,9 +7,9 @@ interface AccountSettingsProps {
 }
 
 export const AccountSettings: React.FC<AccountSettingsProps> = (props: AccountSettingsProps) => {
-  const { onChange, config } = props
+  const { onChange, config } = props;
   return (
-		<Settings.Container title='Public Profile'>
+    <Settings.Container title='Public Profile'>
       <Settings.Item
         title="Make Contact Info Public"
         subtitle="Means that anyone viewing your profile will be able to see your contacts details."
@@ -26,5 +26,5 @@ export const AccountSettings: React.FC<AccountSettingsProps> = (props: AccountSe
         </Button>
       </Settings.Item>
     </Settings.Container>
-  )
-}
+  );
+};

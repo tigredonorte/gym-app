@@ -15,7 +15,7 @@ export interface IRenderedEmail {
   path: string;
   to: string;
   subject: string;
-  emailData: Record<string, never>;
+  emailData: Record<string, unknown>;
 }
 
 @Injectable()

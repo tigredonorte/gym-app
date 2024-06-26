@@ -10,7 +10,7 @@ export class EmailLogger {
     date!: string;
 
   @Prop({ type: SchemaTypes.Mixed, required: true })
-    details!: Record<string, never> | string;
+    details!: Record<string, unknown> | string;
 }
 
 export type EmailLoggerDocument = EmailLogger & Document;
