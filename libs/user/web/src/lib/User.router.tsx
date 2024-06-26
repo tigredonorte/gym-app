@@ -19,4 +19,4 @@ export const UserRouter: React.FC = () => (
       <Route path="*" element={<Navigate to="account" />} />
     </Routes>
   </UserGrid>
-)
+);

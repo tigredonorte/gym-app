@@ -1,4 +1,4 @@
-import { FormContainerType } from "./FormContainer";
+import { FormContainerType } from './FormContainer';
 
 interface RequestType <T extends FormContainerType>{
   formData: T;
@@ -7,7 +7,7 @@ interface RequestType <T extends FormContainerType>{
   method?: 'POST' | 'GET' | 'PUT' | 'DELETE'| 'PATCH';
 }
 
-export async function executeRequest<T extends FormContainerType>  ({ 
+export async function executeRequest<T extends FormContainerType>  ({
   formData,
   errorMessage,
   url,

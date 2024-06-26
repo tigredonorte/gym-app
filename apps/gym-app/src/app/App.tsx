@@ -1,3 +1,5 @@
+/* eslint-disable react-native/no-unused-styles */
+/* eslint-disable react-native/no-color-literals */
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React, { useRef, useState } from 'react';
 import {
@@ -70,7 +72,7 @@ export const App = () => {
             </View>
           </View>
           <View style={styles.section}>
-            <View style={[styles.shadowBox]}>
+            <View style={styles.shadowBox}>
               <Text style={[styles.marginBottomMd, styles.textLg]}>
                 Learning materials
               </Text>
@@ -97,7 +99,7 @@ export const App = () => {
                   />
                 </Svg>
                 <View style={styles.listItemTextContainer}>
-                  <Text style={[styles.textMd]}>Documentation</Text>
+                  <Text style={styles.textMd}>Documentation</Text>
                   <Text style={[styles.text2XS, styles.textSubtle]}>
                     Everything is in there
                   </Text>
@@ -138,7 +140,7 @@ export const App = () => {
                   />
                 </Svg>
                 <View style={styles.listItemTextContainer}>
-                  <Text style={[styles.textMd]}>Blog</Text>
+                  <Text style={styles.textMd}>Blog</Text>
                   <Text style={[styles.text2XS, styles.textSubtle]}>
                     Changelog, features & events
                   </Text>
@@ -170,7 +172,7 @@ export const App = () => {
                   <Path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                 </Svg>
                 <View style={styles.listItemTextContainer}>
-                  <Text style={[styles.textMd]}>Youtube channel</Text>
+                  <Text style={styles.textMd}>Youtube channel</Text>
                   <Text style={[styles.text2XS, styles.textSubtle]}>
                     Nx Show, talks & tutorials
                   </Text>
@@ -213,7 +215,7 @@ export const App = () => {
                   />
                 </Svg>
                 <View style={styles.listItemTextContainer}>
-                  <Text style={[styles.textMd]}>Interactive tutorials</Text>
+                  <Text style={styles.textMd}>Interactive tutorials</Text>
                   <Text style={[styles.text2XS, styles.textSubtle]}>
                     Create an app, step by step
                   </Text>
@@ -258,7 +260,7 @@ export const App = () => {
                   ></Path>
                 </Svg>
                 <View style={styles.listItemTextContainer}>
-                  <Text style={[styles.textMd]}>Video courses</Text>
+                  <Text style={styles.textMd}>Video courses</Text>
                   <Text style={[styles.text2XS, styles.textSubtle]}>
                     Nx custom courses
                   </Text>
@@ -386,7 +388,7 @@ export const App = () => {
                   </View>
                 </View>
                 <View style={styles.codeBlock}>
-                  <Text style={[styles.monospace]}>nx connect-to-nx-cloud</Text>
+                  <Text style={styles.monospace}>nx connect-to-nx-cloud</Text>
                 </View>
               </View>
             </TouchableOpacity>
@@ -580,100 +582,28 @@ export const App = () => {
   );
 };
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: '#ffffff',
+  appTitleText: {
+    fontWeight: '500',
+    paddingTop: 12,
   },
   codeBlock: {
     backgroundColor: 'rgba(55, 65, 81, 1)',
+    borderRadius: 4,
     marginVertical: 12,
     padding: 12,
-    borderRadius: 4,
-  },
-  monospace: {
-    color: '#ffffff',
-    fontFamily: 'Courier New',
-    marginVertical: 4,
   },
   comment: {
     color: '#cccccc',
   },
-  marginBottomSm: {
-    marginBottom: 6,
-  },
-  marginBottomMd: {
-    marginBottom: 18,
-  },
-  marginBottomLg: {
-    marginBottom: 24,
-  },
-  textLight: {
-    fontWeight: '300',
-  },
-  textBold: {
-    fontWeight: '500',
-  },
-  textCenter: {
-    textAlign: 'center',
-  },
-  text2XS: {
-    fontSize: 12,
-  },
-  textXS: {
-    fontSize: 14,
-  },
-  textSm: {
-    fontSize: 16,
-  },
-  textMd: {
-    fontSize: 18,
-  },
-  textLg: {
-    fontSize: 24,
-  },
-  textXL: {
-    fontSize: 48,
-  },
-  textContainer: {
-    marginVertical: 12,
-  },
-  textSubtle: {
-    color: '#6b7280',
-  },
-  section: {
-    marginVertical: 24,
-    marginHorizontal: 12,
-  },
-  shadowBox: {
-    backgroundColor: 'white',
-    borderRadius: 24,
-    shadowColor: 'black',
-    shadowOpacity: 0.15,
-    shadowOffset: {
-      width: 1,
-      height: 4,
-    },
-    shadowRadius: 12,
-    padding: 24,
-    marginBottom: 24,
-  },
-  listItem: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  listItemTextContainer: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  appTitleText: {
-    paddingTop: 12,
-    fontWeight: '500',
-  },
   hero: {
-    borderRadius: 12,
     backgroundColor: '#143055',
-    padding: 36,
+    borderRadius: 12,
     marginBottom: 24,
+    padding: 36,
+  },
+  heroText: {
+    color: '#ffffff',
+    marginVertical: 12,
   },
   heroTitle: {
     flex: 1,
@@ -683,23 +613,95 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginLeft: 12,
   },
-  heroText: {
-    color: '#ffffff',
-    marginVertical: 12,
-  },
-  whatsNextButton: {
-    backgroundColor: '#ffffff',
-    paddingVertical: 16,
-    borderRadius: 8,
-    width: '50%',
-    marginTop: 24,
-  },
   learning: {
     marginVertical: 12,
   },
+  listItem: {
+    alignItems: 'center',
+    display: 'flex',
+    flexDirection: 'row',
+  },
+  listItemTextContainer: {
+    flex: 1,
+    marginLeft: 12,
+  },
   love: {
-    marginTop: 12,
     justifyContent: 'center',
+    marginTop: 12,
+  },
+  marginBottomLg: {
+    marginBottom: 24,
+  },
+  marginBottomMd: {
+    marginBottom: 18,
+  },
+  marginBottomSm: {
+    marginBottom: 6,
+  },
+  monospace: {
+    color: '#ffffff',
+    fontFamily: 'Courier New',
+    marginVertical: 4,
+  },
+  scrollView: {
+    backgroundColor: '#ffffff',
+  },
+  section: {
+    marginHorizontal: 12,
+    marginVertical: 24,
+  },
+  shadowBox: {
+    backgroundColor: 'white',
+    borderRadius: 24,
+    marginBottom: 24,
+    padding: 24,
+    shadowColor: 'black',
+    shadowOffset: {
+      width: 1,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+  },
+  text2XS: {
+    fontSize: 12,
+  },
+  textBold: {
+    fontWeight: '500',
+  },
+  textCenter: {
+    textAlign: 'center',
+  },
+  textContainer: {
+    marginVertical: 12,
+  },
+  textLg: {
+    fontSize: 24,
+  },
+  textLight: {
+    fontWeight: '300',
+  },
+  textMd: {
+    fontSize: 18,
+  },
+  textSm: {
+    fontSize: 16,
+  },
+  textSubtle: {
+    color: '#6b7280',
+  },
+  textXL: {
+    fontSize: 48,
+  },
+  textXS: {
+    fontSize: 14,
+  },
+  whatsNextButton: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    marginTop: 24,
+    paddingVertical: 16,
+    width: '50%',
   },
 });
 

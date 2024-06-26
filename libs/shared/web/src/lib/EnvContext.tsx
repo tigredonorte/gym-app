@@ -17,7 +17,7 @@ export const EnvProvider: React.FC<EnvProviderProps> = ({ children, env }) => {
     <EnvContext.Provider value={env}>
       {children}
     </EnvContext.Provider>
-  )
+  );
 };
 
 export const useEnv = (): Env => {

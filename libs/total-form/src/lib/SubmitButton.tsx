@@ -1,5 +1,6 @@
-import { Button, ButtonOwnProps } from "@mui/material";
-import { useFormContext } from "./FormContext";
+/* eslint-disable react-native/no-inline-styles */
+import { Button, ButtonOwnProps } from '@mui/material';
+import { useFormContext } from './FormContext';
 
 interface SubmitButtonProps {
   children?: React.ReactNode;
@@ -13,17 +14,17 @@ interface SubmitButtonProps {
   loadingIcon?: React.ReactNode | string;
 }
 
-export const SubmitButton: React.FC<SubmitButtonProps & ButtonOwnProps> = ({ 
+export const SubmitButton: React.FC<SubmitButtonProps & ButtonOwnProps> = ({
   children,
   title,
-  variant= "contained",
-  color="primary",
+  variant= 'contained',
+  color='primary',
   fullWidth = true,
   endIcon,
   startIcon,
   loadingIcon = '...',
   ...props
-}) => {
+}: SubmitButtonProps & ButtonOwnProps) => {
   const { isFormValid, isRequesting } = useFormContext();
   return (
     <Button
@@ -41,5 +42,5 @@ export const SubmitButton: React.FC<SubmitButtonProps & ButtonOwnProps> = ({
       {endIcon && (<span style={{ marginLeft: 5, display: 'flex' }}>{endIcon}</span>)}
       {isRequesting && loadingIcon}
     </Button>
-  )
+  );
 };

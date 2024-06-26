@@ -4,34 +4,34 @@ import { Exclude, Type } from 'class-transformer';
 
 class RecoverCode {
   @Prop()
-  code?: string;
+    code?: string;
 
   @Prop()
-  expiresAt!: Date;
+    expiresAt!: Date;
 
   @Prop()
-  createdAt!: Date;
+    createdAt!: Date;
 
   @Prop()
-  changePasswordCode?: string;
+    changePasswordCode?: string;
 }
 
 @Schema()
 export class User {
   @Prop({ required: false, minlength: 3 })
-  name!: string;
+    name!: string;
 
   @Prop({ required: false, unique: true })
-  email!: string;
+    email!: string;
 
   @Exclude()
   @Prop({ required: false, minlength: 10, select: false })
-  password!: string;
+    password!: string;
 
   @Exclude()
   @Type(() => RecoverCode)
   @Prop({ type: RecoverCode, required: false, select: false })
-  recoverCode?: RecoverCode;
+    recoverCode?: RecoverCode;
 }
 
 export type UserDocument = User & Document;

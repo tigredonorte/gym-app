@@ -1,4 +1,4 @@
-import { CustomRequestInfoMiddleware } from '@gym-app/auth/api';
+import { CustomRequestInfoMiddleware } from '@gym-app/user/api';
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import * as requestIp from 'request-ip';

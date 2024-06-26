@@ -7,40 +7,40 @@ import React from 'react';
 import { calcLayoutHeight } from '../utils';
 
 export interface MenuOption {
-	id: string;
-	name: string;
-	icon: string;
-	text: string;
+  id: string;
+  name: string;
+  icon: string;
+  text: string;
 }
 
 interface StickyMenuProps {
-	menuOptions: MenuOption[];
-	activeSection: string;
-	changeSectionHandler: (menuItem: MenuOption) => void;
+  menuOptions: MenuOption[];
+  activeSection: string;
+  changeSectionHandler: (menuItem: MenuOption) => void;
 }
 export const StickyMenu: React.FC<StickyMenuProps> = ({ menuOptions, activeSection, changeSectionHandler }) => (
-	<Card
-		sx={{
-			position: 'sticky',
-			top: `${calcLayoutHeight('nav')}px`,
-		}}
-		component="aside"
-	>
-		<MenuList
-			sx={{
-				'& .MuiMenuItem-root': {
-					borderRadius: 2,
-				},
-			}}
-		>
-			{menuOptions.map((menuItem) => ((
-				<MenuItem key={`stickyMenuItem${menuItem.id}`} selected={activeSection === menuItem.name} onClick={() => changeSectionHandler(menuItem)}>
-					<ListItemIcon>
-						<Icon path={menuItem.icon} size={1} />
-					</ListItemIcon>
-					{menuItem.text}
-				</MenuItem>
-			)))}
-		</MenuList>
-	</Card>
+  <Card
+    sx={{
+      position: 'sticky',
+      top: `${calcLayoutHeight('nav')}px`,
+    }}
+    component="aside"
+  >
+    <MenuList
+      sx={{
+        '& .MuiMenuItem-root': {
+          borderRadius: 2,
+        },
+      }}
+    >
+      {menuOptions.map((menuItem) => ((
+        <MenuItem key={`stickyMenuItem${menuItem.id}`} selected={activeSection === menuItem.name} onClick={() => changeSectionHandler(menuItem)}>
+          <ListItemIcon>
+            <Icon path={menuItem.icon} size={1} />
+          </ListItemIcon>
+          {menuItem.text}
+        </MenuItem>
+      )))}
+    </MenuList>
+  </Card>
 );

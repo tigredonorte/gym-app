@@ -2,7 +2,7 @@ import { TypographyVariantsOptions } from '@mui/material/styles';
 import { IThemePaletteMode } from './palette';
 
 export const getTypography = (palette: IThemePaletteMode, fontFamily: string): TypographyVariantsOptions => ({
-  fontFamily: [fontFamily, "Helvetica" , "-apple-system" , "Arial", "sans-serif"].filter(Boolean).join(","),
+  fontFamily: [fontFamily, 'Helvetica' , '-apple-system' , 'Arial', 'sans-serif'].filter(Boolean).join(','),
   fontSize: 14,
   button: {
     textTransform: 'none',

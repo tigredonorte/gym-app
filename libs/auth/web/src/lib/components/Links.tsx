@@ -16,7 +16,7 @@ const LinkComp = ({ subTitle, content, url }: LinkCompProps) => {
     <Link component={RouterLink} to={url} variant="body2" className='link'>
       {content}
     </Link>
-  )
+  );
   if (!subTitle) {
     return LinkType;
   }
@@ -26,22 +26,22 @@ const LinkComp = ({ subTitle, content, url }: LinkCompProps) => {
       <Box component='span' sx={{ pr: 1}}>{subTitle}</Box>
       {LinkType}
     </Box>
-  )
-}
+  );
+};
 
 export const LoginLink = ({ includeSubTitle = true }: SimpleLinkCompProps) => (
   <LinkComp subTitle={includeSubTitle ? 'Have an account?' : ''} content='Login' url='/auth' />
-)
+);
 
 
 export const SignupLink = ({ includeSubTitle = true }: SimpleLinkCompProps) => (
-  <LinkComp subTitle={includeSubTitle ? "Don't have an account?" : ''} content='Create Account' url='/auth/signup' />
-)
+  <LinkComp subTitle={includeSubTitle ? 'Don\'t have an account?' : ''} content='Create Account' url='/auth/signup' />
+);
 
 export const ForgotLink = ({ includeSubTitle = true, email = '' }: SimpleLinkCompProps & { email?: string }) => (
-  <LinkComp 
-    subTitle={includeSubTitle ? "Don't know your account?" : ''} 
-    content='Forgot Password' 
-    url={`/auth/forgot-password${email &&`?email=${email}`}`} 
+  <LinkComp
+    subTitle={includeSubTitle ? 'Don\'t know your account?' : ''}
+    content='Forgot Password'
+    url={`/auth/forgot-password${email &&`?email=${email}`}`}
   />
-)
+);

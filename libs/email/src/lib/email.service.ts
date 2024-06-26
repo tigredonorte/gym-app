@@ -15,7 +15,7 @@ export interface IRenderedEmail {
   path: string;
   to: string;
   subject: string;
-  emailData: Record<string, any>;
+  emailData: Record<string, never>;
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class EmailService {
     from = process.env['SENDGRID_FROM_EMAIL'],
     subject,
     html,
-  }: ISendMail): Promise<[sgMail.ClientResponse, {}] | unknown> {
+  }: ISendMail): Promise<[sgMail.ClientResponse, object] | unknown> {
     if (!from) {
       throw Error('SENDGRID_FROM_EMAIL is not set');
     }
@@ -102,7 +102,7 @@ export class EmailService {
     try {
       const { subject, ...details } = data;
       const emailLog = {
-        template: data.subject,
+        template: subject,
         date: new Date().toISOString(),
         details,
       };

@@ -23,9 +23,9 @@ export const Profile = (props: ProfileProps) => {
         aria-haspopup="true"
         onClick={onClick as React.MouseEventHandler<HTMLButtonElement> }
         color="inherit"
-        >
+      >
         <Icon path={mdiAccountCircle} size={1.6} />
-      </IconButton> 
+      </IconButton>
     );
   }
   return (
@@ -42,4 +42,4 @@ export const Profile = (props: ProfileProps) => {
       <p>Profile</p>
     </MenuItem>
   );
-}
+};

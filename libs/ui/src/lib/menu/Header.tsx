@@ -70,7 +70,7 @@ export function Header({ children, siteTitle, drawerMenuItemList, menuItems }: H
       open={isMobileMenuOpen}
       onClose={handleMobileMenuClose}
     >
-      <TopMenu 
+      <TopMenu
         menuItems={menuItems || []}
         profileMenuId={menuId}
         onMenuClick={onMenuClick}
@@ -112,7 +112,7 @@ export function Header({ children, siteTitle, drawerMenuItemList, menuItems }: H
 
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-            <TopMenu 
+            <TopMenu
               menuItems={menuItems || []}
               profileMenuId={menuId}
               onMenuClick={onMenuClick}

@@ -13,4 +13,4 @@ export const EmailField: React.FC<EmailFieldProps> = ({ value, validators, ...pr
     value={value}
     validators={mergeValidators(isEmailValid, validators)}
   />
-)
+);

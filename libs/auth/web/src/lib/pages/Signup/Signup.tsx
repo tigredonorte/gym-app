@@ -66,11 +66,11 @@ export default class Signup extends Component<object, SignupState> {
       });
 
       if (response.status !== 200) {
-        return "Email already exists. Do you wan't to <a href='/auth'>Login</a>?";
+        return 'Email already exists. Do you wan\'t to <a href=\'/auth\'>Login</a>?';
       }
     } catch (error) {
       console.error('Error during fetch operation', error);
-    } 
+    }
 
     return null;
   };
@@ -89,7 +89,7 @@ export default class Signup extends Component<object, SignupState> {
       <Container component="main" maxWidth="xs" className="auth-page">
         <Form.Provider>
           <Form.Container className="auth-form" onSave={this.handleSignup}>
-          <Form.Icon path={mdiAccountPlus} />
+            <Form.Icon path={mdiAccountPlus} />
             {errorMessage && <ErrorAlert message={errorMessage} onClose={this.handleCloseSnackbar} />}
             <Form.Title title="Signup" />
             <NameField name='name'/>

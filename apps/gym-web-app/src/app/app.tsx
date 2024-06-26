@@ -12,7 +12,7 @@ const App: React.FC = () => {
         <AppRouter />
       </MUITheme>
     </EnvProvider>
-  )
-}
+  );
+};
 
 export default App;

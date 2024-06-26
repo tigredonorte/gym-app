@@ -4,13 +4,13 @@ import { Document, SchemaTypes } from 'mongoose';
 @Schema()
 export class EmailLogger {
   @Prop({ required: true })
-  template!: string;
+    template!: string;
 
   @Prop({ required: true, minlength: 3 })
-  date!: string;
+    date!: string;
 
   @Prop({ type: SchemaTypes.Mixed, required: true })
-  details!: Record<string, unknown> | string;
+    details!: Record<string, never> | string;
 }
 
 export type EmailLoggerDocument = EmailLogger & Document;

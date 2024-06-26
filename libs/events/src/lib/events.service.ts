@@ -65,7 +65,7 @@ export class EventService {
     ], { fullDocument: 'updateLookup' });
 
     event.on('change', async (change) => {
-      const id = `${serviceName}-${eventName}-${change.fullDocument._id.toString()}`
+      const id = `${serviceName}-${eventName}-${change.fullDocument._id.toString()}`;
       if (this.dispatchedEvents[id]) {
         return;
       }

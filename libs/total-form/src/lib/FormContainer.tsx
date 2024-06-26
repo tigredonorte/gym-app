@@ -1,4 +1,4 @@
-import { Box, BoxProps, CssBaseline, css } from '@mui/material';
+import { Box, BoxProps, CssBaseline } from '@mui/material';
 import React, { Component } from 'react';
 import { FormContext } from './FormContext';
 import { FormError } from './FormErrorException';
@@ -29,7 +29,7 @@ export class FormContainer<FormProps extends FormContainerType> extends Componen
     }
     setRequesting(true);
     try {
-      await this.props.onSave(formData);
+      await this.props.onSave(formData as FormProps);
       clearError();
     } catch (error) {
       if (error instanceof FormError) {
