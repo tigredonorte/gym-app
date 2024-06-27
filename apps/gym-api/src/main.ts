@@ -15,7 +15,11 @@ async function bootstrap() {
   });
   app.use(requestIp.mw());
   app.use(new CustomRequestInfoMiddleware().use);
-  app.useGlobalPipes( new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true, // Automatically transform payloads to DTO instances
+    whitelist: true, // Automatically remove non-whitelisted properties
+    forbidNonWhitelisted: true, // Throw an error if non-whitelisted properties are present
+  }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const port = process.env.PORT || 3000;

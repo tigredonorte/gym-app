@@ -1,5 +1,5 @@
 import { EmailService } from '@gym-app/email';
-import { User, UserService } from '@gym-app/user/api';
+import { IRequestInfo, User, UserService } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { getUserAccessData } from './auth-event-listener.service';
@@ -7,7 +7,6 @@ import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, 
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emailTemplates';
 import { UnauthorizedError } from './errors/UnauthorizedError';
-import { IRequestInfo } from '@gym-app/user/api';
 import { SessionService } from './session/session.service';
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';

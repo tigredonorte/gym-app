@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Model } from 'mongoose';
+import { UserEventsService } from './user-events.service';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
-import { UserEventsService } from './user-events.service';
 
 type UserReturnType = Omit<User, 'password'> & { id?: string };
 
@@ -171,6 +171,15 @@ export class UserService {
   async findById(id: string): Promise<UserReturnType | null> {
     const user = await this.userModel.findById(id).lean().exec();
     return this.getUserReturnData(user);
+  }
+
+  public async updateUser(id: string, data: Partial<Omit<User, 'password' | 'recoverCode' | 'email'>>): Promise<UserReturnType> {
+    const user = await this.userModel.findByIdAndUpdate(id, data, { new: true }).lean().exec();
+    const result = this.getUserReturnData(user);
+    if (!result) {
+      throw new NotFoundException('User not found');
+    }
+    return result;
   }
 
   private getUserReturnData(user: UserDocument | null): UserReturnType | null {
