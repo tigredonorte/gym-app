@@ -1,4 +1,4 @@
-import { EmailField, ErrorAlert, NameField } from '@gym-app/auth/web';
+import { ErrorAlert, NameField } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { CardHeader } from '@gym-app/ui';
 import { mdiAccountBoxEditOutline, mdiContentSaveOutline } from '@mdi/js';
@@ -13,10 +13,10 @@ import './Account.scss';
 
 export interface GeneralSettingFormType extends FormContainerType {
   name: string;
-  email: string;
 }
 
 export interface IUser {
+  id: string;
   name: string;
   email: string;
 }
@@ -58,7 +58,6 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
         <Form.Provider>
           <Form.Container className="general-settings-form" onSave={onSave}>
             <NameField name='name' initialValue={user.name} />
-            <EmailField name='email' initialValue={user.email} />
             <ErrorAlert message={errorMessage} />
             <div className='button-container'>
               <Form.Button.Submit

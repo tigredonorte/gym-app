@@ -11,8 +11,14 @@
 
     .button-container {
       display: flex;
-      justify-content: flex-end;
       grid-column: 1 / -1;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    grid-template-columns: repeat(3, 1fr);
+    &:last-child {
+      grid-column: span 3;
     }
   }
 }

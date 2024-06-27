@@ -9,10 +9,16 @@ interface EnvProviderProps {
 
 export const EnvContext = createContext<Env>({});
 
+let envData: Env = {};
+export const getEnvData = (): Env => {
+  return envData;
+};
+
 export const EnvProvider: React.FC<EnvProviderProps> = ({ children, env }) => {
   if (!env) {
     env = {};
   }
+  envData = env;
   return (
     <EnvContext.Provider value={env}>
       {children}
