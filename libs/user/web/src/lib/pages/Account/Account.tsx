@@ -1,8 +1,9 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import './Account.scss';
 import { AccountSettings } from './AccountSettings';
+import { ChangeEmailSettingFormType, ChangeEmailSettings } from './ChangeEmailSettings';
 import { DeleteAccount } from './DeleteAccount';
 import { GeneralSettingFormType, GeneralSettings, IUser } from './GeneralSettings';
 
@@ -37,8 +38,22 @@ export class Account extends React.Component<AccountProps, AccountState> {
     this.loadUser();
   }
 
-  onSaveProfileInfo(data: GeneralSettingFormType) {
-    console.log('Save profile info', { data });
+  async onSaveProfileInfo(userData: GeneralSettingFormType) {
+    try {
+      const { id } = this.state.user || { id: '' };
+      await postRequest(`user/edit/${id}`, userData);
+    } catch (error) {
+      console.error('Error saving profile info\n\n', { userData }, error);
+    }
+  }
+
+  async onChangeEmail(userData: ChangeEmailSettingFormType) {
+    try {
+      const { id } = this.state.user || { id: '' };
+      await postRequest(`user/edit-email/${id}`, userData);
+    } catch (error) {
+      console.error('Error changing email\n\n', { userData }, error);
+    }
   }
 
   onChangeSettings(option: string, value: boolean) {
@@ -47,13 +62,6 @@ export class Account extends React.Component<AccountProps, AccountState> {
 
   onDeleteAccount() {
     console.log('Delete account');
-    // const userId = localStorage.getItem('userId');
-    // const response = await fetch(`${this.context.backendEndpoint}/user/${userId}`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   }
-    // });
   }
 
   loadUser() {
@@ -62,14 +70,9 @@ export class Account extends React.Component<AccountProps, AccountState> {
       if (!userData) {
         throw new Error('User data not found');
       }
-      const data = JSON.parse(userData);
-      this.setState({
-        user: {
-          name: data.name,
-          email: data.email,
-        }
-      });
-      console.log('User data loaded', data);
+      const user = JSON.parse(userData);
+      this.setState({ user });
+      console.log('User data loaded', user);
     } catch (error) {
       console.error('Error loading user data', error);
     }
@@ -88,6 +91,16 @@ export class Account extends React.Component<AccountProps, AccountState> {
               errorMessage={errorMessage}
               user={user}
               onSave={(data) => this.onSaveProfileInfo(data)}
+            />
+          )
+        }
+        {
+          user && (
+            <ChangeEmailSettings
+              isFormValid={isFormValid}
+              errorMessage={errorMessage}
+              user={user}
+              onSave={(data) => this.onChangeEmail(data)}
             />
           )
         }
