@@ -1,4 +1,4 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { mdiAccountPlus } from '@mdi/js';
 import { Container } from '@mui/material';
@@ -34,20 +34,9 @@ export default class Signup extends Component<object, SignupState> {
 
   handleSignup = async (formData: FormType) => {
     try {
-      const response = await fetch(`${this.context.backendEndpoint}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        return this.setState({ errorMessage: data.message || 'Signup failed' });
-      }
-
-      localStorage.setItem('userData', JSON.stringify(data));
+      const { token, ...userData } = await postRequest<{ token: string, email: string, name: string }>('/auth/signup', formData);
+      localStorage.setItem('token', JSON.stringify(token));
+      localStorage.setItem('userData', JSON.stringify(userData));
       this.setState({ navigate: '/' });
     } catch (error) {
       console.error('Error during fetch operation', error);

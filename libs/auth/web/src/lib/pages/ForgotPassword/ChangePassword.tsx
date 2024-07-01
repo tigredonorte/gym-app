@@ -1,4 +1,4 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { mdiOnepassword } from '@mdi/js';
 import { Container } from '@mui/material';
@@ -18,17 +18,13 @@ export default class ChangePassword extends React.Component<object, { navigate?:
     navigate: '',
   };
   changePassword = async (formData: FormType) => {
-    const data = await Form.executeRequest<FormType>({
-      formData,
-      errorMessage: 'Error changing password',
-      url: `${this.context.backendEndpoint}/auth/change-password`,
-    });
-
-    if (data.errorMessage) {
-      throw new Form.Error(data.errorMessage, 'ChangePassword Error');
+    try {
+      await postRequest<FormType>('/auth/change-password', formData);
+      alert('Password changed successfully');
+      this.setState({ navigate: '/auth' });
+    } catch (error) {
+      throw new Form.Error('Error changing password', 'ChangePassword Error');
     }
-    alert('Password changed successfully');
-    this.setState({ navigate: '/auth' });
   };
 
   render() {
