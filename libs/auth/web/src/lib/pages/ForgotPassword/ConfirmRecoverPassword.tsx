@@ -1,4 +1,4 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { mdiCodeTags } from '@mdi/js';
 import { Container } from '@mui/material';
@@ -19,22 +19,16 @@ export default class ConfirmRecoverPassword extends React.Component< object,{ na
   };
 
   confirmCode = async (formData: FormType) => {
-    const data = await Form.executeRequest<FormType>({
-      formData,
-      errorMessage: 'Error confirming code',
-      url: `${this.context.backendEndpoint}/auth/confirm-recover`,
-    });
+    try {
+      const { resetPasswordToken } = await postRequest<FormType>('/auth/confirm-recover', formData);
+      if (!resetPasswordToken) {
+        throw new Form.Error('Invalid code', 'ConfirmRecoverPassword Error');
+      }
 
-    if (data.errorMessage) {
-      throw new Form.Error(data.errorMessage, 'ConfirmRecoverPassword Error');
+      this.setState({ navigate: '/auth/change-password?email=' +formData.email +'&token=' +resetPasswordToken });
+    } catch (error) {
+      throw new Form.Error('Error confirming code', 'ConfirmRecoverPassword Error');
     }
-
-    const { resetPasswordToken } = data;
-    if (!resetPasswordToken) {
-      throw new Form.Error('Invalid code', 'ConfirmRecoverPassword Error');
-    }
-
-    this.setState({ navigate: '/auth/change-password?email=' +formData.email +'&token=' +resetPasswordToken });
   };
 
   render() {

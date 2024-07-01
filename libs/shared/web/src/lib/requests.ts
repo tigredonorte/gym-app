@@ -15,12 +15,18 @@ const request = async <RequestData, RequestResponse>({
   try {
     const body = formData ? JSON.stringify(formData) : undefined;
     const context = getEnvData();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers.authorization = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${context.backendEndpoint}/${path}`, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-        'authorization': 'Bearer ' + localStorage.getItem('token'),
-      },
+      headers,
       body,
     });
 

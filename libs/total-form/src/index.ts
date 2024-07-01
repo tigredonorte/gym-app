@@ -6,7 +6,6 @@ import { FormIcon } from './lib/FormIcon';
 import { FormText } from './lib/FormText';
 import { FormTitle } from './lib/FormTitle';
 import { SubmitButton } from './lib/SubmitButton';
-import { executeRequest } from './lib/executeRequest';
 import { validators, mergeValidators } from './lib/validators';
 
 export * from './lib/Fields/InputField';
@@ -27,5 +26,4 @@ export const Form = {
   Fields,
   Error: FormError,
   validators,
-  executeRequest,
 };

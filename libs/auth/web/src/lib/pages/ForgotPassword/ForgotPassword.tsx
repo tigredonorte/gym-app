@@ -1,4 +1,4 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { mdiFormTextboxPassword } from '@mdi/js';
 import { Container } from '@mui/material';
@@ -24,26 +24,10 @@ export default class ForgotPassword extends React.Component<object, ForgotPassow
   };
   recoverPassword = async (formData: FormType) => {
     try {
-      const response = await fetch(`${this.context.backendEndpoint}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Form.Error(data.message || 'ForgotPassword failed', 'ForgotPassword Error');
-      }
-
+      await postRequest<FormType>('/auth/forgot-password', formData);
       this.setState({ navigate: '/auth/confirm-recover?email=' + formData.email });
     } catch (error) {
-      if (error instanceof Form.Error) {
-        throw error;
-      }
-      throw new Form.Error('Error during fetch operation', 'ForgotPassword Error');
+      throw new Form.Error(error instanceof Error ? error.message : 'ForgotPassword failed', 'ForgotPassword Error');
     }
   };
 

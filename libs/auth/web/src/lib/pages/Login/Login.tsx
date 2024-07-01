@@ -1,4 +1,4 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
 import { mdiLogin } from '@mdi/js';
 import { Container, Grid } from '@mui/material';
@@ -27,31 +27,12 @@ export default class Login extends React.Component<object, LoginState> {
 
   handleLogin = async (formData: FormType) => {
     try {
-      const response = await fetch(`${this.context.backendEndpoint}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Form.Error(data.message, 'Login Error');
-      }
-
-      const { token, ...userData } = data;
+      const { token, ...userData } = await postRequest<{ token: string, email: string, name: string }>('/auth/login', formData);
       localStorage.setItem('userData', JSON.stringify(userData));
       localStorage.setItem('token', token);
-
       this.setState({ navigate: '/' });
-
     } catch (error) {
-      if (!(error instanceof Form.Error)) {
-        const message = (error instanceof Error) ? error.message : (error as string);
-        throw new Form.Error(message || 'Unkown login error', 'Login Error');
-      }
-      throw error;
+      throw new Form.Error(error instanceof Error ? error.message : 'Unkown login error', 'Login Error');
     }
   };
 
