@@ -14,7 +14,14 @@
         "outputPath": "dist/apps/gym-api",
         "main": "apps/gym-api/src/main.ts",
         "tsConfig": "apps/gym-api/tsconfig.app.json",
-        "assets": ["apps/gym-api/src/assets"],
+        "assets": [
+          "apps/gym-api/src/assets",
+          {
+            "input": "libs",
+            "glob": "**/src/assets/**/*",
+            "output": "assets"
+          }
+        ],
         "isolatedConfig": true,
         "webpackConfig": "apps/gym-api/webpack.config.js"
       },

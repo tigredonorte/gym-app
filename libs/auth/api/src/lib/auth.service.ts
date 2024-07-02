@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import { getUserAccessData } from './auth-event-listener.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
-import { getRecoverPasswordEmail } from './emailTemplates';
+import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
 import { UnauthorizedError } from './errors/UnauthorizedError';
 import { SessionService } from './session/session.service';
 
