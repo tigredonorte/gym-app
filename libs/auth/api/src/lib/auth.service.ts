@@ -1,8 +1,7 @@
 import { EmailService } from '@gym-app/email';
-import { IRequestInfo, User, UserService } from '@gym-app/user/api';
+import { IRequestInfo, User, UserService, getUserAccessData } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { getUserAccessData } from './auth-event-listener.service';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
