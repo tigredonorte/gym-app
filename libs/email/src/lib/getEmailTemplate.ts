@@ -1,4 +1,4 @@
-import { IBaseEmailData, IRenderedEmail, IUserDataInfo } from './email.service';
+import { IBaseEmailData, IRenderedEmail } from './email.service';
 
 export function getEmailTemplate<T>(
   ejsFile: string,
@@ -12,7 +12,7 @@ export function getEmailTemplate<T>(
     return () => null;
   }
 
-  return (email: string, emailData: T & IUserDataInfo): IRenderedEmail => ({
+  return (email: string, emailData: T): IRenderedEmail => ({
     to: email,
     subject,
     emailData: {

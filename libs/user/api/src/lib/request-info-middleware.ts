@@ -67,3 +67,18 @@ function getIp(req: Request & IRequestInfo): string | undefined {
 
   return undefined;
 }
+
+export interface IUserDataInfo {
+  browser: string;
+  location: string;
+  os: string;
+  device: string;
+}
+
+export function getUserAccessData(userData: IRequestInfo['userData']): IUserDataInfo {
+  const location = userData.location ? `${userData.location?.city}, ${userData.location?.region}, ${userData.location?.country}`: '';
+  const browser = `${userData.deviceInfo?.browser?.name} ${userData.deviceInfo?.browser?.major }`;
+  const os = `${userData.deviceInfo?.os?.name} ${userData.deviceInfo?.os?.version}`;
+  const device = `${userData.deviceInfo?.device?.vendor} ${userData.deviceInfo?.device?.model}`;
+  return { browser, location, os, device };
+}

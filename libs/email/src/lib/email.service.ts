@@ -18,13 +18,6 @@ export interface IRenderedEmail {
   emailData: Record<string, unknown>;
 }
 
-export interface IUserDataInfo {
-  browser: string;
-  location: string;
-  os: string;
-  device: string;
-}
-
 export interface IBaseEmailData {
   title: string;
 }
