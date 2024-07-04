@@ -46,7 +46,7 @@ export class FormContainer<FormProps extends FormContainerType> extends Componen
     const { children, containerClassName, onValidityChange, onSave, boxProps, ...props } = this.props;
 
     return (
-      <Box className={containerClassName} {...boxProps}>
+      <Box className={containerClassName} width="100%" {...boxProps} >
         <CssBaseline />
         <FormErrorSnackbar />
         <form onSubmit={this.handleSubmit} {...props}>
