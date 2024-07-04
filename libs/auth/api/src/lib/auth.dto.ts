@@ -34,7 +34,8 @@ interface Logout {
   sessionId: string;
 }
 export class LogoutDto implements Logout {
-  sessionId!: string;
+  @IsString()
+    sessionId!: string;
 }
 
 interface CheckEmail {
