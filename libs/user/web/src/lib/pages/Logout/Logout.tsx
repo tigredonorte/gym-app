@@ -1,10 +1,9 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { postRequest } from '@gym-app/shared/web';
 import React from 'react';
 
 export const Logout: React.FC = () => {
 
   const [errorMessage, setErrorMessage] = React.useState('');
-  const context = React.useContext(EnvContext);
   const logout = async() => {
     try {
       const userData = localStorage.getItem('userData');
@@ -14,27 +13,15 @@ export const Logout: React.FC = () => {
 
       const sessionId = JSON.parse(userData).sessionId;
       const data = { sessionId };
-      const response = await fetch(`${context.backendEndpoint}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message);
-      }
+      await postRequest('/auth/logout', data);
+    } catch (error) {
+      const message = 'Error logging out on server side. Redirecting to login page.';
+      console.error(message, error);
+      setErrorMessage(message);
+    } finally {
       localStorage.removeItem('userData');
       localStorage.removeItem('token');
       window.location.href = '/';
-    } catch (error) {
-      console.error('Error logging out on server side. Redirecting to login page.', error);
-      setErrorMessage('Error logging out on server side. Redirecting to login page.');
-      setTimeout(() => {
-        localStorage.removeItem('userData');
-        window.location.href = '/';
-      }, 2000);
     }
   };
 
