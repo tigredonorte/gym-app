@@ -31,6 +31,12 @@ const request = async <RequestData, RequestResponse>({
       body,
     });
 
+    const isTokenExpired = response.status === 401 && token;
+    if (isTokenExpired) {
+      console.error('Token expired, logging out');
+      window.location.href = '/user/logout';
+    }
+
     if (!response.ok) {
       throw new Error('Failed to fetch data');
     }
