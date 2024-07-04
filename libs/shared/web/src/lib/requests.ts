@@ -21,9 +21,10 @@ const request = async <RequestData, RequestResponse>({
 
     const token = localStorage.getItem('token');
     if (token) {
-      headers.authorization = `Bearer ${token}`;
+      headers.Authorization = `Bearer ${token}`;
     }
 
+    path = path.startsWith('/') ? path.slice(1) : path;
     const response = await fetch(`${context.backendEndpoint}/${path}`, {
       method,
       headers,
