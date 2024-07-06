@@ -1,7 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { Request } from 'express';
 import { User } from '../user.model';
+import { extractTokenFromHeader } from './extractTokenFromHeader';
+
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -9,7 +11,7 @@ export class JwtAuthGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request & { user: User }>();
-    const token = this.extractTokenFromHeader(request);
+    const token = extractTokenFromHeader(request);
     if (!token) {
       throw new UnauthorizedException('Token not found');
     }
@@ -18,21 +20,12 @@ export class JwtAuthGuard implements CanActivate {
       const payload = this.jwtService.verify(token, { secret: process.env['JWT_SECRET'] });
       request.user = payload;
     } catch (e) {
+      if (e instanceof TokenExpiredError) {
+        throw new UnauthorizedException('Token expired');
+      }
       throw new UnauthorizedException('Invalid token');
     }
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | null {
-    const authorization = request.headers['authorization'];
-    if (!authorization || typeof authorization !== 'string') {
-      return null;
-    }
-    const [bearer, token] = authorization.split(' ');
-    if (bearer !== 'Bearer' || !token) {
-      return null;
-    }
-    return token;
   }
 }

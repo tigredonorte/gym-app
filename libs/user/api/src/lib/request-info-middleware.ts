@@ -1,7 +1,10 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { Request, Response } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
+import { extractTokenFromHeader } from './guards/extractTokenFromHeader';
+import { IUser } from './user.model';
 
 export interface IRequestInfo {
   ip: string;
@@ -24,28 +27,48 @@ export interface IRequestInfo {
       area?: number;
     } | null;
     ip?: string;
-  }
+  },
+  user?: IUser;
 }
 
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
   use(req: IRequestInfo & Request, res: Response, next: () => void) {
-    const temp = req.headers['user-agent'] || undefined;
-    const ua = new UAParser(temp).getResult();
-    const ip = getIp(req);
-    const geo = ip ? geoip.lookup(`${ip}`) : null;
-
-    req.userData = {
-      deviceInfo: {
-        browser: ua.browser,
-        os: ua.os,
-        device: ua.device,
-      },
-      location: geo,
-      ip: ip,
-    };
+    req.userData = getUserData(req);
+    const user = getUser(req, new JwtService());
+    req.user = user || undefined;
     next();
   }
+}
+
+function getUser(req: IRequestInfo & Request, jwtService: JwtService): IRequestInfo['user'] | null {
+  const token = extractTokenFromHeader(req);
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = jwtService.verify(token, { secret: process.env['JWT_SECRET'] });
+    return payload;
+  } catch (e) {
+    return null;
+  }
+}
+
+function getUserData(req: IRequestInfo & Request): IRequestInfo['userData'] {
+  const temp = req.headers['user-agent'] || undefined;
+  const ua = new UAParser(temp).getResult();
+  const ip = getIp(req);
+  const geo = ip ? geoip.lookup(`${ip}`) : null;
+  return {
+    deviceInfo: {
+      browser: ua.browser,
+      os: ua.os,
+      device: ua.device,
+    },
+    location: geo,
+    ip: ip,
+  };
 }
 
 function getIp(req: Request & IRequestInfo): string | undefined {
