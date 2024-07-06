@@ -37,18 +37,28 @@ const request = async <RequestData, RequestResponse>({
       window.location.href = '/user/logout';
     }
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch data');
+    const contentType = response.headers.get('Content-Type');
+    let result: RequestResponse;
+    if (contentType && contentType.includes('application/json')) {
+      result = await response.json();
+    } else {
+      result = (await response.text()) as unknown as RequestResponse;
     }
 
-    const data = await response.json();
-    return data;
+    if (!response.ok) {
+      const errorMessage: string = result && typeof result === 'object' && 'message' in result ? (result.message as string) : 'Failed to fetch data';
+      const error = new Error(errorMessage || 'Failed to fetch data');
+      if (result && typeof result === 'object') {
+        Object.assign(error, result);
+      }
+      throw error;
+    }
+    return result as RequestResponse;
   } catch (error) {
     console.error('Failure while fetching data', error);
     throw error;
   }
 };
-
 
 export const getRequest = <RequestResponse>(path: string) => request<undefined, RequestResponse>({
   method: 'GET', path
