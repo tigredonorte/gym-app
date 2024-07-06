@@ -1,7 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
-// import discover from '@/assets/images/discover_card.png';
-// import mastercard from '@/assets/images/mastercard_card.png';
-// import visa from '@/assets/images/visa_card.png';
 import { CardHeader } from '@gym-app/ui';
 import { mdiArrowRight, mdiStar, mdiStarCircle, mdiStarOutline } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -304,10 +300,10 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ card }: PaymentMethodProp
   return (
     <Stack direction="row" alignItems="center" spacing={2}>
       <Box component="img" src={img} width={60} height={60} />
-      <div style={{ flexGrow: 1 }}>
+      <Box flexGrow={1}>
         <Typography variant="subtitle1">{type}</Typography>
         <Typography variant="subtitle2">Ending in {cardNumber}</Typography>
-      </div>
+      </Box>
       {isdefault ? <Chip label="Default" size="small" /> : <Link href="#!">Make Default</Link>}
       <Link href="#!">Edit</Link>
     </Stack>
