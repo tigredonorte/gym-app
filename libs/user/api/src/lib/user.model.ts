@@ -16,8 +16,16 @@ class RecoverCode {
     changePasswordCode?: string;
 }
 
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  password?: string;
+  recoverCode?: RecoverCode;
+}
+
 @Schema()
-export class User {
+export class User implements Omit<IUser, 'id'> {
   @Prop({ required: false, minlength: 3 })
     name!: string;
 
