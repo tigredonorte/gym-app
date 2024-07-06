@@ -1,22 +1,34 @@
+import { MenuOption } from '@gym-app/ui';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { UserGrid } from './components/UserGrid';
 import { UserMenu } from './components/UserMenu';
 import { Account } from './pages/Account/Account';
-import { Billing } from './pages/Billing/Billing';
 import { Logout } from './pages/Logout/Logout';
 import { Security } from './pages/Security/Security';
-import { UserGrid } from './components/UserGrid';
 
-export const UserPath = 'user';
-export const UserRouter: React.FC = () => (
-  <UserGrid menu={<UserMenu />}>
+interface ProfileRouterProps {
+  children: React.ReactNode;
+  extraMenu?: MenuOption[];
+}
+export const ProfilePath = 'profile';
+export const ProfileRouter: React.FC<ProfileRouterProps> = (props: ProfileRouterProps) => (
+  <UserGrid menu={<UserMenu extraMenu={props.extraMenu} />}>
     <Routes>
-      <Route index element={<Account />} />
+      <Route path="/" element={<Navigate to="/profile/account" />} />
       <Route path='account' element={<Account />} />
-      <Route path='billing' element={<Billing />} />
       <Route path='security' element={<Security />} />
-      <Route path='logout' element={<Logout />} />
+      {props.children}
       <Route path="*" element={<Navigate to="account" />} />
     </Routes>
   </UserGrid>
+);
+
+export const UserPath = 'user';
+export const UserRouter: React.FC = () => (
+  <Routes>
+    <Route path="/" element={<Navigate to="/user" />} />
+    <Route path='logout' element={<Logout />} />
+    <Route path="*" element={<Navigate to="/" />} />
+  </Routes>
 );
