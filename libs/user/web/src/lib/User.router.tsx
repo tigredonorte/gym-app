@@ -4,6 +4,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { UserGrid } from './components/UserGrid';
 import { UserMenu } from './components/UserMenu';
 import { Account } from './pages/Account/Account';
+import { Confirm } from './pages/Confirm/Confirm';
 import { Logout } from './pages/Logout/Logout';
 import { Security } from './pages/Security/Security';
 
@@ -29,6 +30,7 @@ export const UserRouter: React.FC = () => (
   <Routes>
     <Route path="/" element={<Navigate to="/user" />} />
     <Route path='logout' element={<Logout />} />
+    <Route path="confirm" element={<Confirm />} />
     <Route path="*" element={<Navigate to="/" />} />
   </Routes>
 );
