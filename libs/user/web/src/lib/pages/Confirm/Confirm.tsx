@@ -20,8 +20,9 @@ export const Confirm: React.FC = () => {
     return queryParams;
   };
   const { url, redirect } = getQueryParams(location.search);
+  const isFetchedRef = React.useRef(false);
 
-  const confirm = async() => {
+  const confirm = async(url: string) => {
     try {
       const { title, message } = await getRequest<{ message: string; title: string; }>(`${url}`);
       setState({
@@ -41,7 +42,11 @@ export const Confirm: React.FC = () => {
   };
 
   React.useEffect(() => {
-    !url ? navigate('/404') : confirm();
+    if (isFetchedRef.current) {
+      return;
+    }
+    isFetchedRef.current = true;
+    !url ? navigate('/404') : confirm(url);
   }, []);
 
   if (!state) {
