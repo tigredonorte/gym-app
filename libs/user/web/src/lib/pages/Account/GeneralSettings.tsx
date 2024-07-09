@@ -23,13 +23,12 @@ export interface IUser {
 
 interface GeneralSettingsProps {
   errorMessage: string;
-  isFormValid: boolean;
   user: IUser;
   onSave: (formData: GeneralSettingFormType) => void;
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSettingsProps) => {
-  const { errorMessage, isFormValid, user, onSave } = props;
+  const { errorMessage, user, onSave } = props;
   return (
     <Card>
       <CardHeader title="General Settings" />
@@ -61,7 +60,6 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
             <ErrorAlert message={errorMessage} />
             <div className='button-container'>
               <Form.Button.Submit
-                disabled={!isFormValid}
                 variant="contained"
                 color="primary"
                 endIcon={<Icon path={mdiContentSaveOutline} size={1}/>}
