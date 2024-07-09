@@ -3,12 +3,76 @@
 <head>
   <title><%= title %></title>
   <style>
-    body {font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;}
-    .header, .footer {background-color: #102A43; color: #ffffff; padding: 20px;}
-    .email-container {max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);}
-    .button {background-color: #1E88E5; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;}
-    .recovery-code {color: #E53935; font-size: 24px; font-weight: bold;}
-    h1, h2, p {margin: 0;}
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .header, .footer {
+      background-color: #102A43;
+      color: #ffffff;
+      padding: 20px;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .button {
+      background-color: #1E88E5;
+      color: #ffffff;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      display: inline-block;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+
+    a.button:visited {
+      background-color: #1E88E5;
+      color: #ffffff; /* Make visited link color same as normal link color */
+      text-decoration: none; /* Remove underline if needed */
+    }
+
+    a.button:hover {
+      background-color: #155fa0;
+      color: #f6f6f6; /* Color when hovering over the link */
+      text-decoration: underline; /* Optional: Add underline on hover */
+    }
+
+    a.button:active {
+      background-color: #0d3f70;
+      color: #f2f2f2; /* Color when the link is being clicked */
+    }
+
+    .code {
+      color: #E53935;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    h1, h2, h3, p {
+      margin: 0;
+    }
+    h1 {
+      font-size: 26px;
+    }
+    h2 {
+      font-size: 22px;
+    }
+    h3 {
+      font-size: 20px;
+    }
+    p {
+      line-height: 1.5;
+      font-size: 16px;
+    }
+  </style>
   </style>
 </head>
 <body>
