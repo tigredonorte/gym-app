@@ -9,10 +9,13 @@ export class UpdateUserDto implements UpdateUser {
 }
 
 
-interface UpdateEmail {
-  email?: string;
+export interface IUpdateEmail {
+  newEmail: string;
+  oldEmail: string;
 }
-export class UpdateEmailDto implements UpdateEmail {
+export class UpdateEmailDto implements IUpdateEmail {
   @IsEmail()
-    email?: string;
+    newEmail!: string;
+  @IsEmail()
+    oldEmail!: string;
 }

@@ -20,6 +20,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
+  confirmed: boolean;
   password?: string;
   recoverCode?: RecoverCode;
 }
@@ -40,6 +41,20 @@ export class User implements Omit<IUser, 'id'> {
   @Type(() => RecoverCode)
   @Prop({ type: RecoverCode, required: false, select: false })
     recoverCode?: RecoverCode;
+
+  @Prop({ required: false, default: false })
+    confirmed!: boolean;
+
+  @Prop({ required: false, default: [], select: false })
+    emailHistory!: {
+    email: string,
+    createdAt: Date,
+    confirmed: boolean,
+    changeEmailCode?: string,
+    revertChangeEmailCode?: string,
+    oldEmail: string
+  }[];
+
 }
 
 export type UserDocument = User & Document;
