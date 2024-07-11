@@ -4,8 +4,7 @@ interface UpdateUser {
   name?: string;
 }
 export class UpdateUserDto implements UpdateUser {
-  @IsString()
-    name?: string;
+  @IsString() name?: string;
 }
 
 
@@ -14,8 +13,6 @@ export interface IUpdateEmail {
   oldEmail: string;
 }
 export class UpdateEmailDto implements IUpdateEmail {
-  @IsEmail()
-    newEmail!: string;
-  @IsEmail()
-    oldEmail!: string;
+  @IsEmail() newEmail!: string;
+  @IsEmail() oldEmail!: string;
 }

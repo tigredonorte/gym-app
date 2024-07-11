@@ -5,13 +5,13 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Model } from 'mongoose';
 import { sendChangeEmailCode } from './emails/sendChangeEmailCode';
+import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 import { sendEmailChanged } from './emails/sendEmailChanged';
 import { IRequestInfo, getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
 import { IUpdateEmail } from './user.dto';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
-import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 
 export type UserReturnType = Omit<User, 'password'> & { id?: string };
 
@@ -77,7 +77,7 @@ export class UserService {
     if (!user) {
       const emailChanged = await this.userModel.findOne({ 'emailHistory.email': email }).select('+emailHistory').exec();
       if (emailChanged) {
-        const changeDate = emailChanged.emailHistory.find((emailHistoryItem) => email === emailHistoryItem.email)?.createdAt;
+        const changeDate = emailChanged.emailHistory?.find((emailHistoryItem) => email === emailHistoryItem.email)?.createdAt;
         throw new BadRequestException({ message: 'Email recently changed', changeDate });
       }
       throw new NotFoundException('User not found');
@@ -233,17 +233,21 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const emailHistoryItemIndex = user.emailHistory.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
-    if (emailHistoryItemIndex === -1) {
+    const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
+    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
       throw new BadRequestException('Invalid change email code');
     }
 
-    if (user.emailHistory[emailHistoryItemIndex].revertChangeEmailCode) {
+    if (user.emailHistory?.[emailHistoryItemIndex].revertChangeEmailCode) {
       throw new BadRequestException('Email is already confirmed');
     }
 
-    if(user.emailHistory[emailHistoryItemIndex].email === user.email) {
+    if(user.emailHistory?.[emailHistoryItemIndex].email === user.email) {
       throw new BadRequestException('Email is already changed');
+    }
+
+    if (!user.emailHistory?.[emailHistoryItemIndex].email) {
+      throw new BadRequestException('Email history entry not found');
     }
 
     const revertChangeEmailCode = this.getRandomString();
@@ -252,7 +256,7 @@ export class UserService {
       revertChangeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/revert-change-email/${id}/${revertChangeEmailCode}`,
     }));
 
-    user.email = user.emailHistory[emailHistoryItemIndex].email;
+    user.email = user.emailHistory?.[emailHistoryItemIndex].email;
     user.emailHistory[emailHistoryItemIndex] = {
       ...user.emailHistory[emailHistoryItemIndex],
       revertChangeEmailCode,
@@ -279,16 +283,16 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const emailHistoryItemIndex = user.emailHistory.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
-    if (emailHistoryItemIndex === -1) {
+    const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
+    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
       throw new BadRequestException('Invalid change email code');
     }
 
-    if (user.emailHistory[emailHistoryItemIndex].email === user.email) {
+    if (user.emailHistory?.[emailHistoryItemIndex].email === user.email) {
       throw new BadRequestException('Email is already confirmed');
     }
 
-    user.emailHistory = user.emailHistory.filter((emailHistoryItem) => changeEmailCode !== emailHistoryItem.changeEmailCode);
+    user.emailHistory = user.emailHistory?.filter((emailHistoryItem) => changeEmailCode !== emailHistoryItem.changeEmailCode);
     await user.save();
   }
 
@@ -298,18 +302,22 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    const emailHistoryItemIndex = user.emailHistory.findIndex((emailHistoryItem) => revertChangeEmailCode === emailHistoryItem.revertChangeEmailCode);
-    if (emailHistoryItemIndex === -1) {
+    const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => revertChangeEmailCode === emailHistoryItem.revertChangeEmailCode);
+    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
       throw new BadRequestException('Invalid revert change email code');
     }
 
-    if (user.emailHistory[emailHistoryItemIndex].oldEmail === user.email) {
+    if (user.emailHistory?.[emailHistoryItemIndex].oldEmail === user.email) {
       throw new BadRequestException('Email is already reverted');
     }
 
+    if (!user.emailHistory?.[emailHistoryItemIndex].oldEmail) {
+      throw new BadRequestException('Old email not found');
+    }
+
     await this.emailService.sendRenderedEmail(sendChangeEmailReverted(user.email, {}));
-    user.email = user.emailHistory[emailHistoryItemIndex].oldEmail;
-    user.emailHistory = user.emailHistory.filter((emailHistoryItem) => emailHistoryItem.email !== user.email);
+    user.email = user.emailHistory?.[emailHistoryItemIndex].oldEmail;
+    user.emailHistory = user.emailHistory?.filter((emailHistoryItem) => emailHistoryItem.email !== user.email);
 
     await user.save();
   }

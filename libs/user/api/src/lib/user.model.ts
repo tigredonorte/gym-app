@@ -1,59 +1,41 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
 import { Exclude, Type } from 'class-transformer';
+import { Document } from 'mongoose';
+import { IRecoveredCode, IUser, IUserEmailHistory } from './interfaces/IUser';
 
-class RecoverCode {
-  @Prop()
-    code?: string;
-
-  @Prop()
-    expiresAt!: Date;
-
-  @Prop()
-    createdAt!: Date;
-
-  @Prop()
-    changePasswordCode?: string;
+class RecoverCode implements IRecoveredCode {
+  @Prop() code?: string;
+  @Prop() expiresAt!: Date;
+  @Prop() createdAt!: Date;
+  @Prop() changePasswordCode?: string;
 }
 
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-  confirmed: boolean;
-  password?: string;
-  recoverCode?: RecoverCode;
+class UserEmailHistory implements IUserEmailHistory {
+  @Prop() email!: string;
+  @Prop() createdAt!: Date;
+  @Prop() confirmed!: boolean;
+  @Prop() changeEmailCode?: string;
+  @Prop() revertChangeEmailCode?: string;
+  @Prop() oldEmail!: string;
 }
 
 @Schema()
 export class User implements Omit<IUser, 'id'> {
-  @Prop({ required: false, minlength: 3 })
-    name!: string;
+  @Prop({ required: false, minlength: 3 }) name!: string;
 
-  @Prop({ required: false, unique: true })
-    email!: string;
+  @Prop({ required: false, unique: true }) email!: string;
 
   @Exclude()
-  @Prop({ required: false, minlength: 10, select: false })
-    password!: string;
+  @Prop({ required: false, minlength: 10, select: false }) password!: string;
 
   @Exclude()
   @Type(() => RecoverCode)
-  @Prop({ type: RecoverCode, required: false, select: false })
-    recoverCode?: RecoverCode;
+  @Prop({ type: RecoverCode, required: false, select: false }) recoverCode?: IRecoveredCode;
 
-  @Prop({ required: false, default: false })
-    confirmed!: boolean;
+  @Prop({ required: false, default: false }) confirmed!: boolean;
 
-  @Prop({ required: false, default: [], select: false })
-    emailHistory!: {
-    email: string,
-    createdAt: Date,
-    confirmed: boolean,
-    changeEmailCode?: string,
-    revertChangeEmailCode?: string,
-    oldEmail: string
-  }[];
+  @Type(() => UserEmailHistory)
+  @Prop({ type: UserEmailHistory, required: false, select: false, default: [] }) emailHistory?: IUserEmailHistory[];
 
 }
 
