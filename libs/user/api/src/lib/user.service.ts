@@ -75,7 +75,7 @@ export class UserService {
 
     const user = await this.userModel.findOne({ email }).select('+password').exec();
     if (!user) {
-      const emailChanged = await this.userModel.findOne({ 'emailHistory.email': email }).select('+emailHistory').exec();
+      const emailChanged = await this.userModel.findOne({ 'emailHistory.oldEmail': email }).select('+emailHistory').exec();
       if (emailChanged) {
         const changeDate = emailChanged.emailHistory?.find((emailHistoryItem) => email === emailHistoryItem.email)?.createdAt;
         throw new BadRequestException({ message: 'Email recently changed', changeDate });
