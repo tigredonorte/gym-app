@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useCallback, useContext, useState } from 'react';
+import React, { ReactNode, createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 class FormProviderError extends Error {
   constructor(message = 'FormProvider not found') {
@@ -44,27 +44,41 @@ export const FormProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [fieldValidity, setFieldValidity] = useState({});
   const [isRequesting, setRequesting] = useState(false);
   const [error, setError] = useState<FormErrorType | null>(null);
-  const clearError = () => setError(null);
-
+  const clearError = useCallback(() => setError(null), []);
 
   const updateFormData = useCallback((name: string, value: unknown) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: Record<string, unknown>) => {
+      if (prev[name] === value) {
+        return prev;
+      }
+      const updatedData = { ...prev, [name]: value };
+      return updatedData;
+    });
   }, []);
 
   const updateFieldValidity = useCallback((name: string, isValid: boolean) => setFieldValidity((prev) => ({ ...prev, [name]: isValid })), []);
-  const isFormValid = Object.values(fieldValidity).every(Boolean);
+  const isFormValid = useMemo(() => Object.values(fieldValidity).every(Boolean), [fieldValidity]);
+
+  const contextValue = useMemo(() => ({
+    formData,
+    isFormValid,
+    fieldValidity,
+    isRequesting,
+    error,
+    updateFormData,
+    updateFieldValidity,
+    setRequesting,
+    setError,
+    clearError,
+  }), [formData, isFormValid, fieldValidity, isRequesting, error, updateFormData, updateFieldValidity, setRequesting, setError, clearError]);
 
   return (
-    <FormContext.Provider value={{
-      formData, isFormValid, fieldValidity, isRequesting, error,
-      updateFormData, updateFieldValidity, setRequesting, setError, clearError,
-    }}>
+    <FormContext.Provider value={contextValue}>
       {children}
     </FormContext.Provider>
   );
 };
 
-// Custom hook to use form context
 export function useFormContext<FormProps> () {
   const context = useContext(FormContext);
   if (!context) {
