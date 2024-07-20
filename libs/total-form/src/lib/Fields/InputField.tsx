@@ -21,16 +21,12 @@ export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'o
   initialValue?: T;
 }
 
-export interface foo {
-  bar: string;
-}
-
 interface InputFieldState {
   touched: boolean;
   error: string | null;
 }
 
-export class InputField<T> extends React.Component<InputFieldProps<T>, InputFieldState> {
+class InputFieldClass<T> extends React.Component<InputFieldProps<T>, InputFieldState> {
   static contextType = FormContext;
   declare context: React.ContextType<typeof FormContext>;
   constructor(props: InputFieldProps<T>) {
@@ -110,3 +106,5 @@ export class InputField<T> extends React.Component<InputFieldProps<T>, InputFiel
     );
   }
 }
+
+export const InputField = React.memo(InputFieldClass) as unknown as typeof InputFieldClass;

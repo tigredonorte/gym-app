@@ -4,7 +4,7 @@ import { isEmailValid } from './validateInput';
 
 type EmailFieldProps = InputFieldProps<string>
 
-export const EmailField: React.FC<EmailFieldProps> = ({ value, validators, ...props }: EmailFieldProps) => (
+export const EmailField: React.FC<EmailFieldProps> = React.memo(({ value, validators, ...props }: EmailFieldProps) => (
   <Form.Fields.TextField
     {...props}
     type="email"
@@ -13,4 +13,4 @@ export const EmailField: React.FC<EmailFieldProps> = ({ value, validators, ...pr
     value={value}
     validators={mergeValidators(isEmailValid, validators)}
   />
-);
+));
