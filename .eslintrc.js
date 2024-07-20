@@ -16,6 +16,7 @@ module.exports = {
     'plugin:react-native/all',
   ],
   rules: {
+    'react/display-name': 0,
     'react-native/no-raw-text': 0,
     'react-native/split-platform-components': 0,
     'react/jsx-uses-react': 'off',

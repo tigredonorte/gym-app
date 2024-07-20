@@ -1,5 +1,5 @@
-import React from 'react';
-import { mergeValidators, validators } from '../validators';
+import React, { useEffect, useState } from 'react';
+import { validators } from '../validators';
 import { InputFieldProps } from './InputField';
 
 interface ConfirmFieldProps {
@@ -8,7 +8,9 @@ interface ConfirmFieldProps {
   confirmName: string;
 }
 
-export const ConfirmField: React.FC<ConfirmFieldProps> = ({ children, confirmLabel: label, confirmName: name }) => {
+export const ConfirmField: React.FC<ConfirmFieldProps> = React.memo(({ children, confirmLabel: label, confirmName: name }: ConfirmFieldProps) => {
+  const [clonedElement, setClonedElement] = useState<React.ReactNode>(null);
+
   const childrenArray = React.Children.toArray(children);
   if (childrenArray.length !== 1) {
     throw new Error('ConfirmField must have exactly one child');
@@ -25,15 +27,19 @@ export const ConfirmField: React.FC<ConfirmFieldProps> = ({ children, confirmLab
     throw new Error('Field child must have a name prop');
   }
 
-  const cloned = React.cloneElement(child as React.ReactElement<InputFieldProps<never>>, {
-    validators: mergeValidators(validators.isEqualField(fieldName), child.props.validators),
-    label,
-    name,
-  });
+  useEffect(() => {
+    setClonedElement(React.cloneElement(child as React.ReactElement<InputFieldProps<never>>, {
+      key: name,
+      validators: validators.isEqualField(fieldName),
+      label,
+      name,
+    }));
+  }, []);
+
   return (
     <>
       {children}
-      {cloned}
+      {clonedElement}
     </>
   );
-};
+});
