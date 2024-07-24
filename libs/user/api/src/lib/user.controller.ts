@@ -3,7 +3,7 @@ import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
 import { IUser } from './interfaces/IUser';
 import { IRequestInfo } from './request-info-middleware';
-import { UpdateEmailDto, UpdateUserDto } from './user.dto';
+import { ChangePasswordDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserReturnType, UserService } from './user.service';
 
@@ -67,5 +67,37 @@ export class UserController {
       @Param('code') code: string
   ): Promise<void> {
     await this.userService.revertChangeEmail(id, code);
+  }
+
+  @Post('change-password/:id')
+  @HttpCode(HttpStatus.OK)
+  async changePassword(
+    @Param('id') id: string,
+      @Body() data: ChangePasswordDto,
+      @Req() req: IRequestInfo
+  ): Promise<IUser['passwordHistory']> {
+    return await this.userService.changePasswordStart(id, data, req.userData);
+  }
+
+  @Get('change-password/:id/:code')
+  @HttpCode(HttpStatus.OK)
+  async confirmChangePassword(
+    @Param('id') id: string,
+      @Param('code') code: string,
+      @Req() req: IRequestInfo
+  ): Promise<{ title: string; message: string }> {
+    await this.userService.changePasswordComplete(id, code, req.userData);
+    return {
+      title: 'Password Changed',
+      message: 'Your password has been successfully changed.',
+    };
+  }
+
+  @Delete('change-password/:id')
+  @HttpCode(HttpStatus.OK)
+  async cancelChangePassword(
+    @Param('id') id: string,
+  ): Promise<void> {
+    await this.userService.deleteChangePassword(id);
   }
 }

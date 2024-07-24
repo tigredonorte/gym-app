@@ -1,10 +1,9 @@
 import { FormContainerType } from './FormContainer';
 
-const isEqualField = (field: string) => (value: string, formData: FormContainerType) => {
+const isEqualField = <T>(field: string) => (value: T, formData: FormContainerType) => {
   const otherValue = formData?.[field];
   return otherValue !== value ? 'Fields do not match' : null;
 };
-
 export const validators = {
   minlength: (min: number) => (value: string) => value?.length < min ? `Must be at least ${min} characters` : null,
   maxlength: (max: number) => (value: string) => value?.length > max ? `Must be less than ${max} characters` : null,

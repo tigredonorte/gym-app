@@ -28,7 +28,9 @@ export interface ActionStatus {
   loading: boolean;
   error: string | null;
 }
-export type UserActionTypes = 'login' | 'logout' | 'loadUser' | 'removeFromEmailHistory' | 'saveProfileInfo' | 'changeEmail';
+export type UserActionTypes = 'login' | 'logout' | 'loadUser' |
+'removeFromEmailHistory' | 'saveProfileInfo' | 'changeEmail' |
+'changePassword' | 'cancelChangePassword'
 
 export type UserStatusses = {
   [key in UserActionTypes]?: ActionStatus;

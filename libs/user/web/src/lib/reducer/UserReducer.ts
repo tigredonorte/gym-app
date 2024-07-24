@@ -29,9 +29,17 @@ export const userSlice = createSlice({
       if (state.user) {
         state.user.emailHistory = state.user.emailHistory?.filter((email) => email.changeEmailCode !== action.payload);
       }
+    },
+    removePasswordChangeRequest: (state: UserState) => {
+      if (state.user) {
+        state.user.passwordHistory = state.user.passwordHistory?.filter((request) => request.confirmed !== false);
+      }
     }
   },
 });
 
-export const { login, logout, setActionType, setUser, updateUser, removeFromEmailHistory } = userSlice.actions;
+export const {
+  login, logout, setActionType, setUser, updateUser,
+  removeFromEmailHistory, removePasswordChangeRequest
+} = userSlice.actions;
 export const UserReducer = userSlice.reducer;

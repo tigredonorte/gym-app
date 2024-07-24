@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 import { extractTokenFromHeader } from './guards/extractTokenFromHeader';
-import { IUser } from './user.model';
+import { IUser } from './interfaces/IUser';
 
 export interface IRequestInfo {
   ip: string;

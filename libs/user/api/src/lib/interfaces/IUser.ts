@@ -14,6 +14,15 @@ export interface IUserEmailHistory {
   oldEmail: string;
 }
 
+export interface IUserPasswordHistory {
+  password?: string;
+  createdAt: Date;
+  expiresAt: Date;
+  code?: string;
+  confirmed: boolean;
+  ip: string;
+}
+
 export interface IUser {
   id: string;
   name: string;
@@ -22,4 +31,5 @@ export interface IUser {
   recoverCode?: IRecoveredCode;
   confirmed: boolean;
   emailHistory?: IUserEmailHistory[];
+  passwordHistory?: IUserPasswordHistory[];
 }
