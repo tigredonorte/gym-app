@@ -1,10 +1,11 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthorGuard, JwtAuthGuard } from './guards';
+import { Public } from './guards/public.decorator';
+import { IUser } from './interfaces/IUser';
 import { IRequestInfo } from './request-info-middleware';
 import { UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserReturnType, UserService } from './user.service';
-import { Public } from './guards/public.decorator';
 
 @Controller('user')
 @UseGuards(AuthorGuard)
@@ -34,8 +35,8 @@ export class UserController {
     @Param('id') id: string,
       @Body() data: UpdateEmailDto,
       @Req() req: IRequestInfo
-  ): Promise<void> {
-    await this.userService.updateEmail(id, data, req.userData);
+  ): Promise<IUser['emailHistory']> {
+    return await this.userService.updateEmail(id, data, req.userData);
   }
 
   @Get('change-email/:id/:code')

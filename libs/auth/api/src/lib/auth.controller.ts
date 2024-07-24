@@ -41,8 +41,8 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
-  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto) {
-    return this.authService.changePassword(data);
+  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto, @Req() req: IRequestInfo) {
+    return this.authService.changePassword(data, req.ip);
   }
 
   @Post('checkEmail')

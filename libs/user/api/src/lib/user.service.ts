@@ -9,9 +9,12 @@ import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 import { sendEmailChanged } from './emails/sendEmailChanged';
 import { IRequestInfo, getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
-import { IUpdateEmail } from './user.dto';
+import { IChangePassword, IUpdateEmail } from './user.dto';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
+import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
+import { sendPasswordChanged } from './emails/sendPasswordChanged';
+import { IUser } from './interfaces/IUser';
 
 export type UserReturnType = Omit<User, 'password'> & { id?: string };
 
@@ -88,9 +91,7 @@ export class UserService {
       throw new BadRequestException('Incorrect email or password');
     }
 
-    const result = user.toObject();
-    result.id = user._id.toString();
-    return _.omit(result, ['password', '__v', '_id']);
+    return this.getUserReturnData(user);
   }
 
   private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date } {
@@ -104,64 +105,85 @@ export class UserService {
     };
   }
 
-  async createRecoverCode(email: string): Promise<{ recoverCode: string, exists: boolean }> {
+  async createRecoverCode(email: string): Promise<{ recoverCode: string }> {
     const user = await this.userModel.findOne({ email }).select('+recoverCode').exec();
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    if (user.recoverCode && user.recoverCode.code && user.recoverCode.expiresAt > new Date()) {
-      return {
-        recoverCode: user.recoverCode.code,
-        exists: true
-      };
-    }
-
     const recoverCode = this.getRecoverCode();
-    user.recoverCode = recoverCode;
+    const code = await this.hashPassword(recoverCode.code);
+    user.recoverCode = {
+      ...recoverCode,
+      code,
+    };
     await user.save();
 
     return {
       recoverCode: recoverCode.code,
-      exists: false
     };
   }
 
   async checkRecoverCode(email: string, code: string): Promise<false | string> {
     const user = await this.userModel.findOne({
       email,
-      'recoverCode.code': code,
       'recoverCode.expiresAt': { $gt: new Date() }
-    }).exec();
+    }).select('+recoverCode').exec();
 
-    if (!user) {
+    if (!user?.recoverCode?.code) {
+      console.error('No recover code found');
+      return false;
+    }
+
+    const isSameCode = await this.decryptPassword(code, user.recoverCode.code);
+    if (!isSameCode) {
+      console.error('Failure to decrypt code');
       return false;
     }
 
     const recoverCode = this.getRecoverCode();
+    const changePasswordCode = await this.hashPassword(recoverCode.code);
     user.recoverCode = {
       code: undefined,
       expiresAt: recoverCode.expiresAt,
       createdAt: recoverCode.createdAt,
-      changePasswordCode: recoverCode.code
+      changePasswordCode,
     };
     await user.save();
 
     return recoverCode.code;
   }
 
-  async changePassword(email: string, password: string, token: string): Promise<boolean> {
+  async changePassword(email: string, password: string, token: string, ip: string): Promise<boolean> {
     const user = await this.userModel.findOne({
       email,
-      'recoverCode.changePasswordCode': token,
       'recoverCode.expiresAt': { $gt: new Date() }
-    }).exec();
+    }).select('+passwordHistory').select('+recoverCode').exec();
 
-    if (!user) {
+    if (!user?.recoverCode?.changePasswordCode) {
+      console.error('No recover code found');
       return false;
     }
 
-    user.password = await this.hashPassword(password);
+    const isSameCode = await this.decryptPassword(token, user.recoverCode.changePasswordCode);
+    if (!isSameCode) {
+      console.error('Failure to decrypt code' + token);
+      return false;
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+    user.passwordHistory = [
+      {
+        password: hashedPassword,
+        createdAt: new Date(),
+        expiresAt: new Date(),
+        code: undefined,
+        confirmed: true,
+        ip,
+      },
+      ...(user?.passwordHistory || []),
+    ];
+    user.password = hashedPassword;
     user.recoverCode = undefined;
     await user.save();
 
@@ -180,13 +202,18 @@ export class UserService {
     return _.omit(result, ['password', '__v', '_id']);
   }
 
+  async findByHistoryEmail(email: string): Promise<UserReturnType | null> {
+    const user = await this.userModel.findOne({ 'emailHistory.email': email }).lean().exec();
+    return this.getUserReturnData(user);
+  }
+
   async findById(id: string): Promise<UserReturnType | null> {
     const user = await this.userModel.findById(id).lean().exec();
     return this.getUserReturnData(user);
   }
 
   async getUserProfile(id: string): Promise<UserReturnType | null> {
-    const user = await this.userModel.findById(id).select('+emailHistory').lean();
+    const user = await this.userModel.findById(id).select('+emailHistory').select('+passwordHistory').lean();
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -203,7 +230,7 @@ export class UserService {
     return result;
   }
 
-  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestInfo['userData']): Promise<void> {
+  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestInfo['userData']): Promise<IUser['emailHistory']> {
     const user = await this.userModel.findById(id).select('+emailHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -225,6 +252,7 @@ export class UserService {
       changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${user.emailHistory[user.emailHistory.length - 1].changeEmailCode}`,
       changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
     }));
+    return user.emailHistory;
   }
 
   async confirmChangeEmail(id: string, changeEmailCode: string, userData: IRequestInfo['userData']): Promise<{ message: string, title: string }> {
@@ -284,11 +312,11 @@ export class UserService {
     }
 
     const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
-    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
+    if (emailHistoryItemIndex === undefined || emailHistoryItemIndex === null || emailHistoryItemIndex === -1) {
       throw new BadRequestException('Invalid change email code');
     }
 
-    if (user.emailHistory?.[emailHistoryItemIndex].email === user.email) {
+    if (user.emailHistory?.[emailHistoryItemIndex]?.email === user.email) {
       throw new BadRequestException('Email is already confirmed');
     }
 
@@ -346,6 +374,10 @@ export class UserService {
   private getUserReturnData(user: UserDocument | null): UserReturnType | null {
     if (!user) {
       return null;
+    }
+
+    if (user.toObject) {
+      user = user.toObject();
     }
 
     user.id = user._id.toString();
