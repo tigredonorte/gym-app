@@ -1,5 +1,5 @@
 import { deleteRequest, getRequest, postRequest } from '@gym-app/shared/web';
-import { removeFromEmailHistory, setActionType, setUser, updateUser } from './UserReducer';
+import { removeFromEmailHistory, removePasswordChangeRequest, setActionType, setUser, updateUser } from './UserReducer';
 import { IUser, UserActionTypes } from './UserReducer.types';
 import { Dispatch } from '@reduxjs/toolkit';
 
@@ -19,7 +19,6 @@ const requestData = async(
   dispatch: Dispatch,
   request: () => Promise<unknown>,
 ) => {
-  console.log(`Requesting ${defaultErrorMessage}`);
   dispatch(setActionType({ status: { loading: true, error: null }, actionName }));
   try {
     await request();
@@ -61,4 +60,23 @@ export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: D
     const id = getUserId();
     await deleteRequest(`user/change-email/${id}/${changeEmailCode}`);
     dispatch(removeFromEmailHistory(changeEmailCode));
+  });
+
+export interface ChangePasswordFormType  {
+  oldPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+export const changePassword = (changePasswordData: ChangePasswordFormType) => async (dispatch: Dispatch) =>
+  requestData('changePassword', 'changing password', dispatch, async() => {
+    const id = getUserId();
+    const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/change-password/${id}`, changePasswordData);
+    dispatch(updateUser({ passwordHistory }));
+  });
+
+export const cancelChangePassword = () => async (dispatch: Dispatch) =>
+  requestData('cancelChangePassword', 'cancel change password', dispatch, async() => {
+    const id = getUserId();
+    await deleteRequest(`user/change-password/${id}`);
+    dispatch(removePasswordChangeRequest());
   });

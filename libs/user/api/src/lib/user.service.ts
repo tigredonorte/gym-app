@@ -91,7 +91,7 @@ export class UserService {
       throw new BadRequestException('Incorrect email or password');
     }
 
-    return this.getUserReturnData(user);
+    return this.getUserReturnData(user) as UserReturnType;
   }
 
   private getRecoverCode(): { code: string, expiresAt: Date, createdAt: Date } {
@@ -154,6 +154,101 @@ export class UserService {
     return recoverCode.code;
   }
 
+  async changePasswordStart(id: string, { newPassword, oldPassword, confirmPassword }: IChangePassword, userData: IRequestInfo['userData']): Promise<IUser['passwordHistory']> {
+    const user = await this.userModel.findById(id).select('+password').select('+passwordHistory').exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const isPasswordCorrect = await this.decryptPassword(oldPassword, user.password);
+    if (!isPasswordCorrect) {
+      throw new BadRequestException('Incorrect password');
+    }
+
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestException('Password and confirm password do not match');
+    }
+
+    if (newPassword === oldPassword) {
+      throw new BadRequestException('New password must be different from old password');
+    }
+
+    const hashedPassword = await this.hashPassword(newPassword);
+    const code = this.getRandomString();
+    const hashedCode = await this.hashPassword(code);
+    user.passwordHistory = [
+      ...(user?.passwordHistory || []),
+      {
+        password: hashedPassword,
+        createdAt: new Date(),
+        expiresAt: new Date(new Date().getTime() + 30*60000), // 30 minutes from now
+        code: hashedCode,
+        confirmed: false,
+        ip: userData.ip || '',
+      }
+    ];
+
+    await this.emailService.sendRenderedEmail(sendChangePasswordCode(user.email, {
+      ...getUserAccessData(userData),
+      changePasswordLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-password/${id}/${code}`,
+    }));
+    await user.save();
+    return this.getUserReturnData({ passwordHistory: user.passwordHistory }) as IUser['passwordHistory'];
+  }
+
+  async changePasswordComplete(id: string, code: string, userData: IRequestInfo['userData']): Promise<void> {
+    const user = await this.userModel.findById(id).select('+passwordHistory').exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.passwordHistory) {
+      throw new BadRequestException('Invalid change password code');
+    }
+
+    const passwordHistoryItemIndex = user.passwordHistory
+      .findIndex(
+        async (item) => {
+          if (item.expiresAt < new Date() || !item.code || item.confirmed) {
+            return false;
+          }
+          return await this.decryptPassword(code, `${item.code}`);
+        }
+      );
+
+    if (_.isNil(passwordHistoryItemIndex) || passwordHistoryItemIndex === -1) {
+      throw new BadRequestException('Invalid change password code');
+    }
+
+    if (user.passwordHistory[passwordHistoryItemIndex].confirmed) {
+      throw new BadRequestException('Password is already confirmed');
+    }
+
+    if (!user.passwordHistory[passwordHistoryItemIndex].password) {
+      throw new BadRequestException('Password history entry not found');
+    }
+
+    user.password = user.passwordHistory[passwordHistoryItemIndex].password;
+    user.passwordHistory[passwordHistoryItemIndex].confirmed = true;
+    user.markModified('passwordHistory');
+
+    await user.save();
+    await this.emailService.sendRenderedEmail(sendPasswordChanged(user.email, {
+      recoverLink: `${process.env['FRONTEND_URL']}/auth/forgot-password?email=${user.email}`,
+      ...getUserAccessData(userData),
+    }));
+  }
+
+  async deleteChangePassword(userId: string) {
+    const user = await this.userModel.findById(userId).select('+passwordHistory').exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.passwordHistory = user.passwordHistory?.filter((item) => item.confirmed || new Date(item.expiresAt) < new Date());
+    await user.save();
+  }
+
   async changePassword(email: string, password: string, token: string, ip: string): Promise<boolean> {
     const user = await this.userModel.findOne({
       email,
@@ -204,12 +299,12 @@ export class UserService {
 
   async findByHistoryEmail(email: string): Promise<UserReturnType | null> {
     const user = await this.userModel.findOne({ 'emailHistory.email': email }).lean().exec();
-    return this.getUserReturnData(user);
+    return this.getUserReturnData(user) as UserReturnType;
   }
 
   async findById(id: string): Promise<UserReturnType | null> {
     const user = await this.userModel.findById(id).lean().exec();
-    return this.getUserReturnData(user);
+    return this.getUserReturnData(user) as UserReturnType;
   }
 
   async getUserProfile(id: string): Promise<UserReturnType | null> {
@@ -218,7 +313,7 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
 
-    return this.getUserReturnData(user);
+    return this.getUserReturnData(user) as UserReturnType;
   }
 
   public async updateUser(id: string, data: Partial<Omit<User, 'password' | 'recoverCode' | 'email'>>): Promise<UserReturnType> {
@@ -227,7 +322,7 @@ export class UserService {
     if (!result) {
       throw new NotFoundException('User not found');
     }
-    return result;
+    return result as UserReturnType;
   }
 
   public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestInfo['userData']): Promise<IUser['emailHistory']> {
@@ -371,7 +466,7 @@ export class UserService {
     return emailHistory;
   }
 
-  private getUserReturnData(user: UserDocument | null): UserReturnType | null {
+  private getUserReturnData(user: Partial<UserDocument> | null): Partial<UserReturnType> | null {
     if (!user) {
       return null;
     }
@@ -380,7 +475,12 @@ export class UserService {
       user = user.toObject();
     }
 
-    user.id = user._id.toString();
+    if (user.passwordHistory) {
+      user.passwordHistory = user.passwordHistory.map((passwordHistoryItem) => _.omit(passwordHistoryItem, ['code', 'password']));
+    }
+    if (user._id) {
+      user.id = user._id.toString();
+    }
     return _.omit(user, ['password', '__v', '_id']);
   }
 }

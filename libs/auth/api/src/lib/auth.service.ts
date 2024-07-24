@@ -73,25 +73,25 @@ export class AuthService {
     await this.emailService.sendRenderedEmail(
       getRecoverPasswordEmail(data.email, {
         ...emailData,
-        recoverCode: this.toBase64(response.recoverCode),
-        recoverLink: `${process.env['FRONTEND_URL']}/auth/confirm-recover?email=${data.email}&token=${this.toBase64(response.recoverCode)}`,
+        recoverCode: response.recoverCode,
+        recoverLink: `${process.env['FRONTEND_URL']}/auth/confirm-recover?email=${data.email}&token=${response.recoverCode}`,
       })
     );
     return {};
   }
 
   async confirmRecover({ email, token }: ConfirmRecoverPasswordDto) {
-    const resetPasswordToken = await this.userService.checkRecoverCode(email, this.fromBase64(token));
+    const resetPasswordToken = await this.userService.checkRecoverCode(email, token);
     if (!resetPasswordToken) {
       throw new Error('Invalid code');
     }
 
     return {
-      resetPasswordToken: this.toBase64(resetPasswordToken)
+      resetPasswordToken
     };
   }
 
-  async changePassword(data: changePasswordDto) {
+  async changePassword(data: changePasswordDto, ip: string) {
     if (data.password !== data.confirmPassword) {
       throw new Error('Passwords do not match');
     }
@@ -100,19 +100,11 @@ export class AuthService {
       throw new Error('Invalid request');
     }
 
-    const changePassword = await this.userService.changePassword(data.email, data.password, this.fromBase64(data.token));
+    const changePassword = await this.userService.changePassword(data.email, data.password, data.token, ip);
     if (!changePassword) {
       throw new Error('Invalid request');
     }
 
     return {};
-  }
-
-  private toBase64(value: string) {
-    return Buffer.from(value).toString('base64');
-  }
-
-  private fromBase64(value: string) {
-    return Buffer.from(value, 'base64').toString();
   }
 }

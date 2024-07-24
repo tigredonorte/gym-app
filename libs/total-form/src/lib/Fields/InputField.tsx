@@ -21,19 +21,21 @@ export interface InputFieldProps<T> extends Omit<TextFieldProps, 'onChange' | 'o
   initialValue?: T;
 }
 
-interface InputFieldState {
+interface InputFieldState<T> {
   touched: boolean;
   error: string | null;
+  value?: T
 }
 
-class InputFieldClass<T> extends React.Component<InputFieldProps<T>, InputFieldState> {
+export class InputField<T> extends React.Component<InputFieldProps<T>, InputFieldState<T>> {
   static contextType = FormContext;
   declare context: React.ContextType<typeof FormContext>;
   constructor(props: InputFieldProps<T>) {
     super(props);
     this.state = {
       touched: false,
-      error: null
+      error: null,
+      value: undefined,
     };
   }
 
@@ -41,8 +43,20 @@ class InputFieldClass<T> extends React.Component<InputFieldProps<T>, InputFieldS
     const { name, value, initialValue } = this.props;
     const currentValue = value || initialValue || '';
     this.context.updateFormData(name, currentValue);
+    this.context.watchFieldChanges(name, this.changeFn.bind(this));
     this.validate(currentValue as never, this.getValidators());
   }
+
+  componentWillUnmount(): void {
+    const { name } = this.props;
+    this.context.unwatchFieldChanges(name, this.changeFn.bind(this));
+  }
+
+  changeFn = (fieldValue: unknown) => {
+    this.setState(({ value }) => {
+      return  (value === fieldValue) ? null : { value: fieldValue as T };
+    });
+  };
 
   getValidators = (isBlur = false) => {
     const { validators, blurValidators } = this.props;
@@ -85,12 +99,11 @@ class InputFieldClass<T> extends React.Component<InputFieldProps<T>, InputFieldS
   };
 
   render() {
-    const { touched, error } = this.state;
+    const { touched, error, value: currentValue } = this.state;
     const { validators, blurValidators, initialValue, ...inputProps } = this.props;
 
     const isHidden = inputProps.type === 'hidden';
     const style = isHidden ? { display: 'none' } : {};
-    const currentValue = (this.context.formData as FormContainerType)[this.props.name];
 
     return (
       <FormControl variant="outlined" fullWidth margin="normal" style={style}>
@@ -106,5 +119,3 @@ class InputFieldClass<T> extends React.Component<InputFieldProps<T>, InputFieldS
     );
   }
 }
-
-export const InputField = React.memo(InputFieldClass) as unknown as typeof InputFieldClass;

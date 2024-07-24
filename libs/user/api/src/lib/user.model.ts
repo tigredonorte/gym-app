@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import { Document } from 'mongoose';
-import { IRecoveredCode, IUser, IUserEmailHistory } from './interfaces/IUser';
+import { IRecoveredCode, IUser, IUserEmailHistory, IUserPasswordHistory } from './interfaces/IUser';
 
 class RecoverCode implements IRecoveredCode {
   @Prop() code?: string;
@@ -17,6 +17,15 @@ class UserEmailHistory implements IUserEmailHistory {
   @Prop() changeEmailCode?: string;
   @Prop() revertChangeEmailCode?: string;
   @Prop() oldEmail!: string;
+}
+
+class UserPasswordHistory implements IUserPasswordHistory {
+  @Prop() password!: string;
+  @Prop() createdAt!: Date;
+  @Prop() expiresAt!: Date;
+  @Prop() code?: string;
+  @Prop() confirmed!: boolean;
+  @Prop() ip!: string;
 }
 
 @Schema()
@@ -36,6 +45,9 @@ export class User implements Omit<IUser, 'id'> {
 
   @Type(() => UserEmailHistory)
   @Prop({ type: UserEmailHistory, required: false, select: false, default: [] }) emailHistory?: IUserEmailHistory[];
+
+  @Type(() => UserPasswordHistory)
+  @Prop({ type: UserPasswordHistory, required: false, select: false, default: [] }) passwordHistory?: IUserPasswordHistory[];
 
 }
 
