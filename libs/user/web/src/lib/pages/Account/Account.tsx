@@ -1,19 +1,29 @@
-import { EnvContext, deleteRequest, getRequest, postRequest } from '@gym-app/shared/web';
-import { CrudContainer, ConfirmationDialog } from '@gym-app/ui';
+import { EnvContext } from '@gym-app/shared/web';
+import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
+import { connect } from 'react-redux';
+import { getUser, getUserState, getUserStatus, IUser, UserStatusses } from '../../reducer';
+import { cancelChangeEmail, changeEmail, ChangeEmailSettingFormType, loadUser, saveProfileInfo } from '../../reducer/UserActions';
 import './Account.scss';
-import { AccountSettings } from './AccountSettings';
-import { ChangeEmailSettingFormType, ChangeEmailSettings } from './ChangeEmailSettings';
+import { ChangeEmailSettings } from './ChangeEmailSettings';
 import { DeleteAccount } from './DeleteAccount';
-import { GeneralSettingFormType, GeneralSettings, IUser } from './GeneralSettings';
+import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
+import { NotificationSettings } from './NotificationSettings';
 
-type AccountProps = object;
+interface AccountProps {
+  user?: IUser;
+  loading: boolean;
+  errorMessage: string;
+  statusses: UserStatusses;
+  loadUser: () => void;
+  saveProfileInfo: (userData: Partial<IUser>) => void;
+  changeEmail: (userData: ChangeEmailSettingFormType) => void;
+  cancelChangeEmail: (changeEmailCode: string) => void;
+}
 
 interface AccountState {
   isFormValid: boolean;
-  errorMessage: string;
-  loading: boolean;
   dialog?: {
     title: string;
     message: string;
@@ -25,7 +35,7 @@ interface AccountState {
   };
 }
 
-export class Account extends React.Component<AccountProps, AccountState> {
+class AccountClass extends React.Component<AccountProps, AccountState> {
   static contextType = EnvContext;
   declare context: React.ContextType<typeof EnvContext>;
 
@@ -33,9 +43,7 @@ export class Account extends React.Component<AccountProps, AccountState> {
     super(props);
 
     this.state = {
-      loading : false,
       isFormValid: true,
-      errorMessage: '',
       dialog: undefined,
       config: {
         publicProfile: true,
@@ -44,27 +52,15 @@ export class Account extends React.Component<AccountProps, AccountState> {
   }
 
   async componentDidMount() {
-    await this.loadUser();
+    this.props.loadUser();
   }
 
   async onSaveProfileInfo(userData: GeneralSettingFormType) {
-    try {
-      const { id } = this.state.user || { id: '' };
-      await postRequest(`user/edit/${id}`, userData);
-      await this.loadUser();
-    } catch (error) {
-      console.error('Error saving profile info\n\n', { userData }, error);
-    }
+    this.props.saveProfileInfo(userData);
   }
 
   async onChangeEmail(userData: ChangeEmailSettingFormType) {
-    try {
-      const { id } = this.state.user || { id: '' };
-      await postRequest(`user/update-email/${id}`, userData);
-      await this.loadUser();
-    } catch (error) {
-      console.error('Error changing email\n\n', { userData }, error);
-    }
+    this.props.changeEmail(userData);
   }
 
   async onCancelEmailChange({ changeEmailCode }: { changeEmailCode: string }) {
@@ -72,14 +68,7 @@ export class Account extends React.Component<AccountProps, AccountState> {
       title: 'Are you sure?',
       message: 'Do you really want to cancel the email change?',
       onConfirm: async () => {
-        try {
-          const { id } = this.state.user || { id: '' };
-          await deleteRequest(`user/change-email/${id}/${encodeURIComponent(changeEmailCode)}`);
-          await this.loadUser();
-        } catch (error) {
-          console.error('Error reverting email change\n\n', { changeEmailCode }, error);
-          this.setState({ errorMessage: 'Error reverting email change' });
-        }
+        this.props.cancelChangeEmail(changeEmailCode);
       },
     });
   }
@@ -97,7 +86,7 @@ export class Account extends React.Component<AccountProps, AccountState> {
     if (!user) {
       return;
     }
-    this.setState({ errorMessage: '' });
+    // this.setState({ errorMessage: '' });
   }
 
   openDialog(dialog: AccountState['dialog']) {
@@ -117,20 +106,10 @@ export class Account extends React.Component<AccountProps, AccountState> {
     this.closeDialog();
   }
 
-  async loadUser() {
-    try {
-      this.setState({ loading: true });
-      const { id } = JSON.parse(localStorage.getItem('userData') || '{}');
-      const user = await getRequest<IUser>(`/user/${id}`);
-      this.setState({ user, loading: false });
-    } catch (error) {
-      this.setState({ loading: false, errorMessage: 'Error loading user data' });
-      console.error('Error loading user data', error);
-    }
-  }
-
   render() {
-    const { errorMessage, user, config, loading, dialog } = this.state;
+    const { config, dialog } = this.state;
+    const { user, errorMessage, loading, statusses } = this.props;
+
     return (
       <CrudContainer
         loading={loading}
@@ -141,18 +120,20 @@ export class Account extends React.Component<AccountProps, AccountState> {
       >
         <Stack spacing={2}>
           <GeneralSettings
-            errorMessage={errorMessage}
+            errorMessage={statusses.loadUser?.error || ''}
+            loading={statusses.loadUser?.loading || false}
             user={user as IUser}
             onSave={(data) => this.onSaveProfileInfo(data)}
           />
 
           <ChangeEmailSettings
-            errorMessage={errorMessage}
+            errorMessage={statusses.changeEmail?.error || statusses.removeFromEmailHistory?.error || ''}
+            loading={statusses.changeEmail?.loading || statusses.removeFromEmailHistory?.loading || false}
             user={user as IUser}
             onSave={(data) => this.onChangeEmail(data)}
             onCancel={(data) => this.onCancelEmailChange(data)}
           />
-          <AccountSettings
+          <NotificationSettings
             onChange={(option: string, value: boolean) => this.onChangeSettings(option, value)}
             config={config}
           />
@@ -171,3 +152,18 @@ export class Account extends React.Component<AccountProps, AccountState> {
     );
   }
 }
+
+export const Account = connect(
+  (state) => ({
+    user: getUser(state as never),
+    loading: getUserStatus(state as never, 'loadUser')?.loading || false,
+    errorMessage: getUserStatus(state as never, 'loadUser')?.error || '',
+    statusses: getUserState(state as never).statuses,
+  }),
+  {
+    loadUser,
+    saveProfileInfo,
+    changeEmail,
+    cancelChangeEmail,
+  }
+)(AccountClass);

@@ -9,26 +9,22 @@ import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { IUser } from '../../reducer';
 import './Account.scss';
 
 export interface GeneralSettingFormType extends FormContainerType {
   name: string;
 }
 
-export interface IUser {
-  id: string;
-  name: string;
-  email: string;
-}
-
 interface GeneralSettingsProps {
   errorMessage: string;
   user: IUser;
+  loading: boolean;
   onSave: (formData: GeneralSettingFormType) => void;
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSettingsProps) => {
-  const { errorMessage, user, onSave } = props;
+  const { errorMessage, user, onSave, loading } = props;
   return (
     <Card>
       <CardHeader title="General Settings" />
@@ -64,6 +60,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
                 color="primary"
                 endIcon={<Icon path={mdiContentSaveOutline} size={1}/>}
                 fullWidth={false}
+                disabled={loading}
               >
                 Save
               </Form.Button.Submit>

@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { IUser } from '../user.model';
+import { IUser } from '../interfaces/IUser';
 import { UserService } from '../user.service';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
