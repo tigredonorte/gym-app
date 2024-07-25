@@ -3,20 +3,22 @@ import { EventModule } from '@gym-app/events';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
+import { Session, SessionSchema, SessionService } from './session';
 import { UserEventsService } from './user-events.service';
 import { UserController } from './user.controller';
-import { UserSchema } from './user.model';
+import { User, UserSchema } from './user.model';
 import { UserService } from './user.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     EmailModule,
     EventModule,
     JwtModule
   ],
   controllers: [UserController],
-  providers: [UserService, UserEventsService],
-  exports: [UserService],
+  providers: [UserService, UserEventsService, SessionService],
+  exports: [SessionService, UserService],
 })
 export class UserModule {}
