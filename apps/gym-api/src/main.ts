@@ -3,9 +3,12 @@ import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/comm
 import { NestFactory, Reflector } from '@nestjs/core';
 import * as requestIp from 'request-ip';
 import { AppModule } from './app/app.module';
+import { getMorgan } from './middlewares/getMorgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use(getMorgan());
+
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
   app.enableCors({
