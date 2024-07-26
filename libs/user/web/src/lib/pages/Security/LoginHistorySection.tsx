@@ -14,7 +14,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
-import { format, formatDistance, formatDistanceToNow, isBefore, subWeeks } from 'date-fns';
+import { differenceInDays, format, formatDistance, formatDistanceToNow, isBefore, subWeeks } from 'date-fns';
 import React from 'react';
 import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
 
@@ -43,11 +43,10 @@ const mapDevice = ({ browser, os, device, updatedAt }: IDeviceInfo): Device => {
   const browserName = [browser?.name, browser?.major || browser?.version].filter(Boolean).join(' ').trim() || 'Unknown Browser';
   const deviceName = [device?.vendor, device?.model].filter(Boolean).join(' ').trim() || '';
   const osName = [os?.name, os?.version].filter(Boolean).join(' ').trim() || 'Unknown OS';
-  const status = (!updatedAt || new Date(updatedAt) <= new Date()) ? 'inactive' : 'active';
+  const status = updatedAt && differenceInDays(new Date(), new Date(updatedAt)) > 1 ? 'inactive' : 'active';
   let last = 'N/A';
   if (updatedAt) {
     const updatedAtDate = new Date(updatedAt);
-
     if (isBefore(updatedAtDate, oneWeekAgo)) {
       last = 'on ' + format(updatedAtDate, 'MMM d, yyyy');
     } else {
@@ -68,98 +67,94 @@ interface LoginHistorySectionProps {
   devices?: IDeviceInfo[];
   accesses?: IAccessLog[];
   sessions?: ISession[];
-  logoutDevice: (device: IDeviceInfo) => void;
-  removeDevice: (device: IDeviceInfo) => void;
+  logoutDevice?: (device: IDeviceInfo) => void;
+  removeDevice?: (device: IDeviceInfo) => void;
+  logoutAll?: () => void;
 }
 export const LoginHistorySection: React.FC<LoginHistorySectionProps> = React.memo((props: LoginHistorySectionProps) => {
-  const { devices, logoutDevice, removeDevice, accesses, sessions } = props;
+  const { devices, logoutDevice, removeDevice, logoutAll, accesses } = props;
 
   if (!devices) {
     return null;
   }
-  console.log('accesses', accesses);
-  console.log('sessions', sessions);
 
   return (
-    <Card>
-      <CardHeader size="small" title="Recognized devices"  />
-      <Stack spacing={1}>
-        {devices.map(mapDevice).map(({ TypeIcon, device, os, active, browser, last }, i) => (
-          <Stack key={i} direction="row" alignItems="center" spacing={1}>
-            <Icon path={TypeIcon} size={1} />
-            <Typography variant="body1" flexGrow={1}>
-              {device && <Typography variant="caption">{device}</Typography>}
-              {browser && <Typography variant="caption">{device ? ' | ' : ''}{browser}</Typography>}
-              {os && <Typography variant="caption"> | {os}</Typography>}
-            </Typography>
-            <Typography color={active ? 'success.main' : 'text.secondary'} variant="caption">
-              <Box
-                width={10}
-                height={10}
-                bgcolor={active ? 'success.main' : '#d3d3d3'}
-                borderRadius="50%"
-                display="inline-block"
-                mr={1}
-              />
-              {active ? 'Current Active' : `Active ${last}`}
-            </Typography>
-            <IconButton aria-label="close" size="small" sx={{ float: 'right' }} onClick={() => removeDevice(devices[i])}>
-              <Icon path={mdiClose} size={1} />
-            </IconButton>
-          </Stack>
-        ))}
-      </Stack>
-      <CardHeader size="small" title="Active Sessions" sx={{ mt: 6 }} >
-        <Button variant="text" color="error" onClick={() => console.log('logout all')}>
-          Logout all
-        </Button>
-      </CardHeader>
-      <Stack spacing={1}>
-        {devices.map(mapDevice).map(({ TypeIcon, device, os, browser }, i) => (
-          <Stack key={i} direction="row" alignItems="center" spacing={1}>
-            <Icon path={TypeIcon} size={1} />
-            <Typography variant="body1" flexGrow={1}>
-              {device && <Typography variant="caption">{device}</Typography>}
-              {browser && <Typography variant="caption">{device ? ' | ' : ''}{browser}</Typography>}
-              {os && <Typography variant="caption"> | {os}</Typography>}
-            </Typography>
-            <Button variant="text" color="error" onClick={() => logoutDevice(devices[i])}>
-							Logout
+    <>
+      <Card>
+        <CardHeader title="Active Sessions">
+          { logoutAll && (
+            <Button variant="text" color="error" onClick={() => logoutAll()}>
+              Logout all
             </Button>
-          </Stack>
-        ))}
-      </Stack>
+          )}
+        </CardHeader>
+        <Stack spacing={1}>
+          {devices.map(mapDevice).map(({ TypeIcon, device, os, active, browser, last }, i) => (
+            <Stack key={i} direction="row" alignItems="flex-start" spacing={1}>
+              <Icon path={TypeIcon} size={1} />
+              <Typography variant="body1" flexGrow={1}>
+                {device && <Typography variant="caption">{device}</Typography>}
+                {browser && <Typography variant="caption">{device ? ' | ' : ''}{browser}</Typography>}
+                {os && <Typography variant="caption"> | {os}</Typography>}
+              </Typography>
+              <Typography color={active ? 'success.main' : 'text.secondary'} variant="caption">
+                <Box
+                  width={10}
+                  height={10}
+                  bgcolor={active ? 'success.main' : '#d3d3d3'}
+                  borderRadius="50%"
+                  display="inline-block"
+                  mr={1}
+                />
+                {active ? 'Current Active' : `Active ${last}`}
+              </Typography>
+              {removeDevice && (
+                <IconButton aria-label="close" size="small" sx={{ float: 'right' }} onClick={() => removeDevice(devices[i])}>
+                  <Icon path={mdiClose} size={1} />
+                </IconButton>
+              )}
 
-      <CardHeader title="Login history" subtitle="Your recent login activity" sx={{ mt: 6 }}/>
-      <TableContainer>
-        <Table size="small" aria-label="results table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Login Date</TableCell>
-              <TableCell align="left">Ip Address</TableCell>
-              <TableCell align="left">Client</TableCell>
-              <TableCell align="left">Active</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {accesses?.map((row, i) => (
-              <TableRow hover key={i}>
-                <TableCell>
-                  <Typography variant="subtitle2">{row.client || 'Unknown Client'}</Typography>
-                  {new Date(row.createdAt).toLocaleString()}
-                </TableCell>
-                <TableCell align="left">{row.ip}</TableCell>
-                <TableCell align="left">
-                  {row.location ? `${row.location.city}, ${row.location.region}, ${row.location.country}` : 'Unknown Location'}
-                </TableCell>
-                <TableCell align="left">
-                  {row.logoutDate ? formatDistance(new Date(row.createdAt), new Date(row.logoutDate)) : 'Active'}
-                </TableCell>
+              {logoutDevice && (
+                <Button variant="text" color="error" onClick={() => logoutDevice(devices[i])}>
+                  Logout
+                </Button>
+              )}
+            </Stack>
+          ))}
+        </Stack>
+      </Card>
+      <Card>
+        <CardHeader title="Login history" subtitle="Your recent login activity"/>
+        <TableContainer>
+          <Table size="small" aria-label="results table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Login Date</TableCell>
+                <TableCell align="left">Ip Address</TableCell>
+                <TableCell align="left">Client</TableCell>
+                <TableCell align="left">Session duration</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Card>
+            </TableHead>
+            <TableBody>
+              {accesses?.map((row, i) => (
+                <TableRow hover key={i}>
+                  <TableCell>
+                    <Typography variant="subtitle2">{row.client || 'Unknown Client'}</Typography>
+                    {new Date(row.createdAt).toLocaleString()}
+                  </TableCell>
+                  <TableCell align="left">{row.ip}</TableCell>
+                  <TableCell align="left">
+                    {row.location ? `${row.location.city}, ${row.location.region}, ${row.location.country}` : 'Unknown Location'}
+                  </TableCell>
+                  <TableCell align="left">
+                    {formatDistance(new Date(row.createdAt), new Date(row.logoutDate ? row.logoutDate : new Date()))}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Card>
+    </>
   );
 });
