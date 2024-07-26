@@ -1,16 +1,9 @@
-import { IRequestInfo } from '@gym-app/user/api';
-
-export class AccessLog {
-  createdAt!: Date;
-  ip!: string;
-  location!: IRequestInfo['userData']['location'];
-  logoutDate?: Date;
-}
+import { IAccessLog, IDeviceInfo } from '../interfaces';
 
 export class CreateSessionDto {
   userId!: string;
-  deviceInfo!: IRequestInfo['userData']['deviceInfo'];
+  deviceInfo!: IDeviceInfo;
   sessionId!: string;
   status?: 'active' | 'inactive' = 'active';
-  access: AccessLog[] = [];
+  access: Omit<IAccessLog, 'createdAt'>[] = [];
 }

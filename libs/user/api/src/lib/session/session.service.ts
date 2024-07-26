@@ -2,12 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { IRequestInfo } from '@gym-app/user/api';
+import { IAccessLog, IRequestInfo, ISession } from '../interfaces';
 import { SessionAlreadyLoggedOut } from './SessionAlreadyLoggedOut';
 import { SessionNotFoundError } from './SessionNotFoundError';
-import { AccessLog } from './session.dto';
 import { Session, SessionDocument } from './session.model';
-import _ = require('lodash');
 
 /**
  * Session id doesn't need to be secure, it's just a hash of the user data
@@ -22,7 +20,7 @@ export class SessionService {
   ) {}
 
   async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<string> {
-    const accessData: AccessLog = { ip: userData.ip , location: userData.location } as AccessLog;
+    const accessData: IAccessLog = { ip: userData.ip || '' , location: userData.location } as IAccessLog;
     const sessionId = await this.getSessionHash(userData);
     let session = await this.findSessionById(sessionId);
     if (session) {
@@ -49,7 +47,7 @@ export class SessionService {
   }
 
   async getSessionHash(userData: IRequestInfo['userData']): Promise<string> {
-    return await bcrypt.hash(JSON.stringify(_.omit(userData, 'ip', 'location')), salt);
+    return await bcrypt.hash(JSON.stringify(userData), salt);
   }
 
   async findSessionById(sessionId: string): Promise<SessionDocument | null> {
@@ -79,11 +77,19 @@ export class SessionService {
 
   async isFirstTimeOnDevice(userDataOrSessionId: IRequestInfo['userData'] | string): Promise<boolean> {
     const sessionId = (typeof userDataOrSessionId === 'string') ? userDataOrSessionId : await this.getSessionHash(userDataOrSessionId);
+    console.log({ userDataOrSessionId, sessionId }, JSON.stringify(userDataOrSessionId, null, 2));
     const session = await this.sessionModel.findOne({ sessionId }).select('_id').exec();
     return !session;
   }
 
-  async getSession(id: string): Promise<SessionDocument | null> {
+  async getSession(id: string): Promise<ISession | null> {
     return await this.sessionModel.findById(id).exec();
+  }
+
+  async getUserSession(userId: string): Promise<ISession[]> {
+    console.log(userId);
+    const data = await this.sessionModel.find({ userId }).exec();
+    console.info(`Found ${data.length} sessions for user ${userId}`);
+    return data.map((session) => session.toJSON());
   }
 }

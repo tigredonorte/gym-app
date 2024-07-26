@@ -1,23 +1,35 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
-import { IUser } from './interfaces/IUser';
-import { IRequestInfo } from './request-info-middleware';
+// import { ISession } from './interfaces';
+import { IRequestInfo, ISession, IUser, UserReturnType } from './interfaces';
+import { SessionService } from './session';
 import { ChangePasswordDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
-import { UserReturnType, UserService } from './user.service';
+import { UserService } from './user.service';
 
 @Controller('user')
 @UseGuards(AuthorGuard)
 @UseGuards(JwtAuthGuard)
 export class UserController {
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private sessionService: SessionService
+  ) {}
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getMe(@Req() req: IRequestInfo): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
+  async getMe(@Req() req: { user: IUser }): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
     return await this.userService.getUserProfile(req.user?.id || '');
+  }
+
+  @Get(':id/session')
+  @HttpCode(HttpStatus.OK)
+  async getSessionInfo(
+    @Param('id') id: string,
+  ): Promise<ISession[]> {
+    return await this.sessionService.getUserSession(id);
   }
 
   @Post('edit/:id')

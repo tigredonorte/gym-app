@@ -1,15 +1,15 @@
-import { IRequestInfo } from '@gym-app/user/api';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { AccessLogType, ILocation } from '../interfaces';
 
 @Schema({ timestamps: true })
-class AccessLog {
+class AccessLog implements AccessLogType {
 
   @Prop()
     ip!: string;
 
   @Prop({ type: Object })
-    location!: IRequestInfo['userData']['location'];
+    location!: ILocation;
 
   @Prop()
     logoutDate?: Date;

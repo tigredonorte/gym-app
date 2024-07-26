@@ -52,7 +52,8 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
   }
 
   async componentDidMount() {
-    this.props.loadUser();
+    const { user, loadUser } = this.props;
+    !user && loadUser();
   }
 
   async onSaveProfileInfo(userData: GeneralSettingFormType) {
