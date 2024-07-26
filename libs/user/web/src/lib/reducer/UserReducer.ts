@@ -30,7 +30,7 @@ export const userSlice = createSlice({
     setSession: (state: UserState, action: PayloadAction<{ sessions: IFetchedSession[], id: string }>) => {
       const { sessions } = action.payload;
       state.devices = sessions.map(session => ({ ...session.deviceInfo, updatedAt: session.updatedAt }));
-      state.accesses = sessions.flatMap(session => (session.access.map(access => {
+      state.accesses = sessions.flatMap(session => session.access.map(access => {
         const { browser, device } = session.deviceInfo;
         const browserName = [browser?.name, browser?.version].filter(Boolean).join(' ').trim() || 'Unknown Browser';
         const deviceName = [device?.vendor, device?.model].filter(Boolean).join(' ').trim() || 'Desktop';
@@ -39,7 +39,7 @@ export const userSlice = createSlice({
           sessionId: session.sessionId,
           client: `${browserName} on ${deviceName}`
         };
-      }))).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       state.sessions = sessions.map(({ access, ...session }) => session);
     },
     removeFromEmailHistory: (state: UserState, action: PayloadAction<string>) => {

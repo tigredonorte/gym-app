@@ -40,14 +40,6 @@ class SecurityClass extends React.Component<SecurityProps> {
     this.props.cancelChangePassword();
   }
 
-  logoutDevice = (device: IDeviceInfo) => {
-    console.log(device);
-  };
-
-  removeDevice = (device: IDeviceInfo) => {
-    console.log(device);
-  };
-
   render(): React.ReactNode {
     const { user, statusses, sessions, accesses, devices } = this.props;
 
@@ -71,8 +63,6 @@ class SecurityClass extends React.Component<SecurityProps> {
             sessions={sessions}
             accesses={accesses}
             devices={devices}
-            logoutDevice={this.logoutDevice.bind(this)}
-            removeDevice={this.removeDevice.bind(this)}
           />
         </Stack>
       </CrudContainer>
