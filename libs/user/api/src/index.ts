@@ -5,3 +5,4 @@ export * from './lib/user-events.service';
 export * from './lib/request-info-middleware';
 export * from './lib/guards';
 export * from './lib/session';
+export * from './lib/interfaces';

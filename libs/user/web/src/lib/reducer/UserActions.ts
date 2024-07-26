@@ -1,7 +1,8 @@
 import { deleteRequest, getRequest, postRequest } from '@gym-app/shared/web';
-import { removeFromEmailHistory, removePasswordChangeRequest, setActionType, setUser, updateUser } from './UserReducer';
-import { IUser, UserActionTypes } from './UserReducer.types';
 import { Dispatch } from '@reduxjs/toolkit';
+import { IFetchedSession } from './session.types';
+import { removeFromEmailHistory, removePasswordChangeRequest, setActionType, setSession, setUser, updateUser } from './UserReducer';
+import { IUser, UserActionTypes } from './UserReducer.types';
 
 const getUserId = (id?: string) => {
   if (id) {
@@ -35,6 +36,12 @@ export const loadUser = (id = undefined) => async (dispatch: Dispatch) =>
     id = getUserId(id);
     const user = await getRequest<IUser>(`/user/${id}`);
     dispatch(setUser(user));
+  });
+
+export const loadUserSession = (id = getUserId()) => async (dispatch: Dispatch) =>
+  requestData('loadUserSession', 'loading user session', dispatch, async() => {
+    const sessions = await getRequest<IFetchedSession[]>(`/user/${id}/session`);
+    dispatch(setSession({ id, sessions }));
   });
 
 export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Dispatch) =>

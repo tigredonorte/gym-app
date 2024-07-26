@@ -6,17 +6,16 @@ import * as crypto from 'crypto';
 import { Model } from 'mongoose';
 import { sendChangeEmailCode } from './emails/sendChangeEmailCode';
 import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
+import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
 import { sendEmailChanged } from './emails/sendEmailChanged';
-import { IRequestInfo, getUserAccessData } from './request-info-middleware';
+import { sendPasswordChanged } from './emails/sendPasswordChanged';
+import { IRequestUserData, IUser, UserReturnType } from './interfaces';
+import { getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
 import { IChangePassword, IUpdateEmail } from './user.dto';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
-import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
-import { sendPasswordChanged } from './emails/sendPasswordChanged';
-import { IUser } from './interfaces/IUser';
 
-export type UserReturnType = Omit<User, 'password'> & { id?: string };
 
 @Injectable()
 export class UserService {
@@ -48,16 +47,12 @@ export class UserService {
 
       const createdUser = new this.userModel(userData);
       await createdUser.save();
-      const plain = createdUser.toObject();
-      plain.id = createdUser._id.toString();
-      delete plain._id;
-      const plainUser = _.omit(plain, ['password', '__v']);
       this.userEventService.emitUserCreated({
-        name: plainUser.name,
-        email: plainUser.email,
-        id: plainUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+        id: createdUser.id,
       });
-      return plainUser;
+      return this.getUserReturnData(createdUser) as UserReturnType;
     } catch (error) {
       if (_.get(error, 'code') === 11000) {
         throw new ConflictException('Email already exists');
@@ -154,7 +149,7 @@ export class UserService {
     return recoverCode.code;
   }
 
-  async changePasswordStart(id: string, { newPassword, oldPassword, confirmPassword }: IChangePassword, userData: IRequestInfo['userData']): Promise<IUser['passwordHistory']> {
+  async changePasswordStart(id: string, { newPassword, oldPassword, confirmPassword }: IChangePassword, userData: IRequestUserData): Promise<IUser['passwordHistory']> {
     const user = await this.userModel.findById(id).select('+password').select('+passwordHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -196,7 +191,7 @@ export class UserService {
     return this.getUserReturnData({ passwordHistory: user.passwordHistory }) as IUser['passwordHistory'];
   }
 
-  async changePasswordComplete(id: string, code: string, userData: IRequestInfo['userData']): Promise<void> {
+  async changePasswordComplete(id: string, code: string, userData: IRequestUserData): Promise<void> {
     const user = await this.userModel.findById(id).select('+passwordHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -294,7 +289,7 @@ export class UserService {
 
     const result = user;
     result.id = user._id.toString();
-    return _.omit(result, ['password', '__v', '_id']);
+    return this.getUserReturnData(result) as UserReturnType;
   }
 
   async findByHistoryEmail(email: string): Promise<UserReturnType | null> {
@@ -325,7 +320,7 @@ export class UserService {
     return result as UserReturnType;
   }
 
-  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestInfo['userData']): Promise<IUser['emailHistory']> {
+  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestUserData): Promise<IUser['emailHistory']> {
     const user = await this.userModel.findById(id).select('+emailHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -350,7 +345,7 @@ export class UserService {
     return user.emailHistory;
   }
 
-  async confirmChangeEmail(id: string, changeEmailCode: string, userData: IRequestInfo['userData']): Promise<{ message: string, title: string }> {
+  async confirmChangeEmail(id: string, changeEmailCode: string, userData: IRequestUserData): Promise<{ message: string, title: string }> {
     const user = await this.userModel.findById(id).select('+emailHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');

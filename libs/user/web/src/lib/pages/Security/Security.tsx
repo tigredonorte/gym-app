@@ -1,50 +1,21 @@
 import { CrudContainer } from '@gym-app/ui';
-import { mdiCellphone, mdiDesktopTower, mdiTablet } from '@mdi/js';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { connect } from 'react-redux';
-import { getUser, getUserState, IUser, UserStatusses } from '../../reducer';
-import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser } from '../../reducer/UserActions';
+import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserStatusses } from '../../reducer';
+import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
+import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser, loadUserSession } from '../../reducer/UserActions';
 import { ChangePasswordHistorySection } from './ChangePasswordHistorySection';
 import { ChangePassworSection } from './ChangePasswordSection';
-import { Device, HistoryRow, LoginHistorySection } from './LoginHistorySection';
-
-const createData = (time: string, ip: string, client: string): HistoryRow => {
-  return { time, ip, client };
-};
-
-const history = [
-  createData('09:06 AM 05/07/2023', '95.130.17.84', 'Chrome, Mac OS 10.15.7'),
-  createData('06:46 AM 05/07/2023', '95.130.17.84', 'Chrome, Mac OS 10.15.7'),
-  createData('09:06 AM 06/07/2023', '95.130.17.84', 'Chrome, Mac OS 10.15.7'),
-];
-
-const devices: Device[] = [
-  {
-    TypeIcon: mdiDesktopTower,
-    device: 'Cent Desktop',
-    ubication: '4351 Deans Lane, Chelmsford',
-    active: true,
-  },
-  {
-    TypeIcon: mdiTablet,
-    device: 'Imho Tablet ',
-    ubication: '4185 Michigan Avenue',
-    active: false,
-    last: '5 days ago',
-  },
-  {
-    TypeIcon: mdiCellphone,
-    device: 'Albs Mobile',
-    ubication: '3462 Fairfax Drive, Montcalm',
-    active: false,
-    last: '1 month ago',
-  },
-];
+import { LoginHistorySection } from './LoginHistorySection';
 interface SecurityProps {
   user?: IUser;
+  sessions?: ISession[];
+  accesses?: IAccessLog[];
+  devices?: IDeviceInfo[];
   statusses: UserStatusses;
   loadUser: () => void;
+  loadUserSession: () => void;
   changePassword: (changePasswordData: ChangePasswordFormType) => void;
   cancelChangePassword: () => void;
 }
@@ -56,7 +27,9 @@ class SecurityClass extends React.Component<SecurityProps> {
   }
 
   async componentDidMount() {
-    this.props.loadUser();
+    const { user, sessions, loadUser, loadUserSession } = this.props;
+    !user && loadUser();
+    !sessions && loadUserSession();
   }
 
   async onChangePassword(changePasswordData: ChangePasswordFormType): Promise<void> {
@@ -67,16 +40,16 @@ class SecurityClass extends React.Component<SecurityProps> {
     this.props.cancelChangePassword();
   }
 
-  logoutDevice = (device: Device) => {
+  logoutDevice = (device: IDeviceInfo) => {
     console.log(device);
   };
 
-  removeDevice = (device: Device) => {
+  removeDevice = (device: IDeviceInfo) => {
     console.log(device);
   };
 
   render(): React.ReactNode {
-    const { user, statusses } = this.props;
+    const { user, statusses, sessions, accesses, devices } = this.props;
 
     return (
       <CrudContainer
@@ -95,8 +68,9 @@ class SecurityClass extends React.Component<SecurityProps> {
           />
           <ChangePasswordHistorySection user={user as IUser} cancelRequest={this.cancelPasswordRequest.bind(this)}/>
           <LoginHistorySection
+            sessions={sessions}
+            accesses={accesses}
             devices={devices}
-            history={history}
             logoutDevice={this.logoutDevice.bind(this)}
             removeDevice={this.removeDevice.bind(this)}
           />
@@ -109,10 +83,14 @@ class SecurityClass extends React.Component<SecurityProps> {
 export const Security = connect(
   (state) => ({
     user: getUser(state as never),
+    sessions: getSessions(state as never),
+    accesses: getAccesses(state as never),
+    devices: getDevices(state as never),
     statusses: getUserState(state as never).statuses,
   }),
   {
     loadUser,
+    loadUserSession,
     changePassword,
     cancelChangePassword,
   }

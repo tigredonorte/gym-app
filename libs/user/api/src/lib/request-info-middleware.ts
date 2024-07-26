@@ -4,32 +4,7 @@ import { Request, Response } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 import { extractTokenFromHeader } from './guards/extractTokenFromHeader';
-import { IUser } from './interfaces/IUser';
-
-export interface IRequestInfo {
-  ip: string;
-  clientIp?: string;
-  userData: {
-    deviceInfo?: {
-      browser: { name?: string; version?: string; major?: string; };
-      os: { name?: string; version?: string; };
-      device: { model?: string; type?: string; vendor?: string; };
-    };
-    location?: {
-      range?: [number, number];
-      country?: string;
-      region?: string;
-      eu?: '0' | '1';
-      timezone?: string;
-      city?: string;
-      ll?: [number, number];
-      metro?: number;
-      area?: number;
-    } | null;
-    ip?: string;
-  },
-  user?: IUser;
-}
+import { IRequestInfo, IUser } from './interfaces';
 
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
@@ -41,7 +16,7 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
   }
 }
 
-function getUser(req: IRequestInfo & Request, jwtService: JwtService): IRequestInfo['user'] | null {
+function getUser(req: IRequestInfo & Request, jwtService: JwtService): IUser | null {
   const token = extractTokenFromHeader(req);
   if (!token) {
     return null;

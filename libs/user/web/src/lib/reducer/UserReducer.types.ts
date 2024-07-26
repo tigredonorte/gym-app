@@ -1,3 +1,5 @@
+import { IAccessLog, IDeviceInfo, ISession } from './session.types';
+
 export interface IPasswordHistoryItem {
   confirmed: boolean;
   createdAt: string;
@@ -30,7 +32,7 @@ export interface ActionStatus {
 }
 export type UserActionTypes = 'login' | 'logout' | 'loadUser' |
 'removeFromEmailHistory' | 'saveProfileInfo' | 'changeEmail' |
-'changePassword' | 'cancelChangePassword'
+'changePassword' | 'cancelChangePassword' | 'loadUserSession';
 
 export type UserStatusses = {
   [key in UserActionTypes]?: ActionStatus;
@@ -38,4 +40,7 @@ export type UserStatusses = {
 export interface UserState {
   user?: IUser;
   statuses: UserStatusses;
+  sessions?: Omit<ISession, 'access' | 'deviceInfo'>[];
+  accesses?: IAccessLog[];
+  devices?: IDeviceInfo[];
 }

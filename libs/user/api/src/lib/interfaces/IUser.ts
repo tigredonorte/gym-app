@@ -33,3 +33,5 @@ export interface IUser {
   emailHistory?: IUserEmailHistory[];
   passwordHistory?: IUserPasswordHistory[];
 }
+
+export type UserReturnType = Omit<IUser, 'password'> & { id?: string };

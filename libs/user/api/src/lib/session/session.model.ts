@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { IRequestInfo } from '@gym-app/user/api';
+import { IAccessLog, IDeviceInfo, ISession } from '../interfaces';
 import { AccessLogSchema } from './accessLog.model';
-import { AccessLog } from './session.dto';
 
 @Schema({ timestamps: true })
-export class Session {
+export class Session implements ISession {
   @Prop({ required: true })
     userId!: string;
 
   @Prop({ type: Object })
-    deviceInfo!: IRequestInfo['userData']['deviceInfo'];
+    deviceInfo!: IDeviceInfo;
 
   @Prop({ required: true })
     sessionId!: string;
@@ -19,7 +18,7 @@ export class Session {
     status: 'active' | 'inactive' = 'active';
 
   @Prop({ type: [AccessLogSchema], default: [] })
-    access!: AccessLog[];
+    access!: IAccessLog[];
 }
 
 export type SessionDocument = Session & Document;
