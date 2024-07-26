@@ -65,6 +65,9 @@ importers:
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      chalk:
+        specifier: 4.1.2
+        version: 4.1.2
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -101,6 +104,9 @@ importers:
       mongoose:
         specifier: ^7.6.10
         version: 7.6.10
+      morgan:
+        specifier: ^1.10.0
+        version: 1.10.0
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -6847,6 +6853,10 @@ packages:
   mongoose@7.6.10:
     resolution: {integrity: sha512-vfvGxXwFk6rZVRaMC+8pgXj1uOR2RafZpgaA3fO6ygDJN7dXnBQ3ehuacwaVD+U3hmZetqHimORJhvLEpdRl1w==}
     engines: {node: '>=14.20.1'}
+
+  morgan@1.10.0:
+    resolution: {integrity: sha512-AbegBVI4sh6El+1gNwvD5YIck7nSA36weD7xvIxG4in80j/UoK8AEGaWnnz8v1GxonMCltmlNs5ZKbGvl9b1XQ==}
+    engines: {node: '>= 0.8.0'}
 
   mpath@0.9.0:
     resolution: {integrity: sha512-ikJRQTk8hw5DEoFVxHG1Gn9T/xcjtdnOKIU1JTmGjZZlg9LST2mBLmcX3/ICIbgJydT2GOc15RnNy5mHmzfSew==}
@@ -18687,6 +18697,16 @@ snapshots:
       - kerberos
       - mongodb-client-encryption
       - snappy
+      - supports-color
+
+  morgan@1.10.0:
+    dependencies:
+      basic-auth: 2.0.1
+      debug: 2.6.9
+      depd: 2.0.0
+      on-finished: 2.3.0
+      on-headers: 1.0.2
+    transitivePeerDependencies:
       - supports-color
 
   mpath@0.9.0: {}
