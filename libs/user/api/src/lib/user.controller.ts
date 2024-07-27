@@ -1,9 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
-// import { ISession } from './interfaces';
-import { IRequestInfo, ISession, IUser, UserReturnType } from './interfaces';
-import { SessionService } from './session';
+import { IAccessLog, IRequestInfo, ISession, IUser, UserReturnType } from './interfaces';
+import { PaginationResult, SessionService } from './session';
 import { ChangePasswordDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
@@ -30,6 +29,17 @@ export class UserController {
     @Param('id') id: string,
   ): Promise<ISession[]> {
     return await this.sessionService.getUserSession(id);
+  }
+
+  @Get(':id/access')
+  @HttpCode(HttpStatus.OK)
+  async getAccessInfo(
+    @Param('id') id: string,
+      @Query('page') page = 1,
+      @Query('limit') limit = 10,
+  ): Promise<PaginationResult<IAccessLog[]>> {
+    const offset = (page - 1) * limit;
+    return await this.sessionService.getAccessInfo(id, offset, limit);
   }
 
   @Post('edit/:id')

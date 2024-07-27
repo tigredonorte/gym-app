@@ -87,7 +87,6 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
     if (!user) {
       return;
     }
-    // this.setState({ errorMessage: '' });
   }
 
   openDialog(dialog: AccountState['dialog']) {

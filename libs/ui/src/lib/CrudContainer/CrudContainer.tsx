@@ -1,5 +1,6 @@
 import { mdiAlertCircleOutline, mdiFolderRemoveOutline, mdiLoading } from '@mdi/js';
 import { CrudBox } from './CrudBox';
+import React from 'react';
 
 function isEmptyData<T>(data: T): data is NonNullable<T> {
   return Array.isArray(data) ? data.length === 0 : !data;
@@ -21,6 +22,9 @@ interface CrudContainerProps<T> {
   // Error handling
   errorMessage: string
   ErrorItem?: React.ReactNode
+
+  Header?: React.ReactNode
+  Container?: React.FC<{ children: React.ReactNode }>
 }
 
 export const CrudContainer = <T,>({
@@ -32,27 +36,44 @@ export const CrudContainer = <T,>({
   ErrorItem,
   data,
   children,
+  Header,
+  Container = ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }: CrudContainerProps<T>) => {
   if (loading) {
-    return <CrudBox text={loadingMessage} icon={mdiLoading} color='info' />;
+    return (
+      <Container>
+        {Header}
+        <CrudBox text={loadingMessage} icon={mdiLoading} color='info' />
+      </Container>
+    );
   }
 
   if (errorMessage) {
     return (
-      <CrudBox icon={mdiAlertCircleOutline} text={errorMessage} color='error'>
-        {ErrorItem}
-      </CrudBox>
+      <Container>
+        {Header}
+        <CrudBox icon={mdiAlertCircleOutline} text={errorMessage} color='error'>
+          {ErrorItem}
+        </CrudBox>
+      </Container>
     );
   }
 
   if (isEmptyData(data)) {
-    const color = Array.isArray(data) ? 'info' : 'error';
     return (
-      <CrudBox icon={mdiFolderRemoveOutline} text={emptyMessage} color={color}>
-        {EmptyItem}
-      </CrudBox>
+      <Container>
+        {Header}
+        <CrudBox icon={mdiFolderRemoveOutline} text={emptyMessage} color={'info'}>
+          {EmptyItem}
+        </CrudBox>
+      </Container>
     );
   }
 
-  return children;
+  return (
+    <Container>
+      {Header}
+      {children}
+    </Container>
+  );
 };
