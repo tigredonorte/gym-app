@@ -19,6 +19,9 @@ export class Session implements ISession {
 
   @Prop({ type: [AccessLogSchema], default: [] })
     access!: IAccessLog[];
+
+  createdAt!: Date;
+  updatedAt!: Date;
 }
 
 export type SessionDocument = Session & Document;

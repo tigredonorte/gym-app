@@ -1,8 +1,8 @@
-import { deleteRequest, getRequest, postRequest } from '@gym-app/shared/web';
+import { deleteRequest, getRequest, IPaginationRequest, postRequest } from '@gym-app/shared/web';
 import { Dispatch } from '@reduxjs/toolkit';
-import { IFetchedSession } from './session.types';
-import { removeFromEmailHistory, removePasswordChangeRequest, setActionType, setSession, setUser, updateUser } from './UserReducer';
-import { IUser, UserActionTypes } from './UserReducer.types';
+import { IAccessLog, IFetchedSession } from './session.types';
+import { removeFromEmailHistory, removePasswordChangeRequest, setAccess, setActionType, setSession, setUser, updateUser } from './UserReducer';
+import { IUser, UserActionTypes, UserState } from './UserReducer.types';
 
 const getUserId = (id?: string) => {
   if (id) {
@@ -18,11 +18,19 @@ const requestData = async(
   actionName: UserActionTypes,
   defaultErrorMessage: string,
   dispatch: Dispatch,
-  request: () => Promise<unknown>,
+  getState: () => { user: UserState },
+  request: (state: UserState) => Promise<unknown>,
 ) => {
+  const state = getState().user;
+  const { statuses } = state;
+
+  if (statuses?.[actionName]?.loading) {
+    return;
+  }
+
   dispatch(setActionType({ status: { loading: true, error: null }, actionName }));
   try {
-    await request();
+    await request(state);
     dispatch(setActionType({ status: { loading: false, error: null }, actionName }));
   } catch (error) {
     console.error(`Error ${defaultErrorMessage}\n\n`, error);
@@ -31,21 +39,41 @@ const requestData = async(
   }
 };
 
-export const loadUser = (id = undefined) => async (dispatch: Dispatch) =>
-  requestData('loadUser', 'loading user data', dispatch, async() => {
+export const loadUser = (id = undefined) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('loadUser', 'loading user data', dispatch, getState, async() => {
     id = getUserId(id);
     const user = await getRequest<IUser>(`/user/${id}`);
     dispatch(setUser(user));
   });
 
-export const loadUserSession = (id = getUserId()) => async (dispatch: Dispatch) =>
-  requestData('loadUserSession', 'loading user session', dispatch, async() => {
+export const loadUserSession = (id = getUserId()) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('loadUserSession', 'loading user session', dispatch, getState, async() => {
     const sessions = await getRequest<IFetchedSession[]>(`/user/${id}/session`);
     dispatch(setSession({ id, sessions }));
   });
 
-export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Dispatch) =>
-  requestData('saveProfileInfo', 'saving profile info', dispatch, async() => {
+export const loadUserAccesses = (page: number, id = getUserId()) => async (dispatch: Dispatch, getState: () => { user: UserState }) => {
+  requestData('loadUserAccesses', 'loading user accesses', dispatch, getState, async (state: UserState) => {
+    const { accesses } = state;
+    const items = accesses?.pages?.[`${page}`];
+    if (items) {
+      dispatch(setAccess({
+        items,
+        currentPage: page,
+        totalPages: accesses.totalPages,
+        totalItems: accesses.totalItems,
+        id,
+      }));
+      return;
+    }
+
+    const data = await getRequest<IPaginationRequest<IAccessLog>>(`/user/${id}/access?page=${page}`);
+    dispatch(setAccess({ ...data, id }));
+  });
+};
+
+export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('saveProfileInfo', 'saving profile info', dispatch, getState, async() => {
     const id = getUserId();
     await postRequest(`user/edit/${id}`, userData);
     dispatch(updateUser(userData));
@@ -55,15 +83,15 @@ export interface ChangeEmailSettingFormType {
   newEmail: string;
   oldEmail: string;
 }
-export const changeEmail = (userData: ChangeEmailSettingFormType) => async (dispatch: Dispatch) =>
-  requestData('changeEmail', 'changing email', dispatch, async() => {
+export const changeEmail = (userData: ChangeEmailSettingFormType) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('changeEmail', 'changing email', dispatch, getState, async() => {
     const id = getUserId();
     const emailHistory = await postRequest<IUser['emailHistory']>(`user/update-email/${id}`, userData);
     dispatch(updateUser({ emailHistory }));
   });
 
-export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: Dispatch) =>
-  requestData('removeFromEmailHistory', 'removing email from history', dispatch, async() => {
+export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('removeFromEmailHistory', 'removing email from history', dispatch, getState, async() => {
     const id = getUserId();
     await deleteRequest(`user/change-email/${id}/${changeEmailCode}`);
     dispatch(removeFromEmailHistory(changeEmailCode));
@@ -74,15 +102,15 @@ export interface ChangePasswordFormType  {
   newPassword: string;
   confirmPassword: string;
 }
-export const changePassword = (changePasswordData: ChangePasswordFormType) => async (dispatch: Dispatch) =>
-  requestData('changePassword', 'changing password', dispatch, async() => {
+export const changePassword = (changePasswordData: ChangePasswordFormType) => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('changePassword', 'changing password', dispatch, getState, async() => {
     const id = getUserId();
     const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/change-password/${id}`, changePasswordData);
     dispatch(updateUser({ passwordHistory }));
   });
 
-export const cancelChangePassword = () => async (dispatch: Dispatch) =>
-  requestData('cancelChangePassword', 'cancel change password', dispatch, async() => {
+export const cancelChangePassword = () => async (dispatch: Dispatch, getState: () => { user: UserState }) =>
+  requestData('cancelChangePassword', 'cancel change password', dispatch, getState, async() => {
     const id = getUserId();
     await deleteRequest(`user/change-password/${id}`);
     dispatch(removePasswordChangeRequest());

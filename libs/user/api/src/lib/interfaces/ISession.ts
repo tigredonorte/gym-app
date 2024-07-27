@@ -15,4 +15,6 @@ export interface ISession {
   sessionId: string;
   status: 'active' | 'inactive';
   access: IAccessLog[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

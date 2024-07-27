@@ -11,7 +11,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import React from 'react';
-import { IPasswordHistoryItem, IUser } from '../../reducer';
+import { IPasswordHistoryItem, IUser } from '../../../reducer';
 
 interface ChangePasswordHistorySectionProps {
   user?: IUser;

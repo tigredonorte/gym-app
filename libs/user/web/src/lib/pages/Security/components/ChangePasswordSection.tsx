@@ -1,12 +1,12 @@
 import { ErrorAlert, PasswordField } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { CardHeader } from '@gym-app/ui';
+import { CardHeader, CrudContainer } from '@gym-app/ui';
 import { mdiLock } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React, { useCallback } from 'react';
-import { IUser } from '../../reducer';
-import { ChangePasswordFormType } from '../../reducer/UserActions';
+import { IUser } from '../../../reducer';
+import { ChangePasswordFormType } from '../../../reducer/UserActions';
 import { PendingChangeChange } from './PendingChangeConfirmation';
 
 
@@ -23,22 +23,7 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
     onSave(formData);
   }, [onSave]);
 
-  if (!user) {
-    return null;
-  }
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader title="Change Password" subtitle="Update Profile Security" />
-        <div className='loading'>
-          Loading...
-        </div>
-      </Card>
-    );
-  }
-
-  const hasPendingRequest = user.passwordHistory?.some((item) => !item.confirmed && new Date(item.expiresAt) > new Date());
+  const hasPendingRequest = user?.passwordHistory?.some((item) => !item.confirmed && new Date(item.expiresAt) > new Date());
   if (hasPendingRequest) {
     return (
       <PendingChangeChange
@@ -50,8 +35,15 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
   }
 
   return (
-    <Card>
-      <CardHeader title="Change Password" subtitle="Update Profile Security" />
+    <CrudContainer
+      loading={loading}
+      loadingMessage="Loading user sessions"
+      errorMessage={error}
+      emptyMessage="No sessions found"
+      data={user}
+      Header={<CardHeader title="Change Password" subtitle="Update Profile Security" />}
+      Container={Card}
+    >
       <Form.Provider>
         <Form.Container className="general-settings-form" onSave={handleSave}>
           <Form.Fields.ConfirmField confirmLabel="Confirm Password" confirmName="confirmPassword">
@@ -72,7 +64,7 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
           </div>
         </Form.Container>
       </Form.Provider>
-    </Card>
+    </CrudContainer>
   );
 });
 
