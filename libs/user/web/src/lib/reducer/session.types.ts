@@ -1,8 +1,15 @@
 export interface IDeviceInfo {
-  updatedAt?: string;
+  sessionId: string;
+  updatedAt: string;
+  isCurrentDevice: boolean;
   browser: { name?: string; version?: string; major?: string; };
   os: { name?: string; version?: string; };
   device: { model?: string; type?: string; vendor?: string; };
+  mappedDevice: {
+    browser: string;
+    os: string;
+    device: string;
+  }
 }
 
 export interface ILocation {
@@ -39,7 +46,7 @@ export interface IFetchedSession {
   userId: string;
   sessionId: string;
   status: 'active' | 'inactive';
-  deviceInfo: IDeviceInfo;
+  deviceInfo: Pick<IDeviceInfo, 'browser' | 'os' | 'device'>;
   access: IAccessLog[];
   updatedAt: string;
 }

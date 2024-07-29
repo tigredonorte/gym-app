@@ -2,6 +2,7 @@ import { IPaginationRequest } from '@gym-app/shared/web';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ActionStatus, IUser, UserActionTypes, userFeatureKey, UserState } from './UserReducer.types';
 import { IAccessLog, IFetchedSession } from './session.types';
+import { UAParser } from 'ua-parser-js';
 
 const initialState: UserState = {
   user: undefined,
@@ -30,7 +31,29 @@ export const userSlice = createSlice({
     },
     setSession: (state: UserState, action: PayloadAction<{ sessions: IFetchedSession[], id: string }>) => {
       const { sessions } = action.payload;
-      state.devices = sessions.map(session => ({ ...session.deviceInfo, updatedAt: session.updatedAt }));
+
+      const mapDevice = (deviceInfo: IFetchedSession['deviceInfo']) => ({
+        browser: `${deviceInfo.browser.name} ${deviceInfo.browser.major}`,
+        os: `${deviceInfo.os.name} ${deviceInfo.os.version}`,
+        device: deviceInfo.device.type ? `${deviceInfo.device.vendor} ${deviceInfo.device.model}` : '',
+      });
+      const parser = new UAParser();
+      const result = parser.getResult();
+      const currentDevice = mapDevice(result);
+      state.devices = sessions.map((session: IFetchedSession) => {
+        const mappedDevice = mapDevice(session.deviceInfo);
+        return {
+          ...session.deviceInfo,
+          updatedAt: session.updatedAt,
+          sessionId: session.sessionId,
+          mappedDevice,
+          isCurrentDevice: mappedDevice.device === currentDevice.device &&
+            mappedDevice.os === currentDevice.os &&
+            mappedDevice.browser === currentDevice.browser
+        };
+      });
+
+      console.log('state.devices ', state.devices );
       state.sessions = sessions.map(({ access, ...session }) => session);
     },
     setAccess: (state: UserState, action: PayloadAction<IPaginationRequest<IAccessLog> & { id: string }>) => {
