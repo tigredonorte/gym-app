@@ -14,7 +14,7 @@ import React from 'react';
 import { IPasswordHistoryItem, IUser } from '../../../reducer';
 
 interface ChangePasswordHistorySectionProps {
-  user?: IUser;
+  user: IUser | undefined;
   cancelRequest: (row: IPasswordHistoryItem) => void;
 }
 

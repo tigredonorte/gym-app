@@ -30,8 +30,8 @@ export interface Device {
 }
 
 interface LoginHistorySectionProps {
-  accesses?: IPagination<IAccessLog>;
-  status?: ActionStatus;
+  accesses: IPagination<IAccessLog> | undefined;
+  status: ActionStatus | undefined;
   loadPage: (page: number) => void;
 }
 export const LoginHistorySection: React.FC<LoginHistorySectionProps> = React.memo((props: LoginHistorySectionProps) => {

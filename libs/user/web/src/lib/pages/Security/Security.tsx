@@ -1,5 +1,5 @@
 import { IPagination } from '@gym-app/shared/web';
-import { CrudContainer } from '@gym-app/ui';
+import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -18,20 +18,34 @@ interface SecurityProps {
   statusses: UserStatusses;
   loadUser: () => void;
   loadUserAccesses: (page: number) => void;
+  loadUserSession: () => void;
   changePassword: (changePasswordData: ChangePasswordFormType) => void;
   cancelChangePassword: () => void;
 }
 
-class SecurityClass extends React.Component<SecurityProps> {
+interface SecurityState {
+  dialog?: {
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  };
+}
+
+class SecurityClass extends React.Component<SecurityProps, SecurityState> {
+
+  state: SecurityState = {
+    dialog: undefined,
+  };
 
   constructor(props: SecurityProps) {
     super(props);
   }
 
   async componentDidMount() {
-    const { user, accesses, loadUser } = this.props;
+    const { user, devices, accesses, loadUser, loadUserSession } = this.props;
     !user && loadUser();
     !accesses && this.loadAccessPage(1);
+    !devices && loadUserSession();
   }
 
   async onChangePassword(changePasswordData: ChangePasswordFormType): Promise<void> {
@@ -47,8 +61,43 @@ class SecurityClass extends React.Component<SecurityProps> {
     loadUserAccesses(page);
   }
 
+  closeDialog() {
+    this.setState({ dialog: undefined });
+  }
+
+  logoutDevice(device: IDeviceInfo) {
+    const onConfirm = async () => {
+      console.log('logoutDevice', device);
+      this.closeDialog();
+    };
+
+    this.setState({
+      dialog: {
+        title: 'Logout device',
+        message: 'Are you sure you want to logout this device?',
+        onConfirm,
+      }
+    });
+  }
+
+  logoutAll(devices: IDeviceInfo[]) {
+    const onConfirm = async () => {
+      console.log('logoutAll', devices);
+      this.closeDialog();
+    };
+
+    this.setState({
+      dialog: {
+        title: 'Logout all devices',
+        message: 'Are you sure you want to logout all devices?',
+        onConfirm,
+      }
+    });
+  }
+
   render(): React.ReactNode {
     const { user, statusses, accesses, devices } = this.props;
+    const { dialog } = this.state;
 
     return (
       <CrudContainer
@@ -66,11 +115,24 @@ class SecurityClass extends React.Component<SecurityProps> {
             onCancel={this.cancelPasswordRequest.bind(this)}
           />
           <ChangePasswordHistorySection user={user as IUser} cancelRequest={this.cancelPasswordRequest.bind(this)}/>
-          <ActiveDevicesSession devices={devices} />
+          <ActiveDevicesSession
+            devices={devices}
+            status={statusses.loadUserSession}
+            logoutDevice={this.logoutDevice.bind(this)}
+            logoutAll={this.logoutAll.bind(this)}
+          />
           <LoginHistorySection
             accesses={accesses}
             loadPage={this.loadAccessPage.bind(this)}
             status={statusses.loadUserAccesses}
+          />
+
+          <ConfirmationDialog
+            open={!!dialog}
+            title={dialog?.title || ''}
+            message={dialog?.message || ''}
+            onConfirm={() => dialog?.onConfirm()}
+            onCancel={() => this.closeDialog()}
           />
         </Stack>
       </CrudContainer>
