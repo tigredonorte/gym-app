@@ -3,7 +3,7 @@ import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { connect } from 'react-redux';
-import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserStatusses } from '../../reducer';
+import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserRequestStatusses } from '../../reducer';
 import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
 import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser, loadUserAccesses, loadUserSession } from '../../reducer/UserActions';
 import { ActiveDevicesSession } from './components/ActiveDevicesSession';
@@ -15,7 +15,7 @@ interface SecurityProps {
   sessions?: ISession[];
   accesses?: IPagination<IAccessLog>;
   devices?: IDeviceInfo[];
-  statusses: UserStatusses;
+  statusses: UserRequestStatusses;
   loadUser: () => void;
   loadUserAccesses: (page: number) => void;
   loadUserSession: () => void;
@@ -44,8 +44,8 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
   async componentDidMount() {
     const { user, devices, accesses, loadUser, loadUserSession } = this.props;
     !user && loadUser();
-    !accesses && this.loadAccessPage(1);
-    !devices && loadUserSession();
+    !accesses?.items && this.loadAccessPage(1);
+    !devices?.length && loadUserSession();
   }
 
   async onChangePassword(changePasswordData: ChangePasswordFormType): Promise<void> {
@@ -100,42 +100,45 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
     const { dialog } = this.state;
 
     return (
-      <CrudContainer
-        loading={statusses.loadUser?.loading || false}
-        loadingMessage="Loading user data"
-        errorMessage={statusses.loadUser?.error || ''}
-        emptyMessage="User not found"
-        data={user}
-      >
-        <Stack spacing={2}>
-          <ChangePassworSection
-            loading={statusses?.changePassword?.loading || false}
-            error={statusses?.changePassword?.error || ''}
-            onSave={this.onChangePassword.bind(this)} user={user as IUser}
-            onCancel={this.cancelPasswordRequest.bind(this)}
-          />
-          <ChangePasswordHistorySection user={user as IUser} cancelRequest={this.cancelPasswordRequest.bind(this)}/>
-          <ActiveDevicesSession
-            devices={devices}
-            status={statusses.loadUserSession}
-            logoutDevice={this.logoutDevice.bind(this)}
-            logoutAll={this.logoutAll.bind(this)}
-          />
-          <LoginHistorySection
-            accesses={accesses}
-            loadPage={this.loadAccessPage.bind(this)}
-            status={statusses.loadUserAccesses}
-          />
+      <>
+        <CrudContainer
+          loading={statusses.loadUser?.loading || false}
+          loadingMessage="Loading user data"
+          errorMessage={statusses.loadUser?.error || ''}
+          emptyMessage="User not found"
+          data={user}
+        >
+          <Stack spacing={2}>
+            <ChangePassworSection
+              loading={statusses?.changePassword?.loading || false}
+              error={statusses?.changePassword?.error || ''}
+              onSave={this.onChangePassword.bind(this)} user={user as IUser}
+              onCancel={this.cancelPasswordRequest.bind(this)}
+            />
+            <ChangePasswordHistorySection user={user as IUser} cancelRequest={this.cancelPasswordRequest.bind(this)}/>
+            <ActiveDevicesSession
+              devices={devices}
+              status={statusses.loadUserSession}
+              logoutDevice={this.logoutDevice.bind(this)}
+              logoutAll={this.logoutAll.bind(this)}
+            />
+            <LoginHistorySection
+              accesses={accesses}
+              loadPage={this.loadAccessPage.bind(this)}
+              status={statusses.loadUserAccesses}
+            />
 
-          <ConfirmationDialog
-            open={!!dialog}
-            title={dialog?.title || ''}
-            message={dialog?.message || ''}
-            onConfirm={() => dialog?.onConfirm()}
-            onCancel={() => this.closeDialog()}
-          />
-        </Stack>
-      </CrudContainer>
+          </Stack>
+        </CrudContainer>
+
+        <ConfirmationDialog
+          open={!!dialog}
+          title={dialog?.title || ''}
+          message={dialog?.message || ''}
+          onConfirm={() => dialog?.onConfirm()}
+          onCancel={() => this.closeDialog()}
+        />
+      </>
     );
   }
 }

@@ -1,4 +1,4 @@
-import { IPagination } from '@gym-app/shared/web';
+import { IPagination, RequestStatusses, StateWithStatus } from '@gym-app/shared/web';
 import { IAccessLog, IDeviceInfo, ISession } from './session.types';
 
 export interface IPasswordHistoryItem {
@@ -36,12 +36,10 @@ export type UserActionTypes = 'login' | 'logout' | 'loadUser' |
 'changePassword' | 'cancelChangePassword' | 'loadUserSession' |
 'loadUserAccesses';
 
-export type UserStatusses = {
-  [key in UserActionTypes]?: ActionStatus;
-};
-export interface UserState {
+export type UserRequestStatusses = RequestStatusses<UserActionTypes>;
+
+export interface UserState extends StateWithStatus<UserActionTypes> {
   user?: IUser;
-  statuses: UserStatusses;
   sessions?: Omit<ISession, 'access' | 'deviceInfo'>[];
   accesses?: IPagination<IAccessLog>;
   devices?: IDeviceInfo[];

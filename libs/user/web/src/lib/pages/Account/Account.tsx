@@ -3,7 +3,7 @@ import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { connect } from 'react-redux';
-import { getUser, getUserState, getUserStatus, IUser, UserStatusses } from '../../reducer';
+import { getUser, getUserState, getUserStatus, IUser, UserRequestStatusses } from '../../reducer';
 import { cancelChangeEmail, changeEmail, ChangeEmailSettingFormType, loadUser, saveProfileInfo } from '../../reducer/UserActions';
 import './Account.scss';
 import { ChangeEmailSettings } from './ChangeEmailSettings';
@@ -15,7 +15,7 @@ interface AccountProps {
   user?: IUser;
   loading: boolean;
   errorMessage: string;
-  statusses: UserStatusses;
+  statusses: UserRequestStatusses;
   loadUser: () => void;
   saveProfileInfo: (userData: Partial<IUser>) => void;
   changeEmail: (userData: ChangeEmailSettingFormType) => void;

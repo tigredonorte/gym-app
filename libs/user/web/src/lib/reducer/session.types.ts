@@ -34,6 +34,7 @@ export interface IRequestInfo {
   }
 }
 export interface IAccessLog {
+  id: string;
   createdAt: string;
   updatedAt: string;
   ip: string;
