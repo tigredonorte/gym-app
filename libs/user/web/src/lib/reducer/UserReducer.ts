@@ -7,7 +7,9 @@ import { UAParser } from 'ua-parser-js';
 const initialState: UserState = {
   user: undefined,
   sessions: undefined,
-  statuses: {}
+  statuses: {},
+  devices: [],
+  accesses: undefined,
 };
 
 export const userSlice = createSlice({
@@ -46,6 +48,7 @@ export const userSlice = createSlice({
           ...session.deviceInfo,
           updatedAt: session.updatedAt,
           sessionId: session.sessionId,
+          accessId: session.access[session.access.length - 1].id,
           mappedDevice,
           isCurrentDevice: mappedDevice.device === currentDevice.device &&
             mappedDevice.os === currentDevice.os &&
@@ -53,7 +56,6 @@ export const userSlice = createSlice({
         };
       });
 
-      console.log('state.devices ', state.devices );
       state.sessions = sessions.map(({ access, ...session }) => session);
     },
     setAccess: (state: UserState, action: PayloadAction<IPaginationRequest<IAccessLog> & { id: string }>) => {
