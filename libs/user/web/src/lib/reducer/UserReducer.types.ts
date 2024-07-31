@@ -34,7 +34,7 @@ export interface ActionStatus {
 export type UserActionTypes = 'login' | 'logout' | 'loadUser' |
 'removeFromEmailHistory' | 'saveProfileInfo' | 'changeEmail' |
 'changePassword' | 'cancelChangePassword' | 'loadUserSession' |
-'loadUserAccesses';
+'loadUserAccesses' | 'logoutDevice';
 
 export type UserRequestStatusses = RequestStatusses<UserActionTypes>;
 

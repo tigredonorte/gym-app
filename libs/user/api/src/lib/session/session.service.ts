@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model, Types } from 'mongoose';
-import { IAccessLog, IRequestInfo, ISession } from '../interfaces';
+import { IAccessLog, IRequestInfo, ISession, IUser, SessionStatus } from '../interfaces';
 import { SessionNotFoundError } from './SessionNotFoundError';
+import { SessionEventsService } from './session-events.service';
 import { Session, SessionDocument } from './session.model';
 
 /**
@@ -21,6 +22,7 @@ export class SessionService {
 
   constructor(
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
+    private readonly sessionEvents: SessionEventsService,
   ) {}
 
   async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<{ sessionId: string, accessId: string }> {
@@ -29,14 +31,14 @@ export class SessionService {
     const deviceInfo = userData.deviceInfo || ({} as IRequestInfo['userData']['deviceInfo']);
 
     const session = await this.sessionModel.findOneAndUpdate(
-      { sessionId },
+      { sessionId, status: { $ne: SessionStatus.DELETED } },
       {
         $set: {
           userId,
           sessionId,
           token,
           deviceInfo,
-          status: 'active',
+          status: SessionStatus.ACTIVE,
           currentAccessId: accessData._id,
         },
         $push: { access: accessData },
@@ -75,6 +77,7 @@ export class SessionService {
     const session = await this.sessionModel.findOneAndUpdate(
       {
         _id: id,
+        status: { $ne: SessionStatus.DELETED },
         access: {
           $elemMatch: {
             _id: accessId,
@@ -85,7 +88,7 @@ export class SessionService {
       {
         $set: {
           'access.$.logoutDate': new Date(),
-          status: 'inactive',
+          status: SessionStatus.INACTIVE,
         },
       },
       { new: true, fields: { userId: 1 } }
@@ -146,6 +149,34 @@ export class SessionService {
     const items = data.flatMap((session) => session.access);
 
     return { items, currentPage, totalPages, totalItems };
+  }
+
+  async logoutDevice(sessionId: string, accessId: string, userData: IUser): Promise<void> {
+    const session = await this.sessionModel.findOneAndUpdate(
+      {
+        sessionId,
+        'access._id': accessId,
+        status: { $ne: SessionStatus.DELETED }
+      },
+      {
+        $set: {
+          'access.$.logoutDate': new Date(),
+          status: SessionStatus.DELETED,
+        },
+      },
+      { new: true, fields: { userId: 1 } }
+    ).exec();
+
+    if (!session) {
+      throw new SessionNotFoundError(`Access with id ${accessId} and session with id ${sessionId} not found.`);
+    }
+
+    this.sessionEvents.emitLogoutDevice({
+      sessionId,
+      userId: session.userId,
+      accessId,
+      requestUserId: userData.id,
+    });
   }
 
 }

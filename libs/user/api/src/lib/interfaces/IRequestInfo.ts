@@ -30,3 +30,7 @@ export interface IRequestInfo {
   userData: IRequestUserData,
   user?: IUser;
 }
+
+export interface IRequestInfoWithUser extends IRequestInfo {
+  user: IUser;
+}

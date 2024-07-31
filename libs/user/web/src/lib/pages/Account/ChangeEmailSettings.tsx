@@ -1,49 +1,14 @@
 import { EmailField, ErrorAlert } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { CardHeader } from '@gym-app/ui';
-import { mdiContentSaveOutline, mdiDeleteOutline } from '@mdi/js';
+import { CardHeader, CrudContainer } from '@gym-app/ui';
+import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
-import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
-import { Box } from '@mui/system';
 import React from 'react';
 import { IUser } from '../../reducer';
 import { ChangeEmailSettingFormType } from '../../reducer/UserActions';
+import { PendingChangeChange } from '../Security/components/PendingChangeConfirmation';
 import './Account.scss';
-
-const ChangeEmailContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <Card>
-      <CardHeader title="Change Email" />
-      {children}
-    </Card>
-  );
-};
-interface PendingEmailChangeProps {
-  onCancel: () => void;
-}
-export const PendingEmailChange: React.FC<PendingEmailChangeProps> = ({ onCancel }: PendingEmailChangeProps) => {
-  return (
-    <ChangeEmailContainer>
-      <p>
-        You have a pending email change request. Access your email to confirm the change.
-      </p>
-      <Button
-        type="submit"
-        color="primary"
-        variant="outlined"
-        sx={{ mt: 3, mb: 2 }}
-        onClick={() => onCancel()}
-      >
-        Cancel Change
-        <Box sx={{ marginLeft: 1, display: 'flex' }}>
-          <Icon path={mdiDeleteOutline} size={1}/>
-        </Box>
-      </Button>
-    </ChangeEmailContainer>
-  );
-};
-
 
 interface IUserForm extends IUser, FormContainerType {}
 
@@ -63,19 +28,13 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
     (email) => email.confirmed === false && user.email === email.oldEmail && !email.revertChangeEmailCode
   );
 
-  if (loading) {
-    return (
-      <ChangeEmailContainer>
-        <p>Loading...</p>
-      </ChangeEmailContainer>
-    );
-  }
-
   if (pendingEmail) {
     return (
       <>
         <ErrorAlert message={errorMessage} />
-        <PendingEmailChange
+        <PendingChangeChange
+          title='Change email'
+          subtitle='You have a pending email change request. Access your email to confirm the change..'
           onCancel={() => onCancel({ changeEmailCode: pendingEmail.changeEmailCode || '' })}
         />
       </>
@@ -83,7 +42,15 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
   }
 
   return (
-    <ChangeEmailContainer>
+    <CrudContainer
+      loading={loading}
+      loadingMessage="Loading user"
+      errorMessage={errorMessage}
+      emptyMessage="No user found"
+      data={user}
+      Header={<CardHeader title="Change Email" subtitle='Only one email change request can be pending at a time'/>}
+      Container={Card}
+    >
       <Form.Provider>
         <Form.Container className="general-settings-form" onSave={saveFn}>
           <EmailField name='email' initialValue={user.email} validators={(email)=> email === user.email ? 'Unchanged email' : null }/>
@@ -100,6 +67,6 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
           </div>
         </Form.Container>
       </Form.Provider>
-    </ChangeEmailContainer>
+    </CrudContainer>
   );
 };

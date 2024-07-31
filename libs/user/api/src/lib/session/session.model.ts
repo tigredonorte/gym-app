@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { IAccessLog, IDeviceInfo, ISession } from '../interfaces';
+import { IAccessLog, IDeviceInfo, ISession, SessionStatus } from '../interfaces';
 import { AccessLogSchema } from './accessLog.model';
 
 @Schema({ timestamps: true })
@@ -14,8 +14,11 @@ export class Session implements ISession {
   @Prop({ required: true })
     sessionId!: string;
 
-  @Prop({ default: 'active' })
-    status: 'active' | 'inactive' = 'active';
+  @Prop({ type: String, enum: SessionStatus, default: SessionStatus.ACTIVE })
+    status!: SessionStatus;
+
+  @Prop({ required: true })
+    currentAccessId!: string;
 
   @Prop({ type: [AccessLogSchema], default: [] })
     access!: IAccessLog[];

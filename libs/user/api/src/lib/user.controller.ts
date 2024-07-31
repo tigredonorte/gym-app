@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
-import { IAccessLog, IRequestInfo, ISession, IUser, UserReturnType } from './interfaces';
+import { IAccessLog, IRequestInfo, IRequestInfoWithUser, ISession, IUser, UserReturnType } from './interfaces';
 import { PaginationResult, SessionService } from './session';
-import { ChangePasswordDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
+import { ChangePasswordDto, LogoutDeviceDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
 
@@ -40,6 +40,15 @@ export class UserController {
   ): Promise<PaginationResult<IAccessLog[]>> {
     const offset = (page - 1) * limit;
     return await this.sessionService.getAccessInfo(id, offset, limit);
+  }
+
+  @Post(':id/logoutDevice')
+  @HttpCode(HttpStatus.OK)
+  async logoutDevice(
+    @Body() data: LogoutDeviceDto,
+      @Req() req: IRequestInfoWithUser
+  ): Promise<void> {
+    await this.sessionService.logoutDevice(data.sessionId, data.accessId, req.user);
   }
 
   @Post('edit/:id')

@@ -7,6 +7,14 @@ export class UpdateUserDto implements UpdateUser {
   @IsString() name?: string;
 }
 
+interface LogoutDevice {
+  sessionId: string;
+  accessId: string;
+}
+export class LogoutDeviceDto implements LogoutDevice {
+  @IsString() sessionId!: string;
+  @IsString() accessId!: string;
+}
 
 export interface IUpdateEmail {
   newEmail: string;
