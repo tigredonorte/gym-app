@@ -72,6 +72,9 @@ export const userSlice = createSlice({
         totalItems: action.payload.totalItems,
       };
     },
+    removeDevice: (state: UserState, action: PayloadAction<string>) => {
+      state.devices = state.devices?.filter((device) => device.sessionId !== action.payload);
+    },
     removeFromEmailHistory: (state: UserState, action: PayloadAction<string>) => {
       if (state.user) {
         state.user.emailHistory = state.user.emailHistory?.filter((email) => email.changeEmailCode !== action.payload);
@@ -85,9 +88,5 @@ export const userSlice = createSlice({
   },
 });
 
-export const {
-  login, logout, setActionType, setUser, updateUser,
-  setSession, removeFromEmailHistory, removePasswordChangeRequest,
-  setAccess,
-} = userSlice.actions;
+export const UserActions = userSlice.actions;
 export const UserReducer = userSlice.reducer;

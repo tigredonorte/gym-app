@@ -1,5 +1,6 @@
 export interface IDeviceInfo {
   sessionId: string;
+  accessId: string;
   updatedAt: string;
   isCurrentDevice: boolean;
   browser: { name?: string; version?: string; major?: string; };
@@ -46,6 +47,7 @@ export interface IAccessLog {
 export interface IFetchedSession {
   userId: string;
   sessionId: string;
+  currentAccessId: string;
   status: 'active' | 'inactive';
   deviceInfo: Pick<IDeviceInfo, 'browser' | 'os' | 'device'>;
   access: IAccessLog[];

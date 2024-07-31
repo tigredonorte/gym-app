@@ -4,9 +4,9 @@ import { Injectable } from '@nestjs/common';
 import { IRequestInfo } from '@gym-app/user/api';
 
 export const AuthEventTypes = {
-  login: 'authLogin',
-  signup: 'authSignup',
-  logout: 'authLogout',
+  login: 'auth.login',
+  signup: 'auth.signup',
+  logout: 'auth.logout',
 };
 
 @Injectable()

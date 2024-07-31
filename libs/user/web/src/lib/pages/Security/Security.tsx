@@ -5,23 +5,30 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserRequestStatusses } from '../../reducer';
 import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
-import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser, loadUserAccesses, loadUserSession } from '../../reducer/UserActions';
+import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser, loadUserAccesses, loadUserSession, logoutDevice } from '../../reducer/UserActions';
 import { ActiveDevicesSession } from './components/ActiveDevicesSession';
 import { ChangePasswordHistorySection } from './components/ChangePasswordHistorySection';
 import { ChangePassworSection } from './components/ChangePasswordSection';
 import { LoginHistorySection } from './components/LoginHistorySection';
-interface SecurityProps {
-  user?: IUser;
-  sessions?: ISession[];
-  accesses?: IPagination<IAccessLog>;
-  devices?: IDeviceInfo[];
-  statusses: UserRequestStatusses;
+
+interface SecurityPropsActions {
   loadUser: () => void;
   loadUserAccesses: (page: number) => void;
   loadUserSession: () => void;
   changePassword: (changePasswordData: ChangePasswordFormType) => void;
   cancelChangePassword: () => void;
+  logoutDevice: (sessionId: string, accessId: string) => void;
 }
+
+interface ISecurityProps {
+  user?: IUser;
+  sessions?: ISession[];
+  accesses?: IPagination<IAccessLog>;
+  devices?: IDeviceInfo[];
+  statusses: UserRequestStatusses;
+}
+
+interface SecurityProps extends SecurityPropsActions, ISecurityProps {}
 
 interface SecurityState {
   dialog?: {
@@ -66,8 +73,9 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
   }
 
   logoutDevice(device: IDeviceInfo) {
+    const { logoutDevice } = this.props;
     const onConfirm = async () => {
-      console.log('logoutDevice', device);
+      logoutDevice(device.sessionId, device.accessId);
       this.closeDialog();
     };
 
@@ -150,12 +158,13 @@ export const Security = connect(
     accesses: getAccesses(state as never),
     devices: getDevices(state as never),
     statusses: getUserState(state as never).statuses,
-  }),
+  } as ISecurityProps),
   {
     loadUser,
     loadUserSession,
     loadUserAccesses,
     changePassword,
     cancelChangePassword,
-  }
+    logoutDevice,
+  } as SecurityPropsActions
 )(SecurityClass);
