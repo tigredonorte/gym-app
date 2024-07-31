@@ -1,13 +1,14 @@
 import { IDeviceInfo, ILocation } from './IRequestInfo';
 
 export interface IAccessLog {
+  _id: string;
   createdAt: Date;
   ip: string;
   location: ILocation;
   logoutDate?: Date;
 }
 
-export type AccessLogType = Omit<IAccessLog, 'createdAt'>;
+export type AccessLogType = Omit<IAccessLog, 'createdAt' | '_id'>;
 
 export interface ISession {
   userId: string;

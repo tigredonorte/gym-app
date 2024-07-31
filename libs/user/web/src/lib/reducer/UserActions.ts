@@ -16,6 +16,20 @@ const getUserId = (id?: string) => {
 
 type getUserStateType = () => { user: UserState };
 
+export const logoutUser = (sessionId: string, accessId: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
+  requestData({
+    actionName: 'logout',
+    defaultErrorMessage: 'logging out user',
+    dispatch,
+    getState: () => getState()?.user,
+    setActionType,
+    request: async() => {
+      await postRequest('/auth/logout', { sessionId, accessId });
+      localStorage.removeItem('userData');
+      localStorage.removeItem('token');
+    }
+  });
+
 export const loadUser = (id = undefined) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
     actionName: 'loadUser',

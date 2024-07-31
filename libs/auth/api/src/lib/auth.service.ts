@@ -30,8 +30,8 @@ export class AuthService {
     return this.userService.emailExists(data.email);
   }
 
-  async logout({ sessionId }: LogoutDto, userData: IRequestInfo['userData']) {
-    const id = await this.sessionService.removeSession(sessionId);
+  async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfo['userData']) {
+    const id = await this.sessionService.removeSession(sessionId, accessId);
     const user = await this.userService.findById(id);
     if (!user || !user.id) {
       throw new Error('User not found');
@@ -54,14 +54,15 @@ export class AuthService {
     const token = jwt.sign(
       result,
       JWT_SECRET,
-      { expiresIn: '1h' } // Token expiration time
+      { expiresIn: '15min' }
     );
-    const sessionId = await this.sessionService.createSession(id, userData, token);
+    const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
     await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
 
     return {
       ...result,
       sessionId,
+      accessId,
       token,
     };
   }

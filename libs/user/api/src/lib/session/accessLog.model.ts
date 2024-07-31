@@ -3,12 +3,11 @@ import { Document } from 'mongoose';
 import { AccessLogType, ILocation } from '../interfaces';
 
 @Schema({ timestamps: true })
-class AccessLog implements AccessLogType {
-
-  @Prop()
+export class AccessLog implements AccessLogType {
+  @Prop({ required: true })
     ip!: string;
 
-  @Prop({ type: Object })
+  @Prop({ type: Object, required: true })
     location!: ILocation;
 
   @Prop()
