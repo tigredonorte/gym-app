@@ -31,9 +31,12 @@ export class LoginDto implements Login {
 }
 
 interface Logout {
+  accessId: string;
   sessionId: string;
 }
 export class LogoutDto implements Logout {
+  @IsString()
+    accessId!: string;
   @IsString()
     sessionId!: string;
 }

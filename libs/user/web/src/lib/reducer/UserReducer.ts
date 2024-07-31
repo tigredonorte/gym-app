@@ -20,7 +20,8 @@ export const userSlice = createSlice({
       state.user = action.payload;
     },
     logout: (state) => {
-      state.user = undefined;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      state = initialState;
     },
     setActionType: (state, action: PayloadAction<{ status: ActionStatus, actionName: UserActionTypes}>) => {
       state.statuses[action.payload.actionName] = action.payload.status;
@@ -48,7 +49,7 @@ export const userSlice = createSlice({
           ...session.deviceInfo,
           updatedAt: session.updatedAt,
           sessionId: session.sessionId,
-          accessId: session.access[session.access.length - 1].id,
+          accessId: session.currentAccessId,
           mappedDevice,
           isCurrentDevice: mappedDevice.device === currentDevice.device &&
             mappedDevice.os === currentDevice.os &&
@@ -87,6 +88,6 @@ export const userSlice = createSlice({
 export const {
   login, logout, setActionType, setUser, updateUser,
   setSession, removeFromEmailHistory, removePasswordChangeRequest,
-  setAccess
+  setAccess,
 } = userSlice.actions;
 export const UserReducer = userSlice.reducer;

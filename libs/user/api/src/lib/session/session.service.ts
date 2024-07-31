@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { IAccessLog, IRequestInfo, ISession } from '../interfaces';
-import { SessionAlreadyLoggedOut } from './SessionAlreadyLoggedOut';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { Session, SessionDocument } from './session.model';
 
@@ -24,8 +23,8 @@ export class SessionService {
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
   ) {}
 
-  async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<string> {
-    const accessData: IAccessLog = { ip: userData.ip || '' , location: userData.location } as IAccessLog;
+  async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<{ sessionId: string, accessId: string }> {
+    const accessData: IAccessLog = {  _id: new Types.ObjectId().toString(), ip: userData.ip || '' , location: userData.location } as IAccessLog;
     const sessionId = await this.getSessionHash(userData);
     const deviceInfo = userData.deviceInfo || ({} as IRequestInfo['userData']['deviceInfo']);
 
@@ -38,6 +37,7 @@ export class SessionService {
           token,
           deviceInfo,
           status: 'active',
+          currentAccessId: accessData._id,
         },
         $push: { access: accessData },
       },
@@ -47,10 +47,14 @@ export class SessionService {
     if (!session) {
       throw new Error('Session creation failed');
     }
-    const wasNew = session.createdAt.getTime() === session.updatedAt.getTime();
-    const id = session._id.toString();
-    console.info(`Session with id ${id} ${wasNew ? 'created' : 'updated'} for user ${userId}.`);
-    return id;
+    const isNew = session.createdAt.getTime() === session.updatedAt.getTime();
+    const id: string = session._id.toString();
+    const accessId: string = session.access[session.access.length - 1]._id.toString();
+    console.info(`Session with id ${id} and access id ${accessId} was ${isNew ? 'created' : 'updated'} for user ${userId}`);
+    return {
+      sessionId: id,
+      accessId,
+    };
   }
 
   async getSessionHash(
@@ -59,29 +63,30 @@ export class SessionService {
     return await bcrypt.hash(JSON.stringify(userData), salt);
   }
 
-  async removeSession(id: string): Promise<string> {
-    const session = await this.sessionModel.findById(id, {
-      access: { $slice: -1 },
-      status: 1,
-      userId: 1,
-    }).exec();
+  async removeSession(id: string, accessId: string): Promise<string> {
+    const session = await this.sessionModel.findOneAndUpdate(
+      {
+        _id: id,
+        access: {
+          $elemMatch: {
+            _id: accessId,
+            logoutDate: { $exists: false }
+          }
+        }
+      },
+      {
+        $set: {
+          'access.$.logoutDate': new Date(),
+          status: 'inactive',
+        },
+      },
+      { new: true, fields: { userId: 1 } }
+    ).exec();
 
     if (!session) {
-      throw new SessionNotFoundError(`Session with id ${id} not found`);
+      throw new SessionNotFoundError(`Access with id ${accessId} not found, or the session has already been logged out.`);
     }
 
-    const lastAccess = session.access[session.access.length - 1];
-    if (!lastAccess) {
-      throw new SessionNotFoundError(`Session with id ${id} not found - no access logs found`);
-    }
-
-    if (lastAccess.logoutDate) {
-      throw new SessionAlreadyLoggedOut(`Session with id ${id} is already logged out`);
-    }
-
-    session.access[session.access.length - 1].logoutDate = new Date();
-    session.status = 'inactive';
-    await session.save();
     return session.userId;
   }
 

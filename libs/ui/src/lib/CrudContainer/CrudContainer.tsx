@@ -12,7 +12,7 @@ interface CrudContainerProps<T> {
   loadingMessage?: string
 
   // Empty state
-  emptyMessage: string
+  emptyMessage?: string
   EmptyItem?: React.ReactNode
 
   // Data
@@ -59,7 +59,7 @@ export const CrudContainer = <T,>({
     );
   }
 
-  if (isEmptyData(data)) {
+  if (emptyMessage && isEmptyData(data)) {
     return (
       <Container>
         {Header}
