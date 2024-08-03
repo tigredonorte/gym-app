@@ -1,5 +1,5 @@
 import { EmailService } from '@gym-app/email';
-import { IRequestInfo, User, UserService, getUserAccessData, SessionService } from '@gym-app/user/api';
+import { IRequestInfo, User, UserService, getUserAccessData, SessionService, IUser } from '@gym-app/user/api';
 import { Injectable } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
@@ -51,11 +51,7 @@ export class AuthService {
 
     const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
 
-    const token = jwt.sign(
-      result,
-      JWT_SECRET,
-      { expiresIn: '15min' }
-    );
+    const token = this.getToken(result);
     const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
     await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
 
@@ -106,5 +102,33 @@ export class AuthService {
     }
 
     return {};
+  }
+
+  async refreshToken(userId: string) {
+
+    if (!userId) {
+      throw new UnauthorizedError();
+    }
+    const user = await this.userService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedError();
+    }
+
+    const token = this.getToken(user);
+    if (!token) {
+      throw new UnauthorizedError();
+    }
+
+    return {
+      token,
+    };
+  }
+
+  private getToken(user: IUser) {
+    return jwt.sign(
+      user,
+      JWT_SECRET,
+      { expiresIn: '15min' }
+    );
   }
 }
