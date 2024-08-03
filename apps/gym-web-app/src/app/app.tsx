@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { environment } from '../environments/environment';
 import './app.module.scss';
 import { AppRouter } from './app.router';
+import { AuthProvider } from '../../../../libs/user/web/src/lib/contexts/AuthContext';
 import { store } from './store';
 import { MUITheme } from './theme';
 
@@ -11,9 +12,11 @@ const App: React.FC = () => {
   return (
     <EnvProvider env={environment}>
       <Provider store={store}>
-        <MUITheme>
-          <AppRouter />
-        </MUITheme>
+        <AuthProvider>
+          <MUITheme>
+            <AppRouter />
+          </MUITheme>
+        </AuthProvider>
       </Provider>
     </EnvProvider>
   );

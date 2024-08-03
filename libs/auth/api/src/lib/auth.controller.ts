@@ -15,6 +15,12 @@ export class AuthController {
     return this.authService.login(data, req.userData);
   }
 
+  @Post('refreshToken')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Req() req: IRequestInfo): Promise<{ token: string }> {
+    return this.authService.refreshToken(req.user?.id || '');
+  }
+
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   async logout(@Body() data: LogoutDto, @Req() req: IRequestInfo) {

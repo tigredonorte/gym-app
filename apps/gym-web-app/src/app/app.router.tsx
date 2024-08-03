@@ -1,17 +1,12 @@
 import { AuthPath, AuthRouter } from '@gym-app/auth/web';
 import { Header } from '@gym-app/ui';
-import { ProfilePath, ProfileRouter, UserPath, UserRouter } from '@gym-app/user/web';
+import { ProfilePath, ProfileRouter, useAuth, UserPath, UserRouter } from '@gym-app/user/web';
 import { mdiCreditCardOutline } from '@mdi/js';
 import React from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';
 import { Billing } from './Billing/Billing';
 import { drawerMenuItemList, menuItems } from './menuItems';
-
-const isAuthenticated = () => {
-  const userData = localStorage.getItem('userData');
-  return !!userData;
-};
 
 const extraMenu = [
   {
@@ -23,9 +18,10 @@ const extraMenu = [
 ];
 
 export const AppRouter: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   useLocation();
 
-  if (!isAuthenticated()) {
+  if (!isAuthenticated) {
     return (
       <Routes>
         <Route path={`/${AuthPath}/*`} element={<AuthRouter />} />

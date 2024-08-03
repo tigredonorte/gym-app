@@ -3,6 +3,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { getUserState, UserRequestStatusses } from '../../reducer';
 import { logoutUser } from '../../reducer/UserActions';
+import { AuthContext } from '../../contexts/AuthContext';
 
 interface LogoutProps {
   logoutUser: (sessionId: string, accessId: string) => void;
@@ -10,6 +11,7 @@ interface LogoutProps {
 }
 
 const LogoutFn: React.FC<LogoutProps> = ({ logoutUser, logoutStatus }: LogoutProps) => {
+  const context = React.useContext(AuthContext);
 
   React.useEffect(() => {
     const userData = localStorage.getItem('userData');
@@ -30,11 +32,14 @@ const LogoutFn: React.FC<LogoutProps> = ({ logoutUser, logoutStatus }: LogoutPro
     }
 
     const time = logoutStatus.error ? 5000 : 0;
-    setTimeout(() => {
-      localStorage.removeItem('userData');
-      localStorage.removeItem('token');
-      window.location.href = '/';
+    const timer = setTimeout(() => {
+      timer && clearTimeout(timer);
+      context?.logout();
     }, time);
+
+    return () => {
+      timer && clearTimeout(timer);
+    };
   }, [logoutStatus]);
 
   return (

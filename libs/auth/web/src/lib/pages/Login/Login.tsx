@@ -1,5 +1,5 @@
-import { EnvContext, postRequest } from '@gym-app/shared/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
+import { AuthContext } from '@gym-app/user/web';
 import { mdiLogin } from '@mdi/js';
 import { Container, Grid } from '@mui/material';
 import React from 'react';
@@ -18,18 +18,21 @@ interface FormType extends FormContainerType {
 }
 
 export default class Login extends React.Component<object, LoginState> {
-  static contextType = EnvContext;
-  declare context: React.ContextType<typeof EnvContext>;
+  static contextType = AuthContext;
+  declare context: React.ContextType<typeof AuthContext>;
   state = {
     email: '',
     navigate: '',
   };
 
   handleLogin = async (formData: FormType) => {
+    const { login } = this.context || {};
+    if (!login) {
+      throw new Error('Login function is not available');
+    }
+
     try {
-      const { token, ...userData } = await postRequest<{ token: string, email: string, name: string }>('/auth/login', formData);
-      localStorage.setItem('userData', JSON.stringify(userData));
-      localStorage.setItem('token', token);
+      await login(formData);
       this.setState({ navigate: '/' });
     } catch (error) {
       throw new Form.Error(error instanceof Error ? error.message : 'Unkown login error', 'Login Error');
