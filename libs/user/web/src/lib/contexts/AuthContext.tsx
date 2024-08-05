@@ -3,17 +3,30 @@ import { IUser } from '@gym-app/user/web';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { getTokenTimeExpiration } from './isTokenExpired';
 
-export interface AuthContextType {
+interface AuthData {
+  token: string
+  accessId: string
+  sessionId: string
+}
+
+const initialState = {
+  isAuthenticated: false,
+  user: null,
+  sessionId: '',
+  accessId: '',
+};
+
+export interface AuthContextType extends Omit<AuthData, 'token'> {
   isAuthenticated: boolean;
   user: IUser | null;
-  logout: () => void;
+  logout: (callback?: (sessionId: string, accessId: string) => Promise<void>) => void;
   login: (data: { email: string, password: string }) => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const [authState, setAuthState] = useState<Pick<AuthContextType, 'isAuthenticated' | 'user'>>({ isAuthenticated: false, user: null });
+  const [authState, setAuthState] = useState<Omit<AuthContextType, 'logout' | 'login'>>(initialState);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const clearAuthTimeout = useCallback((timeoutId: NodeJS.Timeout | null) => {
@@ -23,10 +36,19 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     }
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async (callback?: (sessionId: string, accessId: string) => Promise<void>) => {
+    const sessionId = localStorage.getItem('sessionId');
+    const accessId = localStorage.getItem('accessId');
+    try {
+      await callback?.(sessionId as string, accessId as string);
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('userData');
-    setAuthState({ isAuthenticated: false, user: null });
+    localStorage.removeItem('sessionId');
+    localStorage.removeItem('accessId');
+    setAuthState(initialState);
     clearAuthTimeout(timeoutId);
   }, [clearAuthTimeout]);
 
@@ -54,13 +76,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
 
   const login = useCallback(async (data: { email: string, password: string }) => {
     try {
-      const { token, ...user } = await postRequest<{ token: string } & IUser>('/auth/login', data);
+      const { token, accessId, sessionId, ...user } = await postRequest<AuthData & IUser>('/auth/login', data);
       localStorage.setItem('userData', JSON.stringify(user));
+      localStorage.setItem('accessId', accessId);
+      localStorage.setItem('sessionId', sessionId);
       setNewToken(token);
       setAuthState({
         isAuthenticated: true,
+        accessId,
+        sessionId,
         user,
       });
+
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -72,6 +99,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     const timeToExpire = getTokenTimeExpiration(token);
     const isExpired = timeToExpire <= 0;
     const user = !isExpired ? JSON.parse(localStorage.getItem('userData') as string) : null;
+    const sessionId = localStorage.getItem('sessionId');
+    const accessId = localStorage.getItem('accessId');
 
     if (isExpired) {
       localStorage.removeItem('token');
@@ -81,6 +110,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     setAuthState({
       isAuthenticated: !isExpired,
       user,
+      sessionId: sessionId || '',
+      accessId: accessId || '',
     });
 
     if (timeToExpire > 0) {

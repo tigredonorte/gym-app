@@ -1,8 +1,25 @@
-import { User } from '@gym-app/user/api';
-import { Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, ValidationPipe } from '@nestjs/common';
-import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
+import { IRequestInfo, JwtAuthGuard, User } from '@gym-app/user/api';
+import {
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Post,
+  Req, UseGuards,
+  ValidationPipe
+} from '@nestjs/common';
+import {
+  CheckEmailDto,
+  ConfirmRecoverPasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  LogoutDto,
+  SignupDto,
+  changePasswordDto
+} from './auth.dto';
 import { AuthService } from './auth.service';
-import { IRequestInfo } from '@gym-app/user/api';
 
 @Controller('auth')
 export class AuthController {
@@ -17,8 +34,12 @@ export class AuthController {
 
   @Post('refreshToken')
   @HttpCode(HttpStatus.OK)
-  async refreshToken(@Req() req: IRequestInfo): Promise<{ token: string }> {
-    return this.authService.refreshToken(req.user?.id || '');
+  @UseGuards(JwtAuthGuard)
+  async refreshToken(
+    @Headers('authorization') token: string,
+      @Req() req: IRequestInfo
+  ): Promise<{ token: string }> {
+    return this.authService.refreshToken(req.user?.id || '', token, req.userData);
   }
 
   @Post('logout')

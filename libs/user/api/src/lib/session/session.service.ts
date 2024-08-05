@@ -57,6 +57,14 @@ export class SessionService {
     };
   }
 
+  async getSessionByToken(token: string): Promise<ISession & { _id: string } | null> {
+    return await this.sessionModel.findOne({ token }).select('-access').exec();
+  }
+
+  async updateSessionToken(id: string, token: string): Promise<void> {
+    await this.sessionModel.updateOne({ _id: id }, { $set: { token } }).exec();
+  }
+
   async getSessionHash(
     userData: IRequestInfo['userData']
   ): Promise<string> {

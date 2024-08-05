@@ -1,11 +1,13 @@
 import { EmailService } from '@gym-app/email';
-import { IRequestInfo, User, UserService, getUserAccessData, SessionService, IUser } from '@gym-app/user/api';
-import { Injectable } from '@nestjs/common';
+import { IRequestInfo, IUser, SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
+import { jwtDecode } from 'jwt-decode';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
 import { UnauthorizedError } from './errors/UnauthorizedError';
+import _ = require('lodash');
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';
 
@@ -104,31 +106,49 @@ export class AuthService {
     return {};
   }
 
-  async refreshToken(userId: string) {
+  async refreshToken(userId: string, oldToken: string, userData: IRequestInfo['userData']): Promise<{ token: string }> {
 
     if (!userId) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError('You must inform the user id');
     }
     const user = await this.userService.findById(userId);
     if (!user) {
-      throw new UnauthorizedError();
+      throw new UnauthorizedError('User not found');
+    }
+
+    const tokenData = jwtDecode<IUser>(oldToken);
+    if (tokenData?.id !== userId) {
+      throw new UnauthorizedError('Invalid token');
+    }
+
+    oldToken = oldToken.replace('Bearer ', '');
+    const session = await this.sessionService.getSessionByToken(oldToken);
+
+    if (!session) {
+      throw new UnauthorizedError('Session not found');
+    }
+
+    if (!_.isEqual(session.deviceInfo, userData.deviceInfo)) {
+      throw new UnauthorizedError('Invalid device');
     }
 
     const token = this.getToken(user);
     if (!token) {
-      throw new UnauthorizedError();
+      throw new InternalServerErrorException('Unable to generate token');
     }
+
+    await this.sessionService.updateSessionToken(session._id, token);
 
     return {
       token,
     };
   }
 
-  private getToken(user: IUser) {
+  private getToken(user: IUser): string {
     return jwt.sign(
       user,
       JWT_SECRET,
-      { expiresIn: '15min' }
+      { expiresIn: process.env['JWT_EXPIRATION'] || '15min' }
     );
   }
 }
