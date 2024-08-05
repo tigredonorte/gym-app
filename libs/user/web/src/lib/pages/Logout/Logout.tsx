@@ -4,9 +4,10 @@ import { connect } from 'react-redux';
 import { getUserState, UserRequestStatusses } from '../../reducer';
 import { logoutUser } from '../../reducer/UserActions';
 import { AuthContext } from '../../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 interface LogoutProps {
-  logoutUser: (sessionId: string, accessId: string) => void;
+  logoutUser: (sessionId: string, accessId: string) => Promise<void>;
   logoutStatus: UserRequestStatusses['logout'];
 }
 
@@ -14,16 +15,7 @@ const LogoutFn: React.FC<LogoutProps> = ({ logoutUser, logoutStatus }: LogoutPro
   const context = React.useContext(AuthContext);
 
   React.useEffect(() => {
-    const userData = localStorage.getItem('userData');
-    if (!userData) {
-      window.location.href = '/';
-      return;
-    }
-    const parsedUserData = JSON.parse(userData);
-
-    const sessionId = parsedUserData.sessionId;
-    const accessId = parsedUserData.accessId;
-    logoutUser(sessionId, accessId);
+    context?.logout(logoutUser);
   }, [logoutUser]);
 
   React.useEffect(() => {
@@ -41,6 +33,12 @@ const LogoutFn: React.FC<LogoutProps> = ({ logoutUser, logoutStatus }: LogoutPro
       timer && clearTimeout(timer);
     };
   }, [logoutStatus]);
+
+  if (!context?.isAuthenticated) {
+    return (
+      <Navigate to="/" />
+    );
+  }
 
   return (
     <CrudContainer

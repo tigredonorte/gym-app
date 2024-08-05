@@ -25,8 +25,6 @@ export const logoutUser = (sessionId: string, accessId: string) => async (dispat
     setActionType,
     request: async() => {
       await postRequest('/auth/logout', { sessionId, accessId });
-      localStorage.removeItem('userData');
-      localStorage.removeItem('token');
     }
   });
 

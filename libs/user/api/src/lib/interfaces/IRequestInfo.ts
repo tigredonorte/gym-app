@@ -3,7 +3,7 @@ import { IUser } from './IUser';
 export interface IDeviceInfo {
   browser: { name?: string; version?: string; major?: string; };
   os: { name?: string; version?: string; };
-  device: { model?: string; type?: string; vendor?: string; };
+  device: { model: string | null; type: string | null; vendor: string | null; };
 }
 
 export interface ILocation {

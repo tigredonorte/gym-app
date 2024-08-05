@@ -20,6 +20,9 @@ export class Session implements ISession {
   @Prop({ type: [AccessLogSchema], default: [] })
     access!: IAccessLog[];
 
+  @Prop({ required: true })
+    token!: string;
+
   createdAt!: Date;
   updatedAt!: Date;
 }

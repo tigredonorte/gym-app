@@ -39,7 +39,11 @@ function getUserData(req: IRequestInfo & Request): IRequestInfo['userData'] {
     deviceInfo: {
       browser: ua.browser,
       os: ua.os,
-      device: ua.device,
+      device: {
+        vendor: ua.device.vendor || null,
+        model: ua.device.model || null,
+        type: ua.device.type || null,
+      }
     },
     location: geo,
     ip: ip,
