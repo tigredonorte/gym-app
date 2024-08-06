@@ -2,16 +2,22 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event, EventDocument, EventPayload } from './events.model';
+import { NotificationGateway } from './notification.gateway';
 
 @Injectable()
 export class EventService {
   private dispatchedEvents: { [key: string]: boolean } = {};
-  constructor(@InjectModel(Event.name) private eventModel: Model<EventDocument>) {}
+  constructor(
+    @InjectModel(Event.name) private eventModel: Model<EventDocument>,
+    private readonly notificationGateway: NotificationGateway
+  ) {}
 
   async create(eventType: string, payload: EventPayload): Promise<Event> {
     const createdAt = new Date();
     const newEvent = new this.eventModel({ eventType, payload, createdAt });
-    return newEvent.save();
+    const data = await newEvent.save();
+    this.notificationGateway.emitToChannel(eventType, data);
+    return data;
   }
 
   async findAll(): Promise<Event[]> {
@@ -44,7 +50,7 @@ export class EventService {
   async markEventAsReadById(eventId: string, serviceName: string): Promise<Event> {
     const event = await this.eventModel.findByIdAndUpdate(
       eventId,
-      { $addToSet: { readBy: serviceName } }, // Ensures idempotency
+      { $addToSet: { readBy: serviceName } },
       { new: true }
     ).exec();
     if (!event) {

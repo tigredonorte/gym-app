@@ -1,4 +1,5 @@
 import { AuthModule } from '@gym-app/auth/api';
+import { EventModule } from '@gym-app/events';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -29,6 +30,7 @@ import { AppService } from './app.service';
       }),
       inject: [ConfigService],
     }),
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],
