@@ -1,4 +1,4 @@
-import { EnvProvider } from '@gym-app/shared/web';
+import { EnvProvider, WebSocketProvider } from '@gym-app/shared/web';
 import { AuthProvider } from '@gym-app/user/web';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -12,11 +12,13 @@ const App: React.FC = () => {
   return (
     <EnvProvider env={environment}>
       <Provider store={store}>
-        <AuthProvider>
-          <MUITheme>
-            <AppRouter />
-          </MUITheme>
-        </AuthProvider>
+        <WebSocketProvider>
+          <AuthProvider>
+            <MUITheme>
+              <AppRouter />
+            </MUITheme>
+          </AuthProvider>
+        </WebSocketProvider>
       </Provider>
     </EnvProvider>
   );

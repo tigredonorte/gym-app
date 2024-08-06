@@ -26,13 +26,8 @@ export default class Login extends React.Component<object, LoginState> {
   };
 
   handleLogin = async (formData: FormType) => {
-    const { login } = this.context || {};
-    if (!login) {
-      throw new Error('Login function is not available');
-    }
-
     try {
-      await login(formData);
+      await this.context?.login?.(formData);
       this.setState({ navigate: '/' });
     } catch (error) {
       throw new Form.Error(error instanceof Error ? error.message : 'Unkown login error', 'Login Error');

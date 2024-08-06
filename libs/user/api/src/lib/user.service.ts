@@ -47,12 +47,9 @@ export class UserService {
 
       const createdUser = new this.userModel(userData);
       await createdUser.save();
-      this.userEventService.emitUserCreated({
-        name: createdUser.name,
-        email: createdUser.email,
-        id: createdUser.id,
-      });
-      return this.getUserReturnData(createdUser) as UserReturnType;
+      const user = this.getUserReturnData(createdUser) as UserReturnType;
+      this.userEventService.emitUserCreated(user);
+      return user;
     } catch (error) {
       if (_.get(error, 'code') === 11000) {
         throw new ConflictException('Email already exists');
@@ -228,6 +225,7 @@ export class UserService {
     user.markModified('passwordHistory');
 
     await user.save();
+    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
     await this.emailService.sendRenderedEmail(sendPasswordChanged(user.email, {
       recoverLink: `${process.env['FRONTEND_URL']}/auth/forgot-password?email=${user.email}`,
       ...getUserAccessData(userData),
@@ -277,6 +275,7 @@ export class UserService {
     user.recoverCode = undefined;
     await user.save();
 
+    this.userEventService.emitPasswordChanged(user.id);
     return true;
   }
 
@@ -317,6 +316,8 @@ export class UserService {
     if (!result) {
       throw new NotFoundException('User not found');
     }
+
+    this.userEventService.emitUserEdited(result);
     return result as UserReturnType;
   }
 
@@ -337,6 +338,8 @@ export class UserService {
 
     user.emailHistory = this.addEmailToHistory(user.emailHistory, newEmail, oldEmail);
     await user.save();
+
+    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
     await this.emailService.sendRenderedEmail(sendChangeEmailCode(oldEmail, {
       ...getUserAccessData(userData),
       changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${user.emailHistory[user.emailHistory.length - 1].changeEmailCode}`,
@@ -383,6 +386,8 @@ export class UserService {
     user.confirmed = true;
 
     await user.save();
+
+    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
     return {
       title: 'Email changed',
       message: 'Email changed successfully. Please check your email to revert the change if you did not request this change.',
@@ -412,6 +417,7 @@ export class UserService {
 
     user.emailHistory = user.emailHistory?.filter((emailHistoryItem) => changeEmailCode !== emailHistoryItem.changeEmailCode);
     await user.save();
+    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
   }
 
   async revertChangeEmail(id: string, revertChangeEmailCode: string): Promise<void> {
@@ -438,6 +444,7 @@ export class UserService {
     user.emailHistory = user.emailHistory?.filter((emailHistoryItem) => emailHistoryItem.email !== user.email);
 
     await user.save();
+    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
   }
 
   private addEmailToHistory(emailHistory: UserDocument['emailHistory'], newEmail: string, oldEmail: string) {
