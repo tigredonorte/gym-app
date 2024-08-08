@@ -22,6 +22,7 @@ export interface IUser {
   name: string;
   confirmed: boolean;
   email: string;
+  blocked?: boolean;
   emailHistory?: IEmailHistoryItem[];
   passwordHistory?: IPasswordHistoryItem[];
 }

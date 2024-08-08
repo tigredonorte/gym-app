@@ -1,6 +1,11 @@
+import { JwtService } from '@nestjs/jwt';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
+interface AckType {
+  success: boolean
+  error?: string
+}
 @WebSocketGateway(5000, {
   cors: {
     origin: [process.env['FRONTEND_URL']],
@@ -12,7 +17,9 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   @WebSocketServer() server!: Server;
   private clients: { [key: string]: Socket } = {};
 
-  constructor() {
+  constructor(
+    private readonly jwtService: JwtService
+  ) {
     console.log('NotificationGateway created with CORS origin:', process.env['FRONTEND_URL']);
   }
 
@@ -30,28 +37,35 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   }
 
   @SubscribeMessage('subscribe')
-  handleSubscribe(client: Socket, payload: { channel: string }, callback: (response: { success: boolean; error?: string }) => void): void {
-    const { channel } = payload;
-    console.log(`Client ${client.id} subscribing to channel ${channel}`);
+  handleSubscribe(client: Socket, payload: { channel: string, token: string }): AckType {
+    const { channel, token } = payload;
     try {
+      if (!channel) {
+        throw new Error('Invalid channel');
+      }
+
+      this.jwtService.verify(token, { secret: process.env['JWT_SECRET'] });
+      // @TODO: Add authorization logic here
+
       client.join(channel);
-      callback?.({ success: true });
+      console.log(`Client ${client.id} successfully subscribed to channel ${channel}`);
+      return this.getAckResponse(undefined);
     } catch (error) {
       console.error(`Failed to subscribe client ${client.id} to channel ${channel}: ${error instanceof Error ? error.message : error}`);
-      this.acknowledge({ error: error instanceof Error ? error.message : `${error}` }, callback);    }
+      return this.getAckResponse(error);
+    }
   }
 
   @SubscribeMessage('unsubscribe')
-  handleUnsubscribe(client: Socket, payload: { channel: string }, callback: (response: { success: boolean; error?: string }) => void): void {
+  handleUnsubscribe(client: Socket, payload: { channel: string }): AckType {
     const { channel } = payload;
     console.log(`Client ${client.id} unsubscribing from channel ${channel}`);
     try {
       client.leave(channel);
-      this.acknowledge({ error: undefined }, callback);
-      callback({ success: true });
+      return this.getAckResponse(undefined);
     } catch (error) {
       console.error(`Failed to unsubscribe client ${client.id} from channel ${channel}: ${error instanceof Error ? error.message : error}`);
-      this.acknowledge({ error: error instanceof Error ? error.message : `${error}` }, callback);
+      return this.getAckResponse(error);
     }
   }
 
@@ -69,36 +83,31 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       }
 
       const channel = data.join('.');
-      this.server.to(channel).emit(topic, message, (ack: { error?: string }) => this.acknowledge(ack));
+      console.log(`Emitting message to channel ${channel} on topic ${topic}`);
+      this.server.to(channel).emit(channelAndTopic, message, (error: unknown) => this.getAckResponse(error));
     } catch (error) {
       console.error(`Failed to emit message to channel and topic ${channelAndTopic}: ${error instanceof Error ? error.message : error}`);
     }
   }
 
   @SubscribeMessage('broadcast')
-  handleBroadcast<MessageType>(client: Socket, payload: { channel: string, topic: string, message: MessageType }, callback: (response: { success: boolean; error?: string }) => void): void {
+  handleBroadcast<MessageType>(client: Socket, payload: { channel: string, topic: string, message: MessageType }): AckType {
     const { channel, topic, message } = payload;
     console.log(`Client ${client.id} broadcasting message to channel ${channel} on topic ${topic}`);
     try {
-      this.server.to(channel).emit(topic, message, (ack: { error?: string }) => this.acknowledge(ack, callback));
+      this.server.to(channel).emit(topic, message, (ack: { error?: string }) => this.getAckResponse(ack.error));
+      return this.getAckResponse(undefined);
     } catch (error) {
       console.error(`Failed to broadcast message to channel ${channel} on topic ${topic} from client ${client.id}: ${error instanceof Error ? error.message : error}`);
-      callback({ success: false, error: error instanceof Error ? error.message : `${error}` });
+      return this.getAckResponse(error);
     }
   }
 
-  acknowledge (ack: { error?: string }, callback?: (response: { success: boolean; error?: string }) => void): void {
-    try {
-      if (ack?.error) {
-        console.error(`Error from client acknowledgment: ${ack.error}`);
-      }
-      if (!callback) {
-        console.warn('No callback provided for client acknowledgment');
-        return;
-      }
-      callback({ success: !ack?.error , error: ack.error });
-    } catch (error) {
-      console.error(`Failed to acknowledge client: ${error instanceof Error ? error.message : error}`);
-    }
-  }
+  getAckResponse = (error: unknown): AckType => {
+    const err = error instanceof Error
+      ? error.message : (typeof error === 'string')
+        ? error
+        : 'unknown error';
+    return { success: !error, error: err };
+  };
 }

@@ -17,9 +17,14 @@
         "assets": [
           "apps/gym-api/src/assets",
           {
-            "input": "libs",
-            "glob": "**/src/assets/**/*",
-            "output": "assets"
+            "input": "libs/user/api/src/assets",
+            "glob": "**/*",
+            "output": "assets/user/api"
+          },
+          {
+            "input": "libs/auth/api/src/assets",
+            "glob": "**/*",
+            "output": "assets/auth/api"
           }
         ],
         "isolatedConfig": true,
