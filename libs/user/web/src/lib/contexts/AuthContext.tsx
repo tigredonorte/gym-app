@@ -28,7 +28,7 @@ export interface AuthContextType extends Omit<AuthData, 'token'> {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const wsContext = React.useContext(WebSocketContext);
+  const { webSocketClient, isConnected } = React.useContext(WebSocketContext);
   const [authState, setAuthState] = useState<Omit<AuthContextType, 'logout' | 'login'>>(initialState);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
@@ -82,21 +82,35 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     accessId: string,
     sessionId: string
   }) => {
-    const { userId } = data;
-    if (!wsContext?.subscribe || !userId) {
+    const { userId, accessId } = data;
+    if (!webSocketClient) {
       console.warn('WebSocket context not available or userId not provided');
       return;
     }
-    setAuthState((prevState) => ({
-      ...prevState,
-      online: true
-    }));
+
+    if (!userId || !isConnected) {
+      webSocketClient?.channelClear();
+      console.warn('WebSocket context not available or userId not provided');
+      return;
+    }
 
     console.log('Subscribing to user:', userId);
-    wsContext?.subscribe(`user.${userId}`, (message) => {
-      console.log('Received message:', message);
+    webSocketClient.channelSubscribe(`user.${userId}`);
+    webSocketClient.channelSubscribe(`session.${accessId}`);
+    webSocketClient.on(`user.${userId}.update`, (user: IUser) => {
+      if (user.blocked) {
+        return logout();
+      }
+      localStorage.setItem('userData', JSON.stringify(user));
     });
-  }, [wsContext]);
+    webSocketClient.on(`user.${userId}.delete`, () => {
+      logout();
+    });
+    webSocketClient.on(`session.${accessId}.logout`, (message) => {
+      console.log('Session logout:', message);
+      logout();
+    });
+  }, [webSocketClient, isConnected, logout]);
 
   const login = useCallback(async (data: { email: string, password: string }) => {
     try {

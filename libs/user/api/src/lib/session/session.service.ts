@@ -102,6 +102,7 @@ export class SessionService {
   }
 
   async isFirstTimeOnDevice(userDataOrSessionId: IRequestInfo['userData'] | string): Promise<boolean> {
+    console.info('Checking if user is first time on device', userDataOrSessionId);
     const sessionId = (typeof userDataOrSessionId === 'string') ? userDataOrSessionId : await this.getSessionHash(userDataOrSessionId);
     const session = await this.sessionModel.findOne({ sessionId }).select('_id').exec();
     return !session;
@@ -173,7 +174,7 @@ export class SessionService {
 
     this.sessionEvents.emitLogoutDevice({
       sessionId,
-      userId: session.userId,
+      userId: userData.id,
       accessId,
       requestUserId: userData.id,
     });

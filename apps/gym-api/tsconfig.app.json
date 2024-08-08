@@ -9,5 +9,5 @@
   },
   "composite": true,
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts"],
-  "include": ["src/**/*.ts", "../../libs/user/api/src/lib/user.model.ts", "../../libs/user/api/src/lib/user.module.ts", "../../libs/user/api/src/lib/user.service.ts"]
+  "include": ["src/**/*.ts"]
 }

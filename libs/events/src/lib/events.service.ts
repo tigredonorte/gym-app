@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { omit } from 'lodash';
 import { Model } from 'mongoose';
 import { Event, EventDocument, EventPayload } from './events.model';
 import { NotificationGateway } from './notification.gateway';
@@ -16,7 +17,7 @@ export class EventService {
     const createdAt = new Date();
     const newEvent = new this.eventModel({ eventType, payload, createdAt });
     const data = await newEvent.save();
-    this.notificationGateway.emitToChannel(eventType, data);
+    this.notificationGateway.emitToChannel(eventType, omit(data.toObject(), ['_id', '__v', 'eventType']));
     return data;
   }
 

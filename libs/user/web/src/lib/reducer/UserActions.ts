@@ -95,7 +95,7 @@ export const logoutDevice = (sessionId: string, accessId: string, id = getUserId
         sessionId,
         accessId,
       });
-      dispatch(UserActions.removeDevice(sessionId));
+      // dispatch(UserActions.removeDevice(sessionId));
     }
   });
 
