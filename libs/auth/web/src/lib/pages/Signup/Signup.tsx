@@ -39,7 +39,7 @@ export default class Signup extends Component<object, SignupState> {
       localStorage.setItem('userData', JSON.stringify(userData));
       this.setState({ navigate: '/' });
     } catch (error) {
-      console.error('Error during fetch operation', error);
+      console.error('Error during signup operation', error);
       this.setState({ errorMessage: 'Error during signup' });
     }
   };
@@ -58,7 +58,7 @@ export default class Signup extends Component<object, SignupState> {
         return 'Email already exists. Do you wan\'t to <a href=\'/auth\'>Login</a>?';
       }
     } catch (error) {
-      console.error('Error during fetch operation', error);
+      console.error('Error during checkEmailExists operation', error);
     }
 
     return null;
