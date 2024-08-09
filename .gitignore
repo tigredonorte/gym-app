@@ -57,3 +57,5 @@ cache/
 apps/gym-app-e2e/artifacts
 .env
 mongo-keyfile
+# Sentry Config File
+.env.sentry-build-plugin

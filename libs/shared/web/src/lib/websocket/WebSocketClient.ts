@@ -33,7 +33,6 @@ export class WebSocketClient {
 
     this.socket.onAny((event, args, ack) => {
       ack('Received event');
-      console.log(`Received event: ${event}`, args?.payload || args);
       this.channelListeners.get(event)?.forEach((listener) => {
         try {
           listener(args?.payload || args);
@@ -77,6 +76,9 @@ export class WebSocketClient {
     }
 
     const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Token not found in local storage');
+    }
     this.socket.emit('subscribe', { channel, token }, (response: { success: boolean; error?: string }) => {
       if (!response.success) {
         console.error(`Failed to subscribe to channel ${channel}: ${response.error}`);
@@ -92,7 +94,6 @@ export class WebSocketClient {
   }
 
   public channelUnsubscribe(channel: string): void {
-    console.log(`Unsubscribing from channel ${channel}`);
     this.socket.emit('unsubscribe', { channel }, (response: { success: boolean; error?: string }) => {
       if (!response.success) {
         console.error(`Failed to unsubscribe from channel ${channel}: ${response.error}`);
@@ -104,7 +105,6 @@ export class WebSocketClient {
   }
 
   public channelEmit<MessageType>(channelAndTopic: string, message: MessageType): void {
-    console.log(`Broadcasting message to channel ${channelAndTopic}`);
     const data = channelAndTopic.split('.');
     if (data.length < 2) {
       throw new Error(`Invalid channel and topic: ${channelAndTopic}`);
@@ -114,9 +114,7 @@ export class WebSocketClient {
     const channel = data.join('.');
 
     this.socket.emit('broadcast', { channel, topic, message }, (response: { success: boolean; error?: string }) => {
-      if (response.success) {
-        console.log(`Message broadcasted to channel ${channel} on topic ${topic}`);
-      } else {
+      if (!response.success) {
         console.error(`Failed to broadcast message to channel ${channel} on topic ${topic}: ${response.error}`);
       }
     });
