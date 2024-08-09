@@ -1,6 +1,8 @@
+import { CrudBox } from '@gym-app/ui';
+import { mdiLoading } from '@mdi/js';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { WebSocketClient } from './WebSocketClient';
 import { EnvContext } from '../EnvContext';
+import { WebSocketClient } from './WebSocketClient';
 
 interface WebSocketContextType {
   isConnected: boolean;
@@ -14,11 +16,10 @@ export const WebSocketContext = createContext<WebSocketContextType>({
 export const WebSocketProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [webSocketClient, setWebSocketClient] = useState<WebSocketClient | null>(null);
   const { websocketEndpoint } = useContext(EnvContext);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState<boolean>();
 
   useEffect(() => {
     if (websocketEndpoint) {
-      console.log(`Creating WebSocket client for server: ${websocketEndpoint}`);
       const client = new WebSocketClient(websocketEndpoint as string);
       client.connect();
       setWebSocketClient(client);
@@ -29,12 +30,12 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren> = ({ children 
   }, [websocketEndpoint]);
 
   useEffect(() => {
-    if (webSocketClient) {
-      webSocketClient.connectionStatusChange((status: boolean) => {
-        setIsConnected(status);
-      });
-    }
+    webSocketClient?.connectionStatusChange(setIsConnected);
   }, [webSocketClient]);
+
+  if (isConnected === undefined) {
+    return (<CrudBox text="Connecting to websocket" icon={mdiLoading} color='info' />);
+  }
 
   return (
     <WebSocketContext.Provider value={{
