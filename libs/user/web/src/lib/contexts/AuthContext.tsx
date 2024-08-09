@@ -1,6 +1,10 @@
 import { postRequest, WebSocketContext } from '@gym-app/shared/web';
+import { CrudBox } from '@gym-app/ui';
 import { IUser } from '@gym-app/user/web';
+import { mdiLoading } from '@mdi/js';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { logoutUser } from '../reducer/UserActions';
 import { getTokenTimeExpiration } from './isTokenExpired';
 
 interface AuthData {
@@ -10,7 +14,7 @@ interface AuthData {
 }
 
 const initialState = {
-  isAuthenticated: false,
+  isAuthenticated: undefined,
   user: null,
   sessionId: '',
   accessId: '',
@@ -19,7 +23,7 @@ const initialState = {
 
 export interface AuthContextType extends Omit<AuthData, 'token'> {
   online: boolean;
-  isAuthenticated: boolean;
+  isAuthenticated?: boolean;
   user: IUser | null;
   logout: (callback?: (sessionId: string, accessId: string) => Promise<void>) => void;
   login: (data: { email: string, password: string }) => void;
@@ -27,7 +31,11 @@ export interface AuthContextType extends Omit<AuthData, 'token'> {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
+interface AuthProviderProps {
+  children: React.ReactNode;
+  logoutUser: (sessionId: string, accessId: string) => Promise<void>;
+}
+const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ children, logoutUser }) => {
   const { webSocketClient, isConnected } = React.useContext(WebSocketContext);
   const [authState, setAuthState] = useState<Omit<AuthContextType, 'logout' | 'login'>>(initialState);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
@@ -39,11 +47,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     }
   }, []);
 
-  const logout = useCallback(async (callback?: (sessionId: string, accessId: string) => Promise<void>) => {
+  const logout = useCallback(async () => {
     const sessionId = localStorage.getItem('sessionId');
     const accessId = localStorage.getItem('accessId');
     try {
-      await callback?.(sessionId as string, accessId as string);
+      webSocketClient?.disconnect();
+      await logoutUser(sessionId as string, accessId as string);
     } catch (error) {
       console.error('Failed to logout:', error);
     }
@@ -51,9 +60,12 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     localStorage.removeItem('userData');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('accessId');
-    setAuthState(initialState);
+    setAuthState({
+      ...initialState,
+      isAuthenticated: false,
+    });
     clearAuthTimeout(timeoutId);
-  }, [clearAuthTimeout]);
+  }, [logoutUser, clearAuthTimeout, webSocketClient]);
 
 
   const setNewToken = useCallback((newToken: string) => {
@@ -94,36 +106,28 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
       return;
     }
 
-    console.log('Subscribing to user:', userId);
     webSocketClient.channelSubscribe(`user.${userId}`);
     webSocketClient.channelSubscribe(`session.${accessId}`);
     webSocketClient.on(`user.${userId}.update`, (user: IUser) => {
-      if (user.blocked) {
-        return logout();
-      }
       localStorage.setItem('userData', JSON.stringify(user));
+      user.blocked && logout();
     });
-    webSocketClient.on(`user.${userId}.delete`, () => {
-      logout();
-    });
-    webSocketClient.on(`session.${accessId}.logout`, (message) => {
-      console.log('Session logout:', message);
-      logout();
-    });
+    webSocketClient.on(`user.${userId}.delete`, () => logout());
+    webSocketClient.on(`session.${accessId}.logout`, () => logout());
   }, [webSocketClient, isConnected, logout]);
 
   const login = useCallback(async (data: { email: string, password: string }) => {
     try {
       const { token, accessId, sessionId, ...user } = await postRequest<AuthData & IUser>('/auth/login', data);
+      localStorage.setItem('userData', JSON.stringify(user));
+      localStorage.setItem('accessId', accessId);
+      localStorage.setItem('sessionId', sessionId);
+      setNewToken(token);
       listenUserChanges({
         userId: user.id,
         accessId,
         sessionId,
       });
-      localStorage.setItem('userData', JSON.stringify(user));
-      localStorage.setItem('accessId', accessId);
-      localStorage.setItem('sessionId', sessionId);
-      setNewToken(token);
       setAuthState((prevState) => ({
         ...prevState,
         isAuthenticated: true,
@@ -171,6 +175,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     }
   }, [refreshToken, listenUserChanges]);
 
+  if (authState.isAuthenticated === undefined) {
+    return (<CrudBox text="Authenticating..." icon={mdiLoading} color='info' />);
+  }
+
   return (
     <AuthContext.Provider value={{
       ...authState,
@@ -181,6 +189,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({ children }) =>
     </AuthContext.Provider>
   );
 };
+
+export const AuthProvider = connect(
+  () => ({}),
+  {
+    logoutUser,
+  }
+)(AuthProviderFn);
 
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
