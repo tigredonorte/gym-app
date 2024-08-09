@@ -25,7 +25,9 @@ export const logoutUser = (sessionId: string, accessId: string) => async (dispat
     dispatch,
     getState: () => getState()?.user,
     setActionType,
+    skipLoadingUpdate: true,
     request: async() => {
+      dispatch(UserActions.logout());
       await postRequest('/auth/logout', { sessionId, accessId });
     }
   });
