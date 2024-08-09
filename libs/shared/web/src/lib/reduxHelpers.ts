@@ -16,6 +16,7 @@ export interface StateWithStatus<ActionTypes extends string> {
 interface RequestDataType<ActionTypes extends string, State extends StateWithStatus<ActionTypes>> {
   actionName: ActionTypes,
   defaultErrorMessage: string,
+  skipLoadingUpdate?: boolean,
   dispatch: Dispatch,
   getState: () => State,
   setActionType: (payload: { status: ActionStatus, actionName: ActionTypes }) => UnknownAction,
@@ -29,6 +30,7 @@ export const requestData = async<ActionTypes extends string, State extends State
   getState,
   setActionType,
   request,
+  skipLoadingUpdate,
 }: RequestDataType<ActionTypes, State>) => {
   const state = getState();
   const { statuses } = state;
@@ -37,13 +39,13 @@ export const requestData = async<ActionTypes extends string, State extends State
     return;
   }
 
-  dispatch(setActionType({ status: { loading: true, error: null }, actionName }));
+  !skipLoadingUpdate && dispatch(setActionType({ status: { loading: true, error: null }, actionName }));
   try {
     await request(state);
     dispatch(setActionType({ status: { loading: false, error: null }, actionName }));
   } catch (error) {
     console.error(`Error ${defaultErrorMessage}\n\n`, error);
     const message = error instanceof Error ? error.message : `Error ${defaultErrorMessage}`;
-    dispatch(setActionType({ status: { loading: false, error: message }, actionName }));
+    !skipLoadingUpdate && dispatch(setActionType({ status: { loading: false, error: message }, actionName }));
   }
 };

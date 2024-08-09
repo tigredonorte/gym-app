@@ -1,22 +1,20 @@
 import { CrudContainer } from '@gym-app/ui';
 import React from 'react';
 import { connect } from 'react-redux';
-import { getUserState, UserRequestStatusses } from '../../reducer';
-import { logoutUser } from '../../reducer/UserActions';
-import { AuthContext } from '../../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import { getUserState, UserRequestStatusses } from '../../reducer';
 
 interface LogoutProps {
-  logoutUser: (sessionId: string, accessId: string) => Promise<void>;
   logoutStatus: UserRequestStatusses['logout'];
 }
 
-const LogoutFn: React.FC<LogoutProps> = ({ logoutUser, logoutStatus }: LogoutProps) => {
+const LogoutFn: React.FC<LogoutProps> = ({ logoutStatus }: LogoutProps) => {
   const context = React.useContext(AuthContext);
 
   React.useEffect(() => {
-    context?.logout(logoutUser);
-  }, [logoutUser]);
+    context?.logout();
+  }, []);
 
   React.useEffect(() => {
     if (!logoutStatus || logoutStatus.loading) {
@@ -56,7 +54,4 @@ export const Logout = connect(
   (state) => ({
     logoutStatus: getUserState(state as never).statuses?.logout,
   }),
-  {
-    logoutUser,
-  }
 )(LogoutFn);
