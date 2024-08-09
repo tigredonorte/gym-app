@@ -16,8 +16,9 @@ export const getEnvData = (): Env => {
 
 export const EnvProvider: React.FC<EnvProviderProps> = ({ children, env }) => {
   if (!env) {
-    env = {};
+    throw new Error('EnvProvider requires an env prop');
   }
+
   envData = env;
   return (
     <EnvContext.Provider value={env}>
