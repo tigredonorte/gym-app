@@ -30,6 +30,7 @@ export interface IUser {
   password?: string;
   recoverCode?: IRecoveredCode;
   confirmed: boolean;
+  blocked: boolean;
   emailHistory?: IUserEmailHistory[];
   passwordHistory?: IUserPasswordHistory[];
 }
