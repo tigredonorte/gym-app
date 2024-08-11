@@ -42,6 +42,7 @@ export class User implements Omit<IUser, 'id'> {
   @Prop({ type: RecoverCode, required: false, select: false }) recoverCode?: IRecoveredCode;
 
   @Prop({ required: false, default: false }) confirmed!: boolean;
+  @Prop({ required: false, default: false }) blocked!: boolean;
 
   @Type(() => UserEmailHistory)
   @Prop({ type: UserEmailHistory, required: false, select: false, default: [] }) emailHistory?: IUserEmailHistory[];
