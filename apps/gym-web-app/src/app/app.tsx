@@ -1,4 +1,4 @@
-import { EnvProvider, initSentry, WebSocketProvider } from '@gym-app/shared/web';
+import { EnvProvider, initializeI18n, initSentry, WebSocketProvider } from '@gym-app/shared/web';
 import { AuthProvider } from '@gym-app/user/web';
 import * as Sentry from '@sentry/react';
 import React from 'react';
@@ -9,10 +9,12 @@ import { AppRouter } from './app.router';
 import { store } from './store';
 import { MUITheme } from './theme';
 
+initializeI18n();
 initSentry({
   dsn: environment.sentryDsn,
   environment: environment.env
 });
+
 const App: React.FC = () => {
   return (
     <EnvProvider env={environment}>

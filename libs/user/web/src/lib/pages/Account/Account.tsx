@@ -2,6 +2,7 @@ import { EnvContext } from '@gym-app/shared/web';
 import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { getUser, getUserState, getUserStatus, IUser, UserRequestStatusses } from '../../reducer';
 import { cancelChangeEmail, changeEmail, ChangeEmailSettingFormType, loadUser, saveProfileInfo } from '../../reducer/UserActions';
@@ -12,6 +13,7 @@ import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
 import { NotificationSettings } from './NotificationSettings';
 
 interface AccountProps {
+  t: (key: string) => string;
   user?: IUser;
   loading: boolean;
   errorMessage: string;
@@ -65,9 +67,10 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
   }
 
   async onCancelEmailChange({ changeEmailCode }: { changeEmailCode: string }) {
+    const { t } = this.props;
     this.openDialog({
-      title: 'Are you sure?',
-      message: 'Do you really want to cancel the email change?',
+      title: t('account.cancelEmailChange.title'),
+      message: t('account.cancelEmailChange.message'),
       onConfirm: async () => {
         this.props.cancelChangeEmail(changeEmailCode);
       },
@@ -108,14 +111,14 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 
   render() {
     const { config, dialog } = this.state;
-    const { user, errorMessage, loading, statusses } = this.props;
+    const { user, errorMessage, loading, statusses, t } = this.props;
 
     return (
       <CrudContainer
         loading={loading}
-        loadingMessage="Loading user data"
+        loadingMessage={t('account.container.loading')}
         errorMessage={errorMessage}
-        emptyMessage="User not found"
+        emptyMessage={t('account.container.empty')}
         data={user}
       >
         <Stack spacing={2}>
@@ -166,4 +169,4 @@ export const Account = connect(
     changeEmail,
     cancelChangeEmail,
   }
-)(AccountClass);
+)(withTranslation('user')(AccountClass));

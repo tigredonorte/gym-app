@@ -7,23 +7,27 @@ import { Account } from './pages/Account/Account';
 import { Confirm } from './pages/Confirm/Confirm';
 import { Logout } from './pages/Logout/Logout';
 import { Security } from './pages/Security/Security';
+import { loadUserTranslations } from '../locales';
 
 interface ProfileRouterProps {
   children: React.ReactNode;
   extraMenu?: MenuOption[];
 }
 export const ProfilePath = 'profile';
-export const ProfileRouter: React.FC<ProfileRouterProps> = (props: ProfileRouterProps) => (
-  <UserGrid menu={<UserMenu extraMenu={props.extraMenu} />}>
-    <Routes>
-      <Route path="/" element={<Navigate to="/profile/account" />} />
-      <Route path='account' element={<Account />} />
-      <Route path='security' element={<Security />} />
-      {props.children}
-      <Route path="*" element={<Navigate to="account" />} />
-    </Routes>
-  </UserGrid>
-);
+export const ProfileRouter: React.FC<ProfileRouterProps> = (props: ProfileRouterProps) => {
+  loadUserTranslations();
+  return (
+    <UserGrid menu={<UserMenu extraMenu={props.extraMenu} />}>
+      <Routes>
+        <Route path="/" element={<Navigate to="/profile/account" />} />
+        <Route path='account' element={<Account />} />
+        <Route path='security' element={<Security />} />
+        {props.children}
+        <Route path="*" element={<Navigate to="account" />} />
+      </Routes>
+    </UserGrid>
+  );
+};
 
 export const UserPath = 'user';
 export const UserRouter: React.FC = () => (
