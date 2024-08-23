@@ -1,13 +1,14 @@
 import { CardHeader, ConfirmationDialog } from '@gym-app/ui';
 import { Button, Stack, Typography } from '@mui/material';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteAccountProps {
   onDelete(): void
 }
 
 export const DeleteAccount: React.FC<DeleteAccountProps> = ({ onDelete }: DeleteAccountProps) => {
-
+  const { t } = useTranslation('user');
   const [dialog, setDialog] = React.useState(false);
   const deleteAccount = React.useCallback(() => {
     onDelete();
@@ -37,8 +38,8 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({ onDelete }: Delete
 
       <ConfirmationDialog
         open={!!dialog}
-        title="Delete Account"
-        message="Are you sure you want to delete your account?"
+        title={t('deleteAccount.confirm.title')}
+        message={t('deleteAccount.confirm.message')}
         onConfirm={() => deleteAccount()}
         onCancel={() => setDialog(false)}
       />
