@@ -12,6 +12,8 @@ export interface SentryParams {
   environment: string;
 }
 
+const ignoredErrors = ['ERR_CONNECTION_REFUSED'];
+
 export const initSentry = ({ dsn, environment }: SentryParams): void => {
   if(Sentry.isInitialized() ) {
     return;
@@ -30,6 +32,12 @@ export const initSentry = ({ dsn, environment }: SentryParams): void => {
       }),
       Sentry.replayIntegration(),
     ],
+
+    beforeSend(event) {
+      const errorMessage = event?.exception?.values?.[0]?.value || '';
+      return (ignoredErrors.some((message) => errorMessage.includes(message))) ? null : event;
+    },
+
     tracesSampleRate: 1.0,
     tracePropagationTargets: [new RegExp(window.location.host)],
 
