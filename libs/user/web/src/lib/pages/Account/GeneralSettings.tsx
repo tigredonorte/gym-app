@@ -11,6 +11,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { IUser } from '../../reducer';
 import './Account.scss';
+import { useTranslation } from 'react-i18next';
 
 export interface GeneralSettingFormType extends FormContainerType {
   name: string;
@@ -24,14 +25,15 @@ interface GeneralSettingsProps {
 }
 
 export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSettingsProps) => {
+  const { t } = useTranslation('user');
   const { errorMessage, user, onSave, loading } = props;
   return (
     <Card>
-      <CardHeader title="General Settings" />
+      <CardHeader title={t('GeneralSettings.title')} />
       <Stack spacing={2}>
         <Stack spacing={2} alignItems="center" justifyContent="center">
           <Avatar
-            alt="User Img"
+            alt={t('GeneralSettings.userAvatar')}
             src={'https://picsum.photos/150/150'}
             sx={{
               width: 150,
@@ -42,10 +44,10 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
           />
           <Stack alignItems="center" justifyContent="center">
             <Typography variant="caption" display="block">
-              Image size Limit should be 125kb Max.
+              {t('GeneralSettings.imageLimit')}
             </Typography>
             <Button disableElevation size="medium" variant="contained" endIcon={<Icon path={mdiAccountBoxEditOutline}/>}>
-              Change Image
+              {t('GeneralSettings.changeImage')}
             </Button>
           </Stack>
         </Stack>
@@ -62,7 +64,7 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
                 fullWidth={false}
                 disabled={loading}
               >
-                Save
+                {t('GeneralSettings.save')}
               </Form.Button.Submit>
             </div>
           </Form.Container>

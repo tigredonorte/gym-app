@@ -2,14 +2,27 @@ import { IPagination } from '@gym-app/shared/web';
 import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
+import { withTranslation, WithTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserRequestStatusses } from '../../reducer';
 import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
-import { cancelChangePassword, changePassword, ChangePasswordFormType, loadUser, loadUserAccesses, loadUserSession, logoutDevice } from '../../reducer/UserActions';
+import {
+  cancelChangeEmail,
+  cancelChangePassword,
+  changeEmail,
+  ChangeEmailSettingFormType,
+  changePassword,
+  ChangePasswordFormType,
+  loadUser,
+  loadUserAccesses,
+  loadUserSession,
+  logoutDevice,
+} from '../../reducer/UserActions';
 import { ActiveDevicesSession } from './components/ActiveDevicesSession';
 import { ChangePasswordHistorySection } from './components/ChangePasswordHistorySection';
 import { ChangePassworSection } from './components/ChangePasswordSection';
 import { LoginHistorySection } from './components/LoginHistorySection';
+import { ChangeEmailSettings } from './components/ChangeEmailSettings';
 
 interface SecurityPropsActions {
   loadUser: () => void;
@@ -18,6 +31,8 @@ interface SecurityPropsActions {
   changePassword: (changePasswordData: ChangePasswordFormType) => void;
   cancelChangePassword: () => void;
   logoutDevice: (sessionId: string, accessId: string) => void;
+  changeEmail: (userData: ChangeEmailSettingFormType) => void;
+  cancelChangeEmail: (changeEmailCode: string) => void;
 }
 
 interface ISecurityProps {
@@ -28,14 +43,15 @@ interface ISecurityProps {
   statusses: UserRequestStatusses;
 }
 
-interface SecurityProps extends SecurityPropsActions, ISecurityProps {}
+interface SecurityProps extends SecurityPropsActions, ISecurityProps, WithTranslation {}
 
+interface IDialog {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
 interface SecurityState {
-  dialog?: {
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  };
+  dialog?: IDialog;
 }
 
 class SecurityClass extends React.Component<SecurityProps, SecurityState> {
@@ -55,6 +71,30 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
     !devices?.length && loadUserSession();
   }
 
+  openDialog(dialog: IDialog) {
+    this.setState({ dialog });
+  }
+
+  closeDialog() {
+    this.setState({ dialog: undefined });
+  }
+
+  async onChangeEmail(userData: ChangeEmailSettingFormType) {
+    this.props.changeEmail(userData);
+  }
+
+  async onCancelEmailChange({ changeEmailCode }: { changeEmailCode: string }) {
+    const { t } = this.props;
+    this.openDialog({
+      title: t('account.cancelEmailChange.title'),
+      message: t('account.cancelEmailChange.message'),
+      onConfirm: async () => {
+        await this.props.cancelChangeEmail(changeEmailCode);
+        this.closeDialog();
+      },
+    });
+  }
+
   async onChangePassword(changePasswordData: ChangePasswordFormType): Promise<void> {
     this.props.changePassword(changePasswordData);
   }
@@ -68,10 +108,6 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
     loadUserAccesses(page);
   }
 
-  closeDialog() {
-    this.setState({ dialog: undefined });
-  }
-
   logoutDevice(device: IDeviceInfo) {
     const { logoutDevice } = this.props;
     const onConfirm = async () => {
@@ -79,12 +115,10 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
       this.closeDialog();
     };
 
-    this.setState({
-      dialog: {
-        title: 'Logout device',
-        message: 'Are you sure you want to logout this device?',
-        onConfirm,
-      }
+    this.openDialog({
+      title: this.props.t('Security.logoutDevice'),
+      message: this.props.t('Security.confirmLogoutDevice'),
+      onConfirm,
     });
   }
 
@@ -94,12 +128,10 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
       this.closeDialog();
     };
 
-    this.setState({
-      dialog: {
-        title: 'Logout all devices',
-        message: 'Are you sure you want to logout all devices?',
-        onConfirm,
-      }
+    this.openDialog({
+      title: this.props.t('Security.logoutAllDevices'),
+      message: this.props.t('Security.confirmAllLogoutDevices'),
+      onConfirm,
     });
   }
 
@@ -111,12 +143,19 @@ class SecurityClass extends React.Component<SecurityProps, SecurityState> {
       <>
         <CrudContainer
           loading={statusses.loadUser?.loading || false}
-          loadingMessage="Loading user data"
+          loadingMessage={this.props.t('Security.loading')}
           errorMessage={statusses.loadUser?.error || ''}
-          emptyMessage="User not found"
+          emptyMessage={this.props.t('Security.notFound')}
           data={user}
         >
           <Stack spacing={2}>
+            <ChangeEmailSettings
+              errorMessage={statusses.changeEmail?.error || statusses.removeFromEmailHistory?.error || ''}
+              loading={statusses.changeEmail?.loading || statusses.removeFromEmailHistory?.loading || false}
+              user={user as IUser}
+              onSave={(data) => this.onChangeEmail(data)}
+              onCancel={(data) => this.onCancelEmailChange(data)}
+            />
             <ChangePassworSection
               loading={statusses?.changePassword?.loading || false}
               error={statusses?.changePassword?.error || ''}
@@ -166,5 +205,7 @@ export const Security = connect(
     changePassword,
     cancelChangePassword,
     logoutDevice,
+    changeEmail,
+    cancelChangeEmail,
   } as SecurityPropsActions
-)(SecurityClass);
+)(withTranslation('user')(SecurityClass));

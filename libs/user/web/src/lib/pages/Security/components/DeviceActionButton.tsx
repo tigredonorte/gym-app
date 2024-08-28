@@ -3,6 +3,7 @@ import Icon from '@mdi/react';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { IDeviceInfo } from '../../../reducer/session.types';
 
 interface DeviceActionButtonProps {
@@ -12,12 +13,13 @@ interface DeviceActionButtonProps {
 }
 
 export const DeviceActionButton: React.FC<DeviceActionButtonProps> = ({ isCurrentDevice, logoutDevice, device }) => {
+  const { t } = useTranslation('user');
 
   if (!isCurrentDevice) {
     return logoutDevice && (
       logoutDevice && (
         <IconButton
-          aria-label="close"
+          aria-label={t('DeviceActionButton.close')}
           size="small"
           sx={{ float: 'right' }}
           onClick={() => logoutDevice(device)}
@@ -29,9 +31,9 @@ export const DeviceActionButton: React.FC<DeviceActionButtonProps> = ({ isCurren
   }
 
   return (
-    <Tooltip title="This is your current device. You cannot log out from the current device." arrow>
+    <Tooltip title={t('DeviceActionButton.currentDevice')} arrow>
       <span>
-        <IconButton aria-label="close" size="small" sx={{ float: 'right' }} disabled>
+        <IconButton aria-label={t('DeviceActionButton.close')} size="small" sx={{ float: 'right' }} disabled>
           <Icon path={mdiClose} size={1} />
         </IconButton>
       </span>

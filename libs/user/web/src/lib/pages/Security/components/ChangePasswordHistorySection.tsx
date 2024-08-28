@@ -1,4 +1,3 @@
-
 import { CardHeader } from '@gym-app/ui';
 import { mdiClose } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -11,6 +10,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { IPasswordHistoryItem, IUser } from '../../../reducer';
 
 interface ChangePasswordHistorySectionProps {
@@ -20,6 +20,7 @@ interface ChangePasswordHistorySectionProps {
 
 export const ChangePasswordHistorySection: React.FC<ChangePasswordHistorySectionProps> = React.memo((data: ChangePasswordHistorySectionProps) => {
   const { user, cancelRequest } = data;
+  const { t } = useTranslation('user');
 
   if (!user?.passwordHistory) {
     return null;
@@ -29,23 +30,26 @@ export const ChangePasswordHistorySection: React.FC<ChangePasswordHistorySection
 
   return (
     <Card>
-      <CardHeader title="Password History" subtitle="Password change requests" />
+      <CardHeader
+        title={t('ChangePasswordHistorySection.title')}
+        subtitle={t('ChangePasswordHistorySection.requests')}
+      />
       <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Created At</TableCell>
-              <TableCell>Expiration</TableCell>
-              <TableCell>IP</TableCell>
+              <TableCell>{t('ChangePasswordHistorySection.createdAt')}</TableCell>
+              <TableCell>{t('ChangePasswordHistorySection.expiration')}</TableCell>
+              <TableCell>{t('ChangePasswordHistorySection.ip')}</TableCell>
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            { passwordHistory.map((row: IPasswordHistoryItem, i: number) => {
+            {passwordHistory.map((row: IPasswordHistoryItem, i: number) => {
               const expired = new Date(row.expiresAt) < new Date();
-              let status = expired ? 'Request expired' : 'Pending Confirmation';
+              let status = expired ? t('ChangePasswordHistorySection.expired') : t('ChangePasswordHistorySection.pending');
               if (row.confirmed) {
-                status = 'Password changed';
+                status = t('ChangePasswordHistorySection.changed');
               }
               return (
                 <TableRow hover key={i}>

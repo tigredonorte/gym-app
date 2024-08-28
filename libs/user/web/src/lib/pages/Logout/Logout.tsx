@@ -1,5 +1,6 @@
 import { CrudContainer } from '@gym-app/ui';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -11,6 +12,7 @@ interface LogoutProps {
 
 const LogoutFn: React.FC<LogoutProps> = ({ logoutStatus }: LogoutProps) => {
   const context = React.useContext(AuthContext);
+  const { t } = useTranslation('user');
 
   React.useEffect(() => {
     context?.logout();
@@ -41,7 +43,7 @@ const LogoutFn: React.FC<LogoutProps> = ({ logoutStatus }: LogoutProps) => {
   return (
     <CrudContainer
       loading={logoutStatus?.loading || false}
-      loadingMessage="Logging out..."
+      loadingMessage={t('Logging out...')}
       errorMessage={logoutStatus?.error || ''}
       data={{ notEmpty: [] }}
     >

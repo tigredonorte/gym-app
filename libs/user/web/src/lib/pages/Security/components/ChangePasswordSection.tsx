@@ -5,10 +5,10 @@ import { mdiLock } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IUser } from '../../../reducer';
 import { ChangePasswordFormType } from '../../../reducer/UserActions';
 import { PendingChangeChange } from './PendingChangeConfirmation';
-
 
 interface ChangePassworSectionProps {
   error: string;
@@ -19,6 +19,7 @@ interface ChangePassworSectionProps {
 }
 
 export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.memo(({ error, onSave, loading, user, onCancel }: ChangePassworSectionProps) => {
+  const { t } = useTranslation('user');
   const handleSave = useCallback((formData: ChangePasswordFormType & FormContainerType) => {
     onSave(formData);
   }, [onSave]);
@@ -27,8 +28,8 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
   if (hasPendingRequest) {
     return (
       <PendingChangeChange
-        title='Change password'
-        subtitle='You have a pending password change request. Access your email to confirm the change.'
+        title={t('ChangePasswordSection.title')}
+        subtitle={t('ChangePasswordSection.pendingRequest')}
         onCancel={onCancel}
       />
     );
@@ -37,20 +38,20 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
   return (
     <CrudContainer
       loading={loading}
-      loadingMessage="Loading user sessions"
-      errorMessage={error}
-      emptyMessage="No sessions found"
+      loadingMessage={t('ChangePasswordSection.loading')}
+      errorMessage={t(error)}
+      emptyMessage={t('ChangePasswordSection.noSessions')}
       data={user}
-      Header={<CardHeader title="Change Password" subtitle="Update Profile Security" />}
+      Header={<CardHeader title={t('ChangePasswordSection.changePassword')} subtitle={t('ChangePasswordSection.updateSecurity')} />}
       Container={Card}
     >
       <Form.Provider>
         <Form.Container className="general-settings-form" onSave={handleSave}>
-          <Form.Fields.ConfirmField confirmLabel="Confirm Password" confirmName="confirmPassword">
-            <PasswordField name="newPassword" label="New Password" />
+          <Form.Fields.ConfirmField confirmLabel={t('ChangePasswordSection.confirmPassword')} confirmName="confirmPassword">
+            <PasswordField name="newPassword" label={t('ChangePasswordSection.newPassword')} />
           </Form.Fields.ConfirmField>
-          <PasswordField name='oldPassword' label="Current Password"  />
-          <ErrorAlert message={error} />
+          <PasswordField name='oldPassword' label={t('ChangePasswordSection.currentPassword')}  />
+          <ErrorAlert message={t(error)} />
           <div className='button-container'>
             <Form.Button.Submit
               variant="contained"
@@ -59,7 +60,7 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
               fullWidth={false}
               disabled={loading}
             >
-              Change Password
+              {t('ChangePasswordSection.changePassword')}
             </Form.Button.Submit>
           </div>
         </Form.Container>
@@ -67,4 +68,3 @@ export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.m
     </CrudContainer>
   );
 });
-

@@ -1,4 +1,3 @@
-
 import { IPagination } from '@gym-app/shared/web';
 import { CardHeader, CrudContainer } from '@gym-app/ui';
 import { Pagination } from '@mui/material';
@@ -12,6 +11,7 @@ import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import { formatDistance } from 'date-fns';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActionStatus } from '../../../reducer';
 import { IAccessLog } from '../../../reducer/session.types';
 
@@ -38,37 +38,38 @@ export const LoginHistorySection: React.FC<LoginHistorySectionProps> = React.mem
   const { accesses, loadPage, status } = props;
   const currentPage = accesses?.currentPage || 1;
   const paginatedData = accesses?.items;
+  const { t } = useTranslation('user');
 
   return (
     <CrudContainer
       loading={status?.loading || false}
-      loadingMessage="Loading user sessions"
+      loadingMessage={t('LoginHistorySection.loading')}
       errorMessage={status?.error || ''}
-      emptyMessage="No sessions found"
+      emptyMessage={t('LoginHistorySection.noSessions')}
       data={accesses}
-      Header={<CardHeader title="Login history" subtitle="Your recent login activity"/>}
+      Header={<CardHeader title={t('LoginHistorySection.title')} subtitle={t('LoginHistorySection.recentActivity')}/>}
       Container={Card}
     >
       <TableContainer>
-        <Table size="small" aria-label="results table">
+        <Table size="small" aria-label={t('LoginHistorySection.resultsTable')}>
           <TableHead>
             <TableRow>
-              <TableCell>Login Date</TableCell>
-              <TableCell align="left">Ip Address</TableCell>
-              <TableCell align="left">Client</TableCell>
-              <TableCell align="left">Session duration</TableCell>
+              <TableCell>{t('LoginHistorySection.loginDate')}</TableCell>
+              <TableCell align="left">{t('LoginHistorySection.ipAddress')}</TableCell>
+              <TableCell align="left">{t('LoginHistorySection.client')}</TableCell>
+              <TableCell align="left">{t('LoginHistorySection.sessionDuration')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedData?.map((row, i) => (
               <TableRow hover key={i}>
                 <TableCell>
-                  <Typography variant="subtitle2">{row.client || 'Unknown Client'}</Typography>
+                  <Typography variant="subtitle2">{row.client || t('LoginHistorySection.unknownClient')}</Typography>
                   {new Date(row.createdAt).toLocaleString()}
                 </TableCell>
                 <TableCell align="left">{row.ip}</TableCell>
                 <TableCell align="left">
-                  {row.location ? `${row.location.city}, ${row.location.region}, ${row.location.country}` : 'Unknown Location'}
+                  {row.location ? `${row.location.city}, ${row.location.region}, ${row.location.country}` : t('LoginHistorySection.unknownLocation')}
                 </TableCell>
                 <TableCell align="left">
                   {formatDistance(new Date(row.createdAt), new Date(row.logoutDate ? row.logoutDate : new Date()))}

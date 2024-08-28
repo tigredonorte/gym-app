@@ -2,21 +2,29 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-const languages = ['en', 'pt-br'];
+export enum languages {
+  en = 'en',
+  ptBr = 'pt',
+}
+
+const supportedLngs = Object.values(languages);
 
 export const initializeI18n = () => i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    fallbackLng: 'en',
+    fallbackLng: supportedLngs[0],
     debug: true,
-    load: 'currentOnly',
     interpolation: {
       escapeValue: false,
     },
     react: {
       useSuspense: true,
     },
-    supportedLngs: languages,
+    detection: {
+      order: ['queryString', 'cookie'],
+      caches: ['cookie']
+    },
+    supportedLngs,
   });
 
