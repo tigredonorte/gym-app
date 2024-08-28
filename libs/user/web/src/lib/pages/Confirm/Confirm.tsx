@@ -2,8 +2,10 @@ import { getRequest } from '@gym-app/shared/web';
 import { ConfirmDialog } from '@gym-app/ui';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export const Confirm: React.FC = () => {
+  const { t } = useTranslation('user');
   const navigate = useNavigate();
   const [state, setState] = React.useState<{
     message: string;
@@ -26,13 +28,13 @@ export const Confirm: React.FC = () => {
     try {
       const { title, message } = await getRequest<{ message: string; title: string; }>(`${url}`);
       setState({
-        title,
-        message,
+        title: t(title),
+        message: t(message),
         status: 'success',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error encountered. Please try again.';
-      const title = error instanceof Error && 'title' in error && typeof error.title === 'string' ? error.title : 'Error';
+      const message = error instanceof Error ? error.message : t('Error encountered. Please try again.');
+      const title = error instanceof Error && 'title' in error && typeof error.title === 'string' ? t(error.title) : t('Error');
       setState({
         message,
         title,

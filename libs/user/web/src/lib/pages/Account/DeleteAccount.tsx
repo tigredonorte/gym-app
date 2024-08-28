@@ -4,7 +4,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface DeleteAccountProps {
-  onDelete(): void
+  onDelete(): void;
 }
 
 export const DeleteAccount: React.FC<DeleteAccountProps> = ({ onDelete }: DeleteAccountProps) => {
@@ -27,12 +27,12 @@ export const DeleteAccount: React.FC<DeleteAccountProps> = ({ onDelete }: Delete
           p: 3,
         }}
       >
-        <CardHeader title="Delete Account" />
+        <CardHeader title={t('DeleteAccount.title')} />
         <Typography mb={2}>
-          Once you delete your account, there is no going back. Please be certain.
+          {t('DeleteAccount.warning')}
         </Typography>
         <Button variant="outlined" color="error" onClick={() => setDialog(true)}>
-          Delete Account
+          {t('DeleteAccount.title')}
         </Button>
       </Stack>
 

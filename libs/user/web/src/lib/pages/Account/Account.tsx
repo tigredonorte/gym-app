@@ -1,13 +1,12 @@
 import { EnvContext } from '@gym-app/shared/web';
-import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
+import { CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { getUser, getUserState, getUserStatus, IUser, UserRequestStatusses } from '../../reducer';
-import { cancelChangeEmail, changeEmail, ChangeEmailSettingFormType, loadUser, saveProfileInfo } from '../../reducer/UserActions';
+import { loadUser, saveProfileInfo } from '../../reducer/UserActions';
 import './Account.scss';
-import { ChangeEmailSettings } from './ChangeEmailSettings';
 import { DeleteAccount } from './DeleteAccount';
 import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
 import { NotificationSettings } from './NotificationSettings';
@@ -20,17 +19,10 @@ interface AccountProps {
   statusses: UserRequestStatusses;
   loadUser: () => void;
   saveProfileInfo: (userData: Partial<IUser>) => void;
-  changeEmail: (userData: ChangeEmailSettingFormType) => void;
-  cancelChangeEmail: (changeEmailCode: string) => void;
 }
 
 interface AccountState {
   isFormValid: boolean;
-  dialog?: {
-    title: string;
-    message: string;
-    onConfirm: () => void;
-  };
   user?: IUser;
   config: {
     publicProfile: boolean;
@@ -46,7 +38,6 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 
     this.state = {
       isFormValid: true,
-      dialog: undefined,
       config: {
         publicProfile: true,
       }
@@ -60,21 +51,6 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 
   async onSaveProfileInfo(userData: GeneralSettingFormType) {
     this.props.saveProfileInfo(userData);
-  }
-
-  async onChangeEmail(userData: ChangeEmailSettingFormType) {
-    this.props.changeEmail(userData);
-  }
-
-  async onCancelEmailChange({ changeEmailCode }: { changeEmailCode: string }) {
-    const { t } = this.props;
-    this.openDialog({
-      title: t('account.cancelEmailChange.title'),
-      message: t('account.cancelEmailChange.message'),
-      onConfirm: async () => {
-        this.props.cancelChangeEmail(changeEmailCode);
-      },
-    });
   }
 
   onChangeSettings(option: string, value: boolean) {
@@ -92,25 +68,8 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
     }
   }
 
-  openDialog(dialog: AccountState['dialog']) {
-    this.setState({ dialog });
-  }
-
-  closeDialog() {
-    this.setState({ dialog: undefined });
-  }
-
-  async onConfirm() {
-    const { dialog } = this.state;
-    if (!dialog) {
-      return;
-    }
-    await dialog.onConfirm();
-    this.closeDialog();
-  }
-
   render() {
-    const { config, dialog } = this.state;
+    const { config } = this.state;
     const { user, errorMessage, loading, statusses, t } = this.props;
 
     return (
@@ -128,27 +87,12 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
             user={user as IUser}
             onSave={(data) => this.onSaveProfileInfo(data)}
           />
-
-          <ChangeEmailSettings
-            errorMessage={statusses.changeEmail?.error || statusses.removeFromEmailHistory?.error || ''}
-            loading={statusses.changeEmail?.loading || statusses.removeFromEmailHistory?.loading || false}
-            user={user as IUser}
-            onSave={(data) => this.onChangeEmail(data)}
-            onCancel={(data) => this.onCancelEmailChange(data)}
-          />
           <NotificationSettings
             onChange={(option: string, value: boolean) => this.onChangeSettings(option, value)}
             config={config}
           />
           <DeleteAccount
             onDelete={() => this.onDeleteAccount()}
-          />
-          <ConfirmationDialog
-            open={!!dialog}
-            title={dialog?.title || ''}
-            message={dialog?.message || ''}
-            onConfirm={() => this.onConfirm()}
-            onCancel={() => this.closeDialog()}
           />
         </Stack>
       </CrudContainer>
@@ -166,7 +110,5 @@ export const Account = connect(
   {
     loadUser,
     saveProfileInfo,
-    changeEmail,
-    cancelChangeEmail,
   }
 )(withTranslation('user')(AccountClass));

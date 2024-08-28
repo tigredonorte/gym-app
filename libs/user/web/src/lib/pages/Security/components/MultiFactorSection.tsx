@@ -8,11 +8,14 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 export const MultifactorSection: React.FC = React.memo(() => {
+  const { t } = useTranslation('user');
+
   return (
     <Card>
-      <CardHeader title="Multi Factor Authentication" />
+      <CardHeader title={t('MultiFactorSection.title')} />
       <Grid container spacing={5}>
         <Grid item xs={12} sm={6} md={6}>
           <Stack
@@ -37,14 +40,14 @@ export const MultifactorSection: React.FC = React.memo(() => {
                 display="inline-block"
                 mr={1}
               />
-							Off
+              {t('MultiFactorSection.off')}
             </Typography>
-            <Typography variant="subtitle1">Authenticator App</Typography>
+            <Typography variant="subtitle1">{t('MultiFactorSection.app')}</Typography>
             <Typography variant="body1" color="textSecondary">
-							Use an authenticator app to generate one-time security codes.
+              {t('MultiFactorSection.appDescription')}
             </Typography>
             <Button variant="outlined" sx={{ width: 'fit-content' }} endIcon={<Icon path={mdiArrowRight} size={1} />}>
-							Set Up
+              {t('MultiFactorSection.setUp')}
             </Button>
           </Stack>
         </Grid>
@@ -72,14 +75,14 @@ export const MultifactorSection: React.FC = React.memo(() => {
                 display="inline-block"
                 mr={1}
               />
-							Off
+              {t('MultiFactorSection.off')}
             </Typography>
-            <Typography variant="subtitle1">Text Message</Typography>
+            <Typography variant="subtitle1">{t('MultiFactorSection.sms')}</Typography>
             <Typography variant="body1" color="textSecondary" flexGrow={1}>
-							Use your mobile phone to receive security codes via SMS.
+              {t('MultiFactorSection.smsDescription')}
             </Typography>
             <Button variant="outlined" sx={{ width: 'fit-content' }} endIcon={<Icon path={mdiArrowRight} size={1} />}>
-							Set Up
+              {t('MultiFactorSection.setUp')}
             </Button>
           </Stack>
         </Grid>

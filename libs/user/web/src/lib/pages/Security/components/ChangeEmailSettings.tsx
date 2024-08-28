@@ -5,10 +5,10 @@ import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React from 'react';
-import { IUser } from '../../reducer';
-import { ChangeEmailSettingFormType } from '../../reducer/UserActions';
-import { PendingChangeChange } from '../Security/components/PendingChangeConfirmation';
-import './Account.scss';
+import { IUser } from '../../../reducer';
+import { ChangeEmailSettingFormType } from '../../../reducer/UserActions';
+import { PendingChangeChange } from './PendingChangeConfirmation';
+import { useTranslation } from 'react-i18next';
 
 interface IUserForm extends IUser, FormContainerType {}
 
@@ -22,6 +22,8 @@ interface ChangeEmailSettingsProps {
 
 export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: ChangeEmailSettingsProps) => {
   const { errorMessage, user, onSave, onCancel, loading } = props;
+  const { t } = useTranslation('user');
+
   const saveFn = React.useCallback(async ({ email }: IUserForm) => onSave({ newEmail: email, oldEmail: user.email }), [onSave, user]);
 
   const pendingEmail = (user.emailHistory || [])?.find(
@@ -31,10 +33,10 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
   if (pendingEmail) {
     return (
       <>
-        <ErrorAlert message={errorMessage} />
+        <ErrorAlert message={t(errorMessage)} />
         <PendingChangeChange
-          title='Change email'
-          subtitle='You have a pending email change request. Access your email to confirm the change..'
+          title={t('ChangeEmailSetting.title')}
+          subtitle={t('ChangeEmailSetting.pendingRequest')}
           onCancel={() => onCancel({ changeEmailCode: pendingEmail.changeEmailCode || '' })}
         />
       </>
@@ -44,17 +46,26 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
   return (
     <CrudContainer
       loading={loading}
-      loadingMessage="Loading user"
-      errorMessage={errorMessage}
-      emptyMessage="No user found"
+      loadingMessage={t('ChangeEmailSetting.loadingUser')}
+      errorMessage={t(errorMessage)}
+      emptyMessage={t('ChangeEmailSetting.noUserFound')}
       data={user}
-      Header={<CardHeader title="Change Email" subtitle='Only one email change request can be pending at a time'/>}
+      Header={
+        <CardHeader
+          title={t('ChangeEmailSetting.title')}
+          subtitle={t('ChangeEmailSetting.oneRequestLimit')}
+        />
+      }
       Container={Card}
     >
       <Form.Provider>
         <Form.Container className="general-settings-form" onSave={saveFn}>
-          <EmailField name='email' initialValue={user.email} validators={(email)=> email === user.email ? 'Unchanged email' : null }/>
-          <ErrorAlert message={errorMessage} />
+          <EmailField
+            name='email'
+            initialValue={user.email}
+            validators={(email) => email === user.email ? t('ChangeEmailSetting.unchangedEmail') : null}
+          />
+          <ErrorAlert message={t(errorMessage)} />
           <div className='button-container'>
             <Form.Button.Submit
               variant="contained"
@@ -62,7 +73,7 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
               endIcon={<Icon path={mdiContentSaveOutline} size={1}/>}
               fullWidth={false}
             >
-              Change Email
+              {t('ChangeEmailSetting.title')}
             </Form.Button.Submit>
           </div>
         </Form.Container>

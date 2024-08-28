@@ -1,4 +1,3 @@
-
 import { CardHeader, CrudContainer } from '@gym-app/ui';
 import { mdiCellphone, mdiDesktopTower, mdiTablet } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -9,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { differenceInDays, format, formatDistanceToNow, isBefore, subWeeks } from 'date-fns';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActionStatus } from '../../../reducer';
 import { IDeviceInfo } from '../../../reducer/session.types';
 import { DeviceActionButton } from './DeviceActionButton';
@@ -69,20 +69,21 @@ interface ActiveDevicesSessionProps {
 }
 export const ActiveDevicesSession: React.FC<ActiveDevicesSessionProps> = React.memo((props: ActiveDevicesSessionProps) => {
   const { devices, status, logoutDevice, logoutAll } = props;
+  const { t } = useTranslation('user');
 
   return (
     <CrudContainer
       loading={status?.loading || false}
-      loadingMessage="Loading user devices"
+      loadingMessage={t('ActiveDevicesSession.loading')}
       errorMessage={status?.error || ''}
-      emptyMessage="No devices found"
+      emptyMessage={t('ActiveDevicesSession.noDevices')}
       data={devices}
       Container={Card}
       Header={
-        <CardHeader title="Active Devices" subtitle='Your active devices'>
+        <CardHeader title={t('ActiveDevicesSession.title')} subtitle={t('ActiveDevicesSession.userDevices')}>
           { logoutAll && (
             <Button variant="text" color="error" onClick={() => logoutAll(devices?.filter(device => !device.isCurrentDevice) || [])}>
-              Logout all
+              {t('ActiveDevicesSession.logoutAll')}
             </Button>
           )}
         </CardHeader>
@@ -106,7 +107,7 @@ export const ActiveDevicesSession: React.FC<ActiveDevicesSessionProps> = React.m
                 display="inline-block"
                 mr={1}
               />
-              {active ? 'Current Active' : `Active ${last}`}
+              {active ? t('ActiveDevicesSession.currentActive') : t('ActiveDevicesSession.active', { last })}
             </Typography>
 
             <DeviceActionButton
