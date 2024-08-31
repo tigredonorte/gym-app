@@ -13,11 +13,16 @@ const request = async <RequestData, RequestResponse>({
   path,
 }: RequestInput<RequestData>): Promise<RequestResponse> => {
   try {
-    const body = formData ? JSON.stringify(formData) : undefined;
     const context = getEnvData();
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = {};
+
+    let body = undefined;
+    if (formData) {
+      body = formData instanceof FormData ? formData : JSON.stringify(formData);
+    }
+    if (!(formData instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
 
     const token = localStorage.getItem('token');
     if (token) {
@@ -61,16 +66,16 @@ const request = async <RequestData, RequestResponse>({
 };
 
 export const getRequest = <RequestResponse>(path: string) => request<undefined, RequestResponse>({
-  method: 'GET', path
+  method: 'GET', path,
 });
 export const postRequest = <RequestResponse>(path: string, formData: unknown) => request<typeof formData, RequestResponse>({
-  method: 'POST', formData, path
+  method: 'POST', formData, path,
 });
 
 export const putRequest = <RequestResponse, RequestData>(path: string, formData: RequestData) => request<RequestData, RequestResponse>({
-  method: 'PUT', formData, path
+  method: 'PUT', formData, path,
 });
 
 export const deleteRequest = <RequestResponse>(path: string) => request<undefined, RequestResponse>({
-  method: 'DELETE', path
+  method: 'DELETE', path,
 });
