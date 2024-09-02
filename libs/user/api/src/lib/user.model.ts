@@ -50,6 +50,8 @@ export class User implements Omit<IUser, 'id'> {
   @Type(() => UserPasswordHistory)
   @Prop({ type: UserPasswordHistory, required: false, select: false, default: [] }) passwordHistory?: IUserPasswordHistory[];
 
+  @Type(() => String)
+  @Prop({ required: false }) userAvatar?: string;
 }
 
 export type UserDocument = User & Document;

@@ -49,3 +49,15 @@ export const requestData = async<ActionTypes extends string, State extends State
     !skipLoadingUpdate && dispatch(setActionType({ status: { loading: false, error: message }, actionName }));
   }
 };
+
+export function getStatussesProperty<ActionTypes extends string, Statusses extends RequestStatusses<ActionTypes>>(statuses: Statusses, actions: ActionTypes[]) {
+  return <Key extends keyof ActionStatus>(property: Key): ActionStatus[Key] | null => {
+    for (const action of actions) {
+      const value = statuses[action]?.[property];
+      if (value !== undefined && value !== null) {
+        return value as ActionStatus[Key];
+      }
+    }
+    return null;
+  };
+}

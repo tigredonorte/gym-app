@@ -43,3 +43,11 @@ export class ChangePasswordDto implements IChangePassword {
   @MinLength(6)
     confirmPassword!: string;
 }
+
+export interface IUploadAvatar {
+  avatar: string;
+}
+export class UploadAvatarDto implements IUploadAvatar {
+  @IsString()
+    avatar!: string;
+}

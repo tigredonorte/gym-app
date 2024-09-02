@@ -17,6 +17,7 @@ export const en = {
   },
   GeneralSettings: {
     title: 'General Settings',
+    imageTitle: 'Profile Picture',
     imageLimit: 'Image size Limit should be 125kb Max.',
     changeImage: 'Change Image',
     userAvatar: 'User Avatar',

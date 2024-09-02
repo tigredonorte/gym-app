@@ -19,6 +19,7 @@ export const ptBr: UserLocaleType = {
   },
   GeneralSettings: {
     title: 'Configurações Gerais',
+    imageTitle: 'Foto de Perfil',
     imageLimit: 'O limite de tamanho da imagem deve ser no máximo 125kb.',
     changeImage: 'Alterar Imagem',
     userAvatar: 'Avatar do Usuário',
