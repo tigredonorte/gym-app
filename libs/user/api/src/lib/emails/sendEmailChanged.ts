@@ -5,7 +5,7 @@ interface IChangedEmail {
 }
 
 export const sendEmailChanged = getEmailTemplate<IChangedEmail>(
-  'user/api/src/assets/email-changed',
+  'user/api/email-changed',
   'Email changed successfully',
   {
     title: 'Email changed successfully',

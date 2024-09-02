@@ -6,7 +6,7 @@ interface ISendPasswordChanged {
 }
 
 export const sendPasswordChanged = getEmailTemplate<ISendPasswordChanged & IUserDataInfo>(
-  'user/api/src/assets/change-password-success',
+  'user/api/change-password-success',
   'Password changed successfully',
   {
     title: 'Password changed',
