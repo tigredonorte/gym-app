@@ -7,7 +7,7 @@ interface ISendChangeEmailCode {
 }
 
 export const sendChangeEmailCode = getEmailTemplate<ISendChangeEmailCode & IUserDataInfo>(
-  'user/api/src/assets/change-email-attempt',
+  'user/api/change-email-attempt',
   'Attempt to change your email',
   {
     title: 'Change your email',

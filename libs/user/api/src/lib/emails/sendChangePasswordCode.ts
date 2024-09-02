@@ -6,7 +6,7 @@ interface ISendChangePasswordCode {
 }
 
 export const sendChangePasswordCode = getEmailTemplate<ISendChangePasswordCode & IUserDataInfo>(
-  'user/api/src/assets/change-password-attempt',
+  'user/api/change-password-attempt',
   'Attempt to change your password',
   {
     title: 'Change your password',

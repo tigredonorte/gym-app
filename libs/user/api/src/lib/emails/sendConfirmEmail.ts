@@ -7,7 +7,7 @@ interface ISendConfirmEmail {
 }
 
 export const sendConfirmEmail = getEmailTemplate<ISendConfirmEmail & IUserDataInfo>(
-  'user/api/src/assets/confirm-email',
+  'user/api/confirm-email',
   'Confirm your email',
   {
     title: 'Email Confirmation',
