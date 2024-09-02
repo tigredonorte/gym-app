@@ -1,10 +1,10 @@
-import { EnvContext } from '@gym-app/shared/web';
+import { ActionStatus, EnvContext } from '@gym-app/shared/web';
 import { CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { getUser, getUserState, getUserStatus, IUser, UserRequestStatusses } from '../../reducer';
+import { getUser, getUserStatus, IUser, UserActionTypes } from '../../reducer';
 import { loadUser, saveProfileInfo } from '../../reducer/UserActions';
 import './Account.scss';
 import { DeleteAccount } from './DeleteAccount';
@@ -16,7 +16,7 @@ interface AccountProps {
   user?: IUser;
   loading: boolean;
   errorMessage: string;
-  statusses: UserRequestStatusses;
+  getUserStatusProperty: <Key extends keyof ActionStatus>(property: Key) => ActionStatus[Key] | null;
   loadUser: () => void;
   saveProfileInfo: (userData: Partial<IUser>) => void;
 }
@@ -70,7 +70,7 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 
   render() {
     const { config } = this.state;
-    const { user, errorMessage, loading, statusses, t } = this.props;
+    const { user, errorMessage, loading, getUserStatusProperty, t } = this.props;
 
     return (
       <CrudContainer
@@ -82,8 +82,8 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
       >
         <Stack spacing={2}>
           <GeneralSettings
-            errorMessage={statusses.loadUser?.error || ''}
-            loading={statusses.loadUser?.loading || false}
+            errorMessage={getUserStatusProperty('error') || ''}
+            loading={getUserStatusProperty('loading') || false}
             user={user as IUser}
             onSave={(data) => this.onSaveProfileInfo(data)}
           />
@@ -103,9 +103,8 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 export const Account = connect(
   (state) => ({
     user: getUser(state as never),
-    loading: getUserStatus(state as never, 'loadUser')?.loading || false,
-    errorMessage: getUserStatus(state as never, 'loadUser')?.error || '',
-    statusses: getUserState(state as never).statuses,
+    loading: getUserStatus(state as never, UserActionTypes.LoadUser)?.loading || false,
+    errorMessage: getUserStatus(state as never, UserActionTypes.LoadUser)?.error || '',
   }),
   {
     loadUser,

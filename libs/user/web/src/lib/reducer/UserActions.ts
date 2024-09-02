@@ -2,7 +2,7 @@ import { deleteRequest, getRequest, IPaginationRequest, postRequest, requestData
 import { Dispatch } from '@reduxjs/toolkit';
 import { IAccessLog, IFetchedSession } from './session.types';
 import { UserActions } from './UserReducer';
-import { IUser, UserState } from './UserReducer.types';
+import { IUser, UserActionTypes, UserState } from './UserReducer.types';
 
 export const { setActionType } = UserActions;
 
@@ -20,7 +20,7 @@ type getUserStateType = () => { user: UserState };
 
 export const logoutUser = (sessionId: string, accessId: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'logout',
+    actionName: UserActionTypes.Logout,
     defaultErrorMessage: 'logging out user',
     dispatch,
     getState: () => getState()?.user,
@@ -34,7 +34,7 @@ export const logoutUser = (sessionId: string, accessId: string) => async (dispat
 
 export const loadUser = (id = undefined) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'loadUser',
+    actionName: UserActionTypes.LoadUser,
     defaultErrorMessage: 'loading user data',
     dispatch,
     getState: () => getState()?.user,
@@ -48,7 +48,7 @@ export const loadUser = (id = undefined) => async (dispatch: Dispatch, getState:
 
 export const loadUserSession = (id = getUserId()) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'loadUserSession',
+    actionName: UserActionTypes.LoadUserSession,
     defaultErrorMessage: 'loading user session',
     dispatch,
     getState: () => getState()?.user,
@@ -61,7 +61,7 @@ export const loadUserSession = (id = getUserId()) => async (dispatch: Dispatch, 
 
 export const loadUserAccesses = (page: number, id = getUserId()) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'loadUserAccesses',
+    actionName: UserActionTypes.LoadUserAccesses,
     defaultErrorMessage: 'loading user accesses',
     dispatch,
     getState: () => getState()?.user,
@@ -87,7 +87,7 @@ export const loadUserAccesses = (page: number, id = getUserId()) => async (dispa
 
 export const logoutDevice = (sessionId: string, accessId: string, id = getUserId()) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'logoutDevice',
+    actionName: UserActionTypes.LogoutDevice,
     defaultErrorMessage: 'logging out device',
     dispatch,
     getState: () => getState()?.user,
@@ -97,13 +97,13 @@ export const logoutDevice = (sessionId: string, accessId: string, id = getUserId
         sessionId,
         accessId,
       });
-      // dispatch(UserActions.removeDevice(sessionId));
+      dispatch(UserActions.removeDevice(sessionId));
     }
   });
 
 export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'saveProfileInfo',
+    actionName: UserActionTypes.SaveProfileInfo,
     defaultErrorMessage: 'saving profile info',
     dispatch,
     getState: () => getState()?.user,
@@ -121,7 +121,7 @@ export interface ChangeEmailSettingFormType {
 }
 export const changeEmail = (userData: ChangeEmailSettingFormType) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'changeEmail',
+    actionName: UserActionTypes.ChangeEmail,
     defaultErrorMessage: 'changing email',
     dispatch,
     getState: () => getState()?.user,
@@ -135,7 +135,7 @@ export const changeEmail = (userData: ChangeEmailSettingFormType) => async (disp
 
 export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'removeFromEmailHistory',
+    actionName: UserActionTypes.RemoveFromEmailHistory,
     defaultErrorMessage: 'removing email from history',
     dispatch,
     getState: () => getState()?.user,
@@ -154,7 +154,7 @@ export interface ChangePasswordFormType  {
 }
 export const changePassword = (changePasswordData: ChangePasswordFormType) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'changePassword',
+    actionName: UserActionTypes.ChangePassword,
     defaultErrorMessage: 'changing password',
     dispatch,
     getState: () => getState()?.user,
@@ -168,7 +168,7 @@ export const changePassword = (changePasswordData: ChangePasswordFormType) => as
 
 export const cancelChangePassword = () => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
-    actionName: 'cancelChangePassword',
+    actionName:  UserActionTypes.CancelChangePassword,
     defaultErrorMessage: 'cancel change password',
     dispatch,
     getState: () => getState()?.user,
