@@ -1,4 +1,4 @@
-export * from './lib/CardHeader';
+export * from './lib/Cards';
 export * from './lib/CrudContainer';
 export * from './lib/PageHeader';
 export * from './lib/Settings';

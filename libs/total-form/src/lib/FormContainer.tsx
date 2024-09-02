@@ -7,7 +7,7 @@ import FormErrorSnackbar from './FormErrorSnackbar';
 interface FormContainerProps<FormProps> extends React.HTMLProps<HTMLFormElement> {
   containerClassName?: string;
   boxProps?: BoxProps;
-  children: React.ReactNode[];
+  children: React.ReactNode[] | React.ReactNode;
   onSave: (state: FormProps) => void;
   onValidityChange?: (isFormValid: boolean) => void;
 }
