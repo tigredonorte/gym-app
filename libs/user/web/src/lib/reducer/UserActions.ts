@@ -179,3 +179,21 @@ export const cancelChangePassword = () => async (dispatch: Dispatch, getState: g
       dispatch(UserActions.removePasswordChangeRequest());
     },
   });
+
+export const uploadUserImage = (file: File) => async (dispatch: Dispatch, getState: getUserStateType) =>
+  requestData({
+    actionName: UserActionTypes.UploadUserImage,
+    defaultErrorMessage: 'uploading user image',
+    dispatch,
+    getState: () => getState()?.user,
+    setActionType,
+    request: async() => {
+      const id = getUserId();
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await postRequest<{ fileUrl: string }>(`user/${id}/upload-avatar`, formData);
+
+      dispatch(UserActions.updateUser({ avatar: response.fileUrl }));
+    }
+  });

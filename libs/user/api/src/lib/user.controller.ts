@@ -1,4 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
+import { diskStorage } from 'multer';
 import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
 import { IAccessLog, IRequestInfo, IRequestInfoWithUser, ISession, IUser, UserReturnType } from './interfaces';
@@ -6,6 +9,8 @@ import { PaginationResult, SessionService } from './session';
 import { ChangePasswordDto, LogoutDeviceDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
+import path = require('path');
+import fs = require('fs');
 
 @Controller('user')
 @UseGuards(AuthorGuard)
@@ -68,6 +73,45 @@ export class UserController {
       @Req() req: IRequestInfo
   ): Promise<IUser['emailHistory']> {
     return await this.userService.updateEmail(id, data, req.userData);
+  }
+
+  @Post(':id/upload-avatar')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (req: Request, file: Express.Multer.File, callback: (error: Error | null, destination: string) => void) => {
+          const userId = req.params['id'];
+          const userDir = path.join(__dirname, 'uploads', 'avatars', userId);
+
+          fs.mkdir(userDir, { recursive: true }, (err) => {
+            callback(err, userDir);
+          });
+        },
+        filename: (req: Express.Request, file: Express.Multer.File, callback: (error: Error | null, filename: string) => void) => {
+          const extension = file.mimetype.split('/')[1];
+          callback(null, `avatar.${extension}`);
+        },
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter: (req, file, callback) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+          return callback(new Error('Only image files are allowed!'), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  async uploadAvatar(
+    @Param('id') id: string,
+      @UploadedFile() file: Express.Multer.File,
+  ): Promise<UserReturnType> {
+    if (!file) {
+      throw new Error('File is missing');
+    }
+
+    const avatarUrl = `uploads/avatars/${id}/${file.filename}`;
+    return await this.userService.updateAvatar(id, avatarUrl);
   }
 
   @Get('change-email/:id/:code')

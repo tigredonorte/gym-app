@@ -1,15 +1,17 @@
-import { ActionStatus, EnvContext } from '@gym-app/shared/web';
+import { ActionStatus, EnvContext, getStatussesProperty } from '@gym-app/shared/web';
 import { CrudContainer } from '@gym-app/ui';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { getUser, getUserStatus, IUser, UserActionTypes } from '../../reducer';
-import { loadUser, saveProfileInfo } from '../../reducer/UserActions';
+import { getUser, getUserState, getUserStatus, IUser, UserActionTypes } from '../../reducer';
+import { loadUser, saveProfileInfo, uploadUserImage } from '../../reducer/UserActions';
 import './Account.scss';
 import { DeleteAccount } from './DeleteAccount';
 import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
 import { NotificationSettings } from './NotificationSettings';
+
+const subjectStatusses = [UserActionTypes.LoadUser, UserActionTypes.UploadUserImage];
 
 interface AccountProps {
   t: (key: string) => string;
@@ -18,6 +20,7 @@ interface AccountProps {
   errorMessage: string;
   getUserStatusProperty: <Key extends keyof ActionStatus>(property: Key) => ActionStatus[Key] | null;
   loadUser: () => void;
+  uploadUserImage: (file: File) => void;
   saveProfileInfo: (userData: Partial<IUser>) => void;
 }
 
@@ -57,6 +60,12 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
     console.log('Change settings', { option, value });
   }
 
+  handleChangeImage(file: File) {
+    const { uploadUserImage } = this.props;
+
+    uploadUserImage(file);
+  }
+
   onDeleteAccount() {
     console.log('Delete account');
   }
@@ -86,6 +95,7 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
             loading={getUserStatusProperty('loading') || false}
             user={user as IUser}
             onSave={(data) => this.onSaveProfileInfo(data)}
+            handleChangeImage={this.handleChangeImage.bind(this)}
           />
           <NotificationSettings
             onChange={(option: string, value: boolean) => this.onChangeSettings(option, value)}
@@ -105,9 +115,11 @@ export const Account = connect(
     user: getUser(state as never),
     loading: getUserStatus(state as never, UserActionTypes.LoadUser)?.loading || false,
     errorMessage: getUserStatus(state as never, UserActionTypes.LoadUser)?.error || '',
+    getUserStatusProperty: getStatussesProperty(getUserState(state as never).statuses, subjectStatusses),
   }),
   {
     loadUser,
     saveProfileInfo,
+    uploadUserImage,
   }
 )(withTranslation('user')(AccountClass));

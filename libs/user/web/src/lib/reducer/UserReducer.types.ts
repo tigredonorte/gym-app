@@ -26,6 +26,7 @@ export interface IUser {
   name: string;
   confirmed: boolean;
   email: string;
+  avatar?: string;
   blocked?: boolean;
   emailHistory?: IEmailHistoryItem[];
   passwordHistory?: IPasswordHistoryItem[];
@@ -44,6 +45,7 @@ export enum UserActionTypes {
   LoadUserSession = 'loadUserSession',
   LoadUserAccesses = 'loadUserAccesses',
   LogoutDevice = 'logoutDevice',
+  UploadUserImage = 'uploadUserImage'
 }
 
 export type UserRequestStatusses = RequestStatusses<UserActionTypes>;

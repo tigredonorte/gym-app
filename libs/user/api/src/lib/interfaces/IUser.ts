@@ -27,6 +27,7 @@ export interface IUser {
   id: string;
   name: string;
   email: string;
+  userAvatar?: string;
   password?: string;
   recoverCode?: IRecoveredCode;
   confirmed: boolean;

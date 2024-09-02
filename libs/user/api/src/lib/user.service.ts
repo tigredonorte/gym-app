@@ -16,13 +16,12 @@ import { IChangePassword, IUpdateEmail } from './user.dto';
 import { User, UserDocument } from './user.model';
 import _ = require('lodash');
 
-
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private userEventService: UserEventsService,
-    private emailService: EmailService
+    private emailService: EmailService,
   ) {}
 
   private async hashPassword(password: string): Promise<string> {
@@ -56,6 +55,18 @@ export class UserService {
       }
       throw error;
     }
+  }
+
+  async updateAvatar(userId: string, avatarUrl: string): Promise<UserReturnType> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.userAvatar = avatarUrl;
+    await user.save();
+
+    return this.getUserReturnData(user) as UserReturnType;
   }
 
   async emailExists(email: string): Promise<boolean> {
