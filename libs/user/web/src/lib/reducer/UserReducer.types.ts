@@ -1,4 +1,8 @@
-import { IPagination, RequestStatusses, StateWithStatus } from '@gym-app/shared/web';
+import {
+  IPagination,
+  RequestStatusses,
+  StateWithStatus,
+} from '@gym-app/shared/web';
 import { IAccessLog, IDeviceInfo, ISession } from './session.types';
 
 export interface IPasswordHistoryItem {
@@ -28,14 +32,19 @@ export interface IUser {
 }
 
 export const userFeatureKey = 'user';
-export interface ActionStatus {
-  loading: boolean;
-  error: string | null;
+export enum UserActionTypes {
+  Login = 'login',
+  Logout = 'logout',
+  LoadUser = 'loadUser',
+  RemoveFromEmailHistory = 'removeFromEmailHistory',
+  SaveProfileInfo = 'saveProfileInfo',
+  ChangeEmail = 'changeEmail',
+  ChangePassword = 'changePassword',
+  CancelChangePassword = 'cancelChangePassword',
+  LoadUserSession = 'loadUserSession',
+  LoadUserAccesses = 'loadUserAccesses',
+  LogoutDevice = 'logoutDevice',
 }
-export type UserActionTypes = 'login' | 'logout' | 'loadUser' |
-'removeFromEmailHistory' | 'saveProfileInfo' | 'changeEmail' |
-'changePassword' | 'cancelChangePassword' | 'loadUserSession' |
-'loadUserAccesses' | 'logoutDevice';
 
 export type UserRequestStatusses = RequestStatusses<UserActionTypes>;
 

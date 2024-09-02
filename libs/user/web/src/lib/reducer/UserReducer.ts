@@ -1,8 +1,8 @@
-import { IPaginationRequest } from '@gym-app/shared/web';
+import { ActionStatus, IPaginationRequest } from '@gym-app/shared/web';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ActionStatus, IUser, UserActionTypes, userFeatureKey, UserState } from './UserReducer.types';
-import { IAccessLog, IFetchedSession } from './session.types';
 import { UAParser } from 'ua-parser-js';
+import { IUser, UserActionTypes, userFeatureKey, UserState } from './UserReducer.types';
+import { IAccessLog, IFetchedSession } from './session.types';
 
 const initialState: UserState = {
   user: undefined,
