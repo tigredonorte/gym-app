@@ -1,3 +1,4 @@
+import { ActionStatus } from '@gym-app/shared/web';
 import { CardHeader, CrudContainer } from '@gym-app/ui';
 import { mdiCellphone, mdiDesktopTower, mdiTablet } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -9,7 +10,6 @@ import Typography from '@mui/material/Typography';
 import { differenceInDays, format, formatDistanceToNow, isBefore, subWeeks } from 'date-fns';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActionStatus } from '../../../reducer';
 import { IDeviceInfo } from '../../../reducer/session.types';
 import { DeviceActionButton } from './DeviceActionButton';
 

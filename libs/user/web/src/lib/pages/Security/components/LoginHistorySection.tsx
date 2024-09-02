@@ -1,4 +1,4 @@
-import { IPagination } from '@gym-app/shared/web';
+import { IPagination, ActionStatus } from '@gym-app/shared/web';
 import { CardHeader, CrudContainer } from '@gym-app/ui';
 import { Pagination } from '@mui/material';
 import Card from '@mui/material/Card';
@@ -12,7 +12,6 @@ import Typography from '@mui/material/Typography';
 import { formatDistance } from 'date-fns';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActionStatus } from '../../../reducer';
 import { IAccessLog } from '../../../reducer/session.types';
 
 export interface HistoryRow {

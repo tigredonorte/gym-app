@@ -2,7 +2,7 @@ import { Divider } from '@mui/material';
 import Card from '@mui/material/Card';
 import { Stack } from '@mui/system';
 import React from 'react';
-import { CardHeader } from '../CardHeader';
+import { CardHeader } from '../Cards/CardHeader';
 
 interface ContainerProps {
   title: string;
