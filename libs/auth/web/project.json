@@ -6,11 +6,9 @@
   "tags": [],
   "targets": {
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "executor": "@nx/eslint:lint",
       "options": {
-        "assets": ["libs/auth/src/assets"],
-        "lintFilePatterns": ["libs/auth/web/**/*.{ts,tsx,js,jsx}"]
+        "assets": ["libs/auth/src/assets"]
       }
     },
     "test": {

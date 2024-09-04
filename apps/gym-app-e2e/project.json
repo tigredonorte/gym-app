@@ -3,6 +3,8 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/gym-app-e2e/src",
   "projectType": "application",
+  "tags": [],
+  "implicitDependencies": ["gym-app"],
   "targets": {
     "build-ios": {
       "executor": "@nx/detox:build",
@@ -67,13 +69,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["apps/gym-app-e2e/**/*.{ts,tsx,js,jsx}"]
-      }
+      "executor": "@nx/eslint:lint"
     }
-  },
-  "tags": [],
-  "implicitDependencies": ["gym-app"]
+  }
 }

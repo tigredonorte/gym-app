@@ -59,3 +59,4 @@ apps/gym-app-e2e/artifacts
 mongo-keyfile
 # Sentry Config File
 .env.sentry-build-plugin
+.nx
