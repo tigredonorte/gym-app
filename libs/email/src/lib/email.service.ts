@@ -90,6 +90,15 @@ export class EmailService {
     await this.logEmailSent({ ...newEmail, html, from, response });
   }
 
+  public async debugSendRenderedEmail(data: IRenderedEmail | null) {
+    if (!data) {
+      return;
+    }
+
+    const html = await this.renderEmail(data);
+    return { ...data, html };
+  }
+
   private renderEmail({ path, emailData }: IRenderedEmail): Promise<string> {
     return new Promise((resolve, reject) => {
       renderFile(path, emailData, (err, data) => {
