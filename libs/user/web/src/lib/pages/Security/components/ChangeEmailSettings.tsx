@@ -1,14 +1,14 @@
 import { EmailField, ErrorAlert } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/total-form';
-import { CardHeader, CrudContainer } from '@gym-app/ui';
+import { CardHeader, CrudContainer, CloseButton } from '@gym-app/ui';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { IUser } from '../../../reducer';
 import { ChangeEmailSettingFormType } from '../../../reducer/UserActions';
 import { PendingChangeChange } from './PendingChangeConfirmation';
-import { useTranslation } from 'react-i18next';
 
 interface IUserForm extends IUser, FormContainerType {}
 
@@ -21,10 +21,14 @@ interface ChangeEmailSettingsProps {
 }
 
 export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: ChangeEmailSettingsProps) => {
+  const [cancelError, setCancelError] = React.useState('');
   const { errorMessage, user, onSave, onCancel, loading } = props;
   const { t } = useTranslation('user');
 
   const saveFn = React.useCallback(async ({ email }: IUserForm) => onSave({ newEmail: email, oldEmail: user.email }), [onSave, user]);
+  React.useEffect(() => {
+    setCancelError(errorMessage);
+  }, [errorMessage, setCancelError]);
 
   const pendingEmail = (user.emailHistory || [])?.find(
     (email) => email.confirmed === false && user.email === email.oldEmail && !email.revertChangeEmailCode
@@ -47,7 +51,8 @@ export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: C
     <CrudContainer
       loading={loading}
       loadingMessage={t('ChangeEmailSetting.loadingUser')}
-      errorMessage={t(errorMessage)}
+      errorMessage={t(cancelError)}
+      ErrorItem={<CloseButton onClick={() => setCancelError('')} />}
       emptyMessage={t('ChangeEmailSetting.noUserFound')}
       data={user}
       Header={
