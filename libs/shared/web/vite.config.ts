@@ -29,11 +29,6 @@ export default defineConfig({
     outDir: '../../../dist/libs/shared/web',
     reportCompressedSize: true,
     commonjsOptions: { transformMixedEsModules: true },
-    entry: 'src/index.ts',
-    name: 'shared-web',
-    fileName: 'index',
-    formats: ['es', 'cjs'],
-    external: ['react', 'react-dom', 'react/jsx-runtime'],
     lib: {
       entry: 'src/index.ts',
       name: 'shared-web',
@@ -41,7 +36,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ["'react'", "'react-dom'", "'react/jsx-runtime'"],
+      external: ['\'react\'', '\'react-dom\'', '\'react/jsx-runtime\''],
     },
   },
 

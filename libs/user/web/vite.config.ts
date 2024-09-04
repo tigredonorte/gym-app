@@ -29,11 +29,6 @@ export default defineConfig({
     outDir: '../../../dist/libs/user/web',
     reportCompressedSize: true,
     commonjsOptions: { transformMixedEsModules: true },
-    entry: 'src/index.ts',
-    name: 'user-web',
-    fileName: 'index',
-    formats: ['es', 'cjs'],
-    external: ['react', 'react-dom', 'react/jsx-runtime'],
     lib: {
       entry: 'src/index.ts',
       name: 'user-web',
@@ -41,7 +36,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ["'react'", "'react-dom'", "'react/jsx-runtime'"],
+      external: ['\'react\'', '\'react-dom\'', '\'react/jsx-runtime\''],
     },
   },
 

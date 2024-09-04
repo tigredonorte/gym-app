@@ -1,4 +1,4 @@
-const http = require('http');
+import { request as _request } from 'http';
 
 const options = {
   host: 'localhost',
@@ -6,7 +6,7 @@ const options = {
   timeout: 2000, // Timeout to wait for a response (in milliseconds)
 };
 
-const request = http.request(options, (res) => {
+const request = _request(options, (res) => {
   console.log(`STATUS: ${res.statusCode}`);
   if (res.statusCode === 200) {
     process.exit(0);

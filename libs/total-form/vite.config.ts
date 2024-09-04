@@ -28,11 +28,7 @@ export default defineConfig({
   build: {
     outDir: '../../dist/total-form',
     reportCompressedSize: true,
-    commonjsOptions: { transformMixedEsModules: true }, // entry: './src/index.ts',
-    // name: 'total-form',
-    // fileName: 'index',
-    // formats: ['es', 'cjs'],
-    // external: ['react', 'react-dom', 'react/jsx-runtime'],
+    commonjsOptions: { transformMixedEsModules: true },
     lib: {
       entry: 'src/index.ts',
       name: 'total-form',
@@ -40,7 +36,7 @@ export default defineConfig({
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
-      external: ["'react'", "'react-dom'", "'react/jsx-runtime'"],
+      external: ['\'react\'', '\'react-dom\'', '\'react/jsx-runtime\''],
     },
   },
 
