@@ -1,7 +1,7 @@
-const { withNxMetro } = require('@nx/expo');
-const { getDefaultConfig } = require('@expo/metro-config');
-const { mergeConfig } = require('metro-config');
-const exclusionList = require('metro-config/src/defaults/exclusionList');
+import { withNxMetro } from '@nx/expo';
+import{ getDefaultConfig } from '@expo/metro-config';
+import { mergeConfig } from 'metro-config';
+import exclusionList from 'metro-config/src/defaults/exclusionList';
 
 const defaultConfig = getDefaultConfig(__dirname);
 const { assetExts, sourceExts } = defaultConfig.resolver;
