@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm install -g pnpm@8.8.0
+RUN npm install -g pnpm@9.9.0
 
 RUN pnpm install --frozen-lockfile
 
