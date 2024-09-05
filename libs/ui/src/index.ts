@@ -6,4 +6,5 @@ export * from './lib/modal';
 export * from './lib/PageHeader';
 export * from './lib/Settings';
 export * from './lib/utils';
+export * from './lib/PersistentAlert';
 
