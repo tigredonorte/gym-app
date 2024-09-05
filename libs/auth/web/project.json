@@ -18,6 +18,18 @@
         "passWithNoTests": true,
         "reportsDirectory": "../../../coverage/libs/auth/web"
       }
+    },
+    "test:e2e": {
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "pnpm playwright test",
+            "cwd": "libs/auth/web/tests"
+          }
+        ],
+        "parallel": false
+      }
     }
   }
 }
