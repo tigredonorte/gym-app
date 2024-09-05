@@ -1,5 +1,4 @@
-import { CrudBox } from '@gym-app/ui';
-import { mdiLoading } from '@mdi/js';
+import { PersistentAlert } from '@gym-app/ui';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { EnvContext } from '../EnvContext';
 import { WebSocketClient } from './WebSocketClient';
@@ -33,15 +32,12 @@ export const WebSocketProvider: React.FC<React.PropsWithChildren> = ({ children 
     webSocketClient?.connectionStatusChange(setIsConnected);
   }, [webSocketClient]);
 
-  if (isConnected === undefined) {
-    return (<CrudBox text="Connecting to websocket" icon={mdiLoading} color='info' />);
-  }
-
   return (
     <WebSocketContext.Provider value={{
-      isConnected,
+      isConnected: isConnected || false,
       webSocketClient
     }}>
+      {!isConnected && <PersistentAlert message="Server is offline" severity='warning' />}
       {children}
     </WebSocketContext.Provider>
   );
