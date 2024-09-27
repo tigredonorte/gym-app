@@ -21,17 +21,23 @@ check_env_variables() {
 }
 
 set_permission_on_keyfile() {
-  # Set permissions and ownership for keyfile
   echo "@@Setting permissions on /data/keyfile..."
-  chmod 600 /data/keyfile
-  chown mongodb:mongodb /data/keyfile
-  echo "@@done"
+  if [ ! -f /data/keyfile ]; then
+    cp /mongo-keyfile /data/keyfile
+    chmod 600 /data/keyfile
+    chown mongodb:mongodb /data/keyfile
+    echo "@@done"
+  fi
 }
 
 start_mongo() {
   local auth=$1
   local hasReplicaSet=${MONGO_ENABLE_REPLICA_SET:-false}
   local allowExternalConnections=${MONGO_ALLOW_EXTERNAL_CONNECTIONS:-false}
+
+  if check_mongo_started $auth; then
+    stop_mongo $auth
+  fi
 
   echo "@@Starting MongoDB with auth={$auth}"
   if [[ "$auth" == "true" ]]; then
