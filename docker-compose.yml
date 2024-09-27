@@ -57,7 +57,7 @@ services:
       - mongo1_db:/data/db
       - mongo1_configdb:/data/configdb
       - ./scripts/mongodb-healthcheck.sh:/mongodb-healthcheck.sh
-      - ./mongo-keyfile:/mongo-keyfile
+      - ./mongo-keyfile:/data/keyfile:ro
       # - ./scripts/mongo/mongod.conf:/etc/mongod.conf
       - ./scripts/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
