@@ -50,7 +50,7 @@ start_mongo() {
   fi
 
   echo "@@Starting MongoDB with auth={$auth}, replSetOption={$replSetOption}, bindIpOption={$bindIpOption}..."
-  result=$(mongod $authString $replSetOption $bindIpOption --fork --port 27017 --logpath /var/log/mongodb/mongod.log)
+  mongod $authString $replSetOption $bindIpOption --fork --port 27017 --logpath /var/log/mongodb/mongod.log
 
   echo "$result"
   
