@@ -1,12 +1,18 @@
 #!/bin/bash
 set -e
-source /functions.sh || { echo "Failed to source functions.sh"; exit 1; }
+source /docker-entrypoint-initdb.d/functions.sh  || { echo "Failed to source functions.sh"; exit 1; }
 
 echo -e "\n\n@@------Initializing database------\n\n"
 
 check_env_variables
 
 # set_permission_on_keyfile
+
+if ! check_mongo_started "false"; then
+  start_mongo "false"
+fi
+
+create_root_user "${MONGO_INITDB_ROOT_USERNAME}" "${MONGO_INITDB_ROOT_PASSWORD}"
 
 auth="true"
 

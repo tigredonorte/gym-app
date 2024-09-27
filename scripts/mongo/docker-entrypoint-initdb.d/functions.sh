@@ -33,18 +33,24 @@ start_mongo() {
   local hasReplicaSet=${MONGO_ENABLE_REPLICA_SET:-false}
   local allowExternalConnections=${MONGO_ALLOW_EXTERNAL_CONNECTIONS:-false}
 
-  if check_mongo_started "$auth"; then
-    stop_mongo "$auth"
-  fi
-
   local authString="--noauth"
   if [[ "$auth" == "true" ]]; then
     authString="--auth --keyFile /data/keyfile"
+    # authString="--auth --keyFile /data/keyfile -f /etc/mongod.conf"
   fi
 
-# --config /etc/mongod.conf
+  local replSetOption=""
+  if [[ "$hasReplicaSet" == "true" ]]; then
+    replSetOption="--replSet rs0"
+  fi
+
+  local bindIpOption=""
+  if [[ "$allowExternalConnections" == "true" ]]; then
+    bindIpOption="--bind_ip_all"
+  fi
+
   echo "@@Starting MongoDB with auth={$auth}, replSetOption={$replSetOption}, bindIpOption={$bindIpOption}..."
-  result=$(mongod -f /etc/mongod.conf $authString --fork --logpath /var/log/mongodb/mongod.log)
+  result=$(mongod $authString $replSetOption $bindIpOption --fork --port 27017 --logpath /var/log/mongodb/mongod.log)
 
   echo "$result"
   
@@ -109,12 +115,17 @@ stop_mongo() {
     }
   ")
 
+  _wait_mongo_stop
+
   echo "@@MongoDB stop status: $status"
   if echo "$status" | grep -q "error"; then
     echo "@@Failed to stop MongoDB. Probably already stopped. Continuing..."
   fi
 
-  _wait_mongo_stop
+  if pgrep mongod > /dev/null; then
+    echo "@@MongoDB is still running. Killing the process..."
+    pkill -9 mongod
+  fi
 }
 
 _wait_mongo_stop() {
@@ -137,14 +148,24 @@ create_root_user() {
   local password=$2
 
   echo "@@Creating root user '$username'..."
-  if ! mongosh --eval "
-  use admin;
-  db.createUser({
-    user: '${username}',
-    pwd: '${password}',
-    roles: [{ role: 'root', db: 'admin' }]
-  });
-  "; then
+   if ! mongosh --eval "
+    use admin;
+    if (db.getUser(\"${username}\") == null) {
+      try {
+        db.createUser({
+          user: '${username}',
+          pwd: '${password}',
+          roles: [{ role: 'root', db: 'admin' }]
+        });
+        print('Root user created.');
+      } catch(e) {
+        print(e);
+        'error';
+      }
+    } else {
+      print('Root user already exists.');
+    }
+   "; then
     echo "@@Error: Failed to create root user '$username'. Exiting."
     exit 1
   else

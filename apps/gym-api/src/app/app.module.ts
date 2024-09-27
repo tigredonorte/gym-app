@@ -32,6 +32,7 @@ import { AppService } from './app.service';
           useUnifiedTopology: true,
           replicaSet: 'rs0',
         };
+        console.log('MONGO_URI', { uri });
         return configuration;
       },
       inject: [ConfigService],

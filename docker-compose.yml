@@ -30,14 +30,25 @@ services:
 
   mongo1:
     image: mongo:8.0
-    container_name: mongo1
     hostname: mongo1
-    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    command: --replSet rs0 --bind_ip_all --port 27017
+    # command: --replSet rs0 --bind_ip_all --port 27017 --config /etc/mongod.conf
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_ENABLE_REPLICA_SET=${MONGO_ENABLE_REPLICA_SET}
+      - MONGO_ALLOW_EXTERNAL_CONNECTIONS=${MONGO_ALLOW_EXTERNAL_CONNECTIONS}
     healthcheck:
-      test: ["CMD", "bash", "./scripts/mongodb-healthcheck.sh"]
+      test: ["CMD", "bash", "./mongodb-healthcheck.sh"]
       interval: 60s
       timeout: 10s
       retries: 5
+    networks:
+      - mongo-cluster
     ports:
       - 27017:27017
     extra_hosts:
@@ -45,6 +56,10 @@ services:
     volumes:
       - mongo1_db:/data/db
       - mongo1_configdb:/data/configdb
+      - ./scripts/mongodb-healthcheck.sh:/mongodb-healthcheck.sh
+      - ./mongo-keyfile:/data/keyfile
+      - ./scripts/mongo/mongod.conf:/etc/mongod.conf
+      - ./scripts/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   # mongo1:
   #   image: mongo:8.0
