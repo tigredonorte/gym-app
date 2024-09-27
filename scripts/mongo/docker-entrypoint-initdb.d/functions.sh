@@ -22,12 +22,8 @@ check_env_variables() {
 
 set_permission_on_keyfile() {
   echo "@@Setting permissions on /data/keyfile..."
-  if [ ! -f /data/keyfile ]; then
-    cp /mongo-keyfile /data/keyfile
-    chmod 600 /data/keyfile
-    chown mongodb:mongodb /data/keyfile
-    echo "@@done"
-  fi
+  chmod 600 /data/keyfile
+  chown mongodb:mongodb /data/keyfile
 }
 
 start_mongo() {
