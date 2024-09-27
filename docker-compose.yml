@@ -29,10 +29,10 @@ services:
       - mongo1
 
   mongo1:
-    image: mongo:8.0
+    build:
+      context: .
+      dockerfile: ./Dockerfile.mongo
     hostname: mongo1
-    command: --replSet rs0 --bind_ip_all --port 27017
-    # command: --replSet rs0 --bind_ip_all --port 27017 --config /etc/mongod.conf
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
@@ -58,8 +58,8 @@ services:
       - mongo1_configdb:/data/configdb
       - ./scripts/mongodb-healthcheck.sh:/mongodb-healthcheck.sh
       - ./mongo-keyfile:/data/keyfile:ro
-      # - ./scripts/mongo/mongod.conf:/etc/mongod.conf
       - ./scripts/mongo/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      # - ./scripts/mongo/mongod.conf:/etc/mongod.conf
 
   # mongo1:
   #   image: mongo:8.0

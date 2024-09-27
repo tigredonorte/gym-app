@@ -6,8 +6,6 @@ echo -e "\n\n@@------Initializing database------\n\n"
 
 check_env_variables
 
-set_permission_on_keyfile
-
 create_root_user "${MONGO_INITDB_ROOT_USERNAME}" "${MONGO_INITDB_ROOT_PASSWORD}"
 
 auth="true"
