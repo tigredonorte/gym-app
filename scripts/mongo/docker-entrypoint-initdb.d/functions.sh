@@ -33,28 +33,33 @@ start_mongo() {
   local hasReplicaSet=${MONGO_ENABLE_REPLICA_SET:-false}
   local allowExternalConnections=${MONGO_ALLOW_EXTERNAL_CONNECTIONS:-false}
 
-  local authString="--noauth"
+  echo "@@Starting MongoDB with auth={$auth}"
   if [[ "$auth" == "true" ]]; then
-    authString="--auth --keyFile /data/keyfile"
-    # authString="--auth --keyFile /data/keyfile -f /etc/mongod.conf"
+    mongod --auth --keyFile /data/keyfile --replSet rs0 --bind_ip_all --fork --port 27017 --logpath /var/log/mongodb/mongod.log
+  else
+    mongod --noauth --replSet rs0 --bind_ip_all --fork --port 27017 --logpath /var/log/mongodb/mongod.log
   fi
+  # local authString="--noauth"
+  # if [[ "$auth" == "true" ]]; then
+  #   authString="--auth --keyFile /data/keyfile"
+  #   # authString="--auth --keyFile /data/keyfile -f /etc/mongod.conf"
+  # fi
 
-  local replSetOption=""
-  if [[ "$hasReplicaSet" == "true" ]]; then
-    replSetOption="--replSet rs0"
-  fi
+  # local replSetOption=""
+  # if [[ "$hasReplicaSet" == "true" ]]; then
+  #   replSetOption="--replSet rs0"
+  # fi
 
-  local bindIpOption=""
-  if [[ "$allowExternalConnections" == "true" ]]; then
-    bindIpOption="--bind_ip_all"
-  fi
+  # local bindIpOption=""
+  # if [[ "$allowExternalConnections" == "true" ]]; then
+  #   bindIpOption="--bind_ip_all"
+  # fi
 
-  echo "@@Starting MongoDB with auth={$auth}, replSetOption={$replSetOption}, bindIpOption={$bindIpOption}..."
-  mongod $authString $replSetOption $bindIpOption --fork --port 27017 --logpath /var/log/mongodb/mongod.log
-
-  echo "$result"
+  # result=$(mongod $authString $replSetOption $bindIpOption --fork--port 27017 --logpath /var/log/mongodb/mongod.log)
+  # echo "$result"
   
-  echo "@@Executed with options replSetOption=$replSetOption bindIpOption=$bindIpOption"
+  # echo "@@Executed with options replSetOption=$replSetOption bindIpOption=$bindIpOption"
+  echo "@@MongoDB started successfully."
   _wait_mongo_start "$auth"
 }
 
