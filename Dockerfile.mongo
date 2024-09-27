@@ -1,15 +1,19 @@
+# FROM mongo:7.0.2
+
+# # Copy files
+# COPY mongo-keyfile /etc/mongo-keyfile
+# COPY mongo-init.js /docker-entrypoint-initdb.d/mongo-init.js
+
+# # Set the permissions
+# RUN chown mongodb:mongodb /etc/mongo-keyfile && chmod 400 /etc/mongo-keyfile
+# RUN chmod -R 755 docker-entrypoint-initdb.d
+
+# # Copy the initialization scripts
+# COPY scripts/mongo/*.sh /docker-entrypoint-initdb.d/
+# COPY scripts/mongo/mongo-entrypoint.sh /mongo-entrypoint.sh
+# RUN chmod +x /docker-entrypoint-initdb.d/*.sh /mongo-entrypoint.sh
+
 FROM mongo:7.0.2
-
-# Copy files
 COPY mongo-keyfile /etc/mongo-keyfile
-COPY mongo-init.js /docker-entrypoint-initdb.d/mongo-init.js
-
-# Set the permissions
-RUN chown mongodb:mongodb /etc/mongo-keyfile && chmod 400 /etc/mongo-keyfile
-RUN chmod -R 755 docker-entrypoint-initdb.d
-
-# Copy the initialization scripts
-COPY scripts/mongo/*.sh /docker-entrypoint-initdb.d/
-COPY scripts/mongo/mongo-entrypoint.sh /mongo-entrypoint.sh
-RUN chmod +x /docker-entrypoint-initdb.d/*.sh /mongo-entrypoint.sh
-
+RUN chown mongodb:mongodb /etc/mongo-keyfile
+RUN chmod 400 /etc/mongo-keyfile
