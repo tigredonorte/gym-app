@@ -1,0 +1,17 @@
+FROM node:18 AS gym-web-app-base
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN npm install -g pnpm@9.9.0 
+
+# RUN npm install -g npx
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+EXPOSE 4200
+
+CMD ["npx", "nx", "serve", "gym-web-app", "--host", "0.0.0.0"]

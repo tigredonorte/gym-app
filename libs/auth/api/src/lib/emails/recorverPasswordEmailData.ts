@@ -5,7 +5,7 @@ interface IRecoverPasswordEmailData {
   recoverLink: string;
 }
 export const getRecoverPasswordEmail = getEmailTemplate<IRecoverPasswordEmailData>(
-  'auth/api/src/assets/recover.email',
+  'auth/api/recover.email',
   'Attempt to recover your password',
   { title: 'Password Recovery' }
 );
