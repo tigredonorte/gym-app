@@ -1,15 +1,25 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /usr/src/app
 
-COPY . .
+COPY package.json pnpm-lock.yaml ./
 
 RUN npm install -g pnpm@9.9.0
 
 RUN pnpm install --frozen-lockfile
 
-RUN npx nx build gym-api
+COPY . .
+
+RUN npx nx build gym-api --prod
+
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/dist/apps/gym-api .
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/package.json ./
 
 EXPOSE 3000
 
-CMD ["node", "dist/apps/gym-api/main"]
+CMD ["node", "main"]

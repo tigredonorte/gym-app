@@ -2,13 +2,15 @@
   "name": "@gym-app/source",
   "version": "1.0.0",
   "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "docker compose up --timestamps --watch --no-attach mongo1 --no-attach mongo2 --no-attach mongo3",
     "dev:api": "yarn docker:up:db & nx serve gym-api",
-    "dev:app": "nx serve gym-app",
     "dev:web": "nx serve gym-web-app --open",
-    "docker:up": "./scripts/start-docker.sh",
-    "docker:down": "./scripts/stop-docker.sh",
-    "docker:up:db": "docker-compose up -d mongo",
     "init:repo": "sudo ./scripts/init-repository.sh",
     "build": "nx run-many --target=build --all --exclude=gym-app --no-cloud",
     "lint": "nx run-many --target=lint --all --no-cloud",
@@ -16,9 +18,11 @@
     "test": "nx run-many --target=test --all --exclude=gym-app --no-cloud",
     "test:affected": "nx affected:test",
     "test:watch": "nx test gym-app --watch",
-    "ci": "pnpm install --frozen-lockfile"
+    "ci": "pnpm install --frozen-lockfile",
+    "mongo-logs": "docker compose logs -f mongo1 | grep -oP '\"\\$date\":\"\\K[^\"]+|\"msg\":\"\\K[^\"]+' | sed -n 'N;s/\\n/ - /p'",
+    "mongo-logs-health": "docker inspect --format='{{json .State.Health}}' gym-mongo1-1 | jq",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org thomfilgcom --project node ./build && sentry-cli sourcemaps upload --org thomfilgcom --project node ./build"
   },
-  "private": true,
   "dependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",

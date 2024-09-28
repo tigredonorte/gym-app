@@ -1,0 +1,31 @@
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/gym-web-app/Dockerfile.dev
+    restart: "no"
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    command: ["npx", "nx", "serve", "gym-web-app", "--host", "0.0.0.0"]
+    volumes:
+      - ./:/app
+
+  api:
+    build:
+      context: .
+      dockerfile: ./apps/gym-api/Dockerfile.dev
+    command: ["npx", "nx", "serve", "gym-api", "--host", "0.0.0.0"]
+    restart: "no"
+    environment:
+      - NODE_ENV=development
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+      - "5000:5000"
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules

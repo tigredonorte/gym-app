@@ -1,3 +1,6 @@
 {
-  "jest.useDashedArgs": true
+  "jest.useDashedArgs": true,
+  "cSpell.words": [
+    "preinstall"
+  ]
 }
