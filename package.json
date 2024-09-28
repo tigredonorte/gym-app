@@ -8,7 +8,7 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "dev": "docker compose up --timestamps --watch --no-attach mongo1 --no-attach mongo2 --no-attach mongo3",
+    "dev": "docker compose up --timestamps --watch --attach api --attach web",
     "dev:api": "yarn docker:up:db & nx serve gym-api",
     "dev:web": "nx serve gym-web-app --open",
     "init:repo": "sudo ./scripts/init-repository.sh",

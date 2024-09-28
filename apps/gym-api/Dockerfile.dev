@@ -10,6 +10,4 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 3000
-
-CMD ["npx", "nx", "serve", "gym-api", "--host", "0.0.0.0"]
+CMD ["npx", "nx", "serve", "gym-api"]
