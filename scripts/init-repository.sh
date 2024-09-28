@@ -143,9 +143,8 @@ if [[ ! -f mongo-keyfile ]]; then
         echo "openssl is already installed!"
     fi
 
-    openssl rand -base64 756 > mongo-keyfile
-    chmod 600 mongo-keyfile
-    cp mongo-keyfile ./scripts/mongo/keyfile
+    openssl rand -base64 756 > ./scripts/mongo/mongo-keyfile
+    chmod 600 ./scripts/mongo/mongo-keyfile
 fi
 
 docker compose up --build

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 # Global variable to store the primary node
 PRIMARY_NODE=""
@@ -41,27 +41,7 @@ start_mongo() {
   else
     mongod --noauth --replSet rs0 --bind_ip_all --fork --port 27017 --logpath /var/log/mongodb/mongod.log
   fi
-  # local authString="--noauth"
-  # if [[ "$auth" == "true" ]]; then
-  #   authString="--auth --keyFile /data/keyfile"
-  #   # authString="--auth --keyFile /data/keyfile -f /etc/mongod.conf"
-  # fi
 
-  # local replSetOption=""
-  # if [[ "$hasReplicaSet" == "true" ]]; then
-  #   replSetOption="--replSet rs0"
-  # fi
-
-  # local bindIpOption=""
-  # if [[ "$allowExternalConnections" == "true" ]]; then
-  #   bindIpOption="--bind_ip_all"
-  # fi
-
-  # result=$(mongod $authString $replSetOption $bindIpOption --fork--port 27017 --logpath /var/log/mongodb/mongod.log)
-  # echo "$result"
-  
-  # echo "@@Executed with options replSetOption=$replSetOption bindIpOption=$bindIpOption"
-  echo "@@MongoDB started successfully."
   _wait_mongo_start "$auth"
 }
 
@@ -227,6 +207,11 @@ _run_auth_mongosh() {
   local eval_command=$1
   local database=$2
 
+  # mongosh --quiet \
+  #   --host "$PRIMARY_NODE" \
+  #   --eval "$eval_command" \
+  #   $database
+  
   mongosh --quiet \
     --host "$PRIMARY_NODE" \
     --username "${MONGO_INITDB_ROOT_USERNAME}" \
