@@ -39,6 +39,8 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   @SubscribeMessage('subscribe')
   handleSubscribe(client: Socket, payload: { channel: string, token: string }): AckType {
     const { channel, token } = payload;
+    console.log(`Received token: ${token}`);
+
     try {
       if (!channel) {
         throw new Error('Invalid channel');
