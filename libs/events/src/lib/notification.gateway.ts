@@ -7,8 +7,10 @@ interface AckType {
   error?: string
 }
 @WebSocketGateway(5000, {
+  path: '/ws',
+  namespace: '/ws',
   cors: {
-    origin: [process.env['FRONTEND_URL']],
+    origin: [process.env['FRONTEND_URL'], 'localhost'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -20,7 +22,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   constructor(
     private readonly jwtService: JwtService
   ) {
-    console.log('NotificationGateway created with CORS origin:', process.env['FRONTEND_URL']);
+    console.log('\n\n\nNotificationGateway created with CORS origin:', process.env['FRONTEND_URL'], '\n\n\n');
   }
 
   handleConnection(client: Socket) {

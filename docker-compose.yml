@@ -2,7 +2,9 @@ name: gym
 
 services:
   nginx:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile.nginx
     ports:
       - "80:80"
     volumes:
@@ -28,7 +30,7 @@ services:
       context: .
       dockerfile: ./apps/gym-api/Dockerfile
     healthcheck:
-      test: ["CMD", "node", "./scripts/healthcheck.js"]
+      test: ["CMD", "node", "./scripts/api/healthcheck.js"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -37,8 +39,7 @@ services:
       - mongo-cluster
       - gym-network
     depends_on:
-      mongo1:
-        condition: service_healthy
+      - mongo1
     links:
       - mongo1
     expose:

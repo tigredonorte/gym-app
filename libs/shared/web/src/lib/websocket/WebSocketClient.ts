@@ -7,6 +7,7 @@ export class WebSocketClient {
 
   constructor(serverUrl: string) {
     this.socket = io(serverUrl, {
+      path: '/ws',
       transports: ['websocket'],
       autoConnect: false
     });
