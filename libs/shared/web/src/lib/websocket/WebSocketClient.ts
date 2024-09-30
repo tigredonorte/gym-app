@@ -6,8 +6,13 @@ export class WebSocketClient {
   private subscribedChannels = new Set<string>();
 
   constructor(serverUrl: string) {
-    this.socket = io(serverUrl, {
-      path: '/ws',
+
+    const url = new URL(serverUrl);
+    const path = url.pathname === '/' ? '/ws' : url.pathname;
+    const urlParsed = `${url.protocol}//${url.host}`;
+
+    this.socket = io(urlParsed, {
+      path: path,
       transports: ['websocket'],
       autoConnect: false
     });

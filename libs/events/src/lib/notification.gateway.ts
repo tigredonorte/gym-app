@@ -87,6 +87,9 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       }
 
       const channel = data.join('.');
+      if (!channel) {
+        throw new Error('Invalid channel');
+      }
       console.log(`Emitting message to channel ${channel} on topic ${topic}`);
       this.server.to(channel).emit(channelAndTopic, message, (error: unknown) => this.getAckResponse(error));
     } catch (error) {
