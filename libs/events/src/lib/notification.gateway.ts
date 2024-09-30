@@ -7,8 +7,10 @@ interface AckType {
   error?: string
 }
 @WebSocketGateway(5000, {
+  path: '/ws',
+  namespace: '/ws',
   cors: {
-    origin: [process.env['FRONTEND_URL']],
+    origin: [process.env['FRONTEND_URL'], 'localhost'],
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -20,7 +22,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   constructor(
     private readonly jwtService: JwtService
   ) {
-    console.log('NotificationGateway created with CORS origin:', process.env['FRONTEND_URL']);
+    console.log('\n\n\nNotificationGateway created with CORS origin:', process.env['FRONTEND_URL'], '\n\n\n');
   }
 
   handleConnection(client: Socket) {
@@ -39,6 +41,8 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   @SubscribeMessage('subscribe')
   handleSubscribe(client: Socket, payload: { channel: string, token: string }): AckType {
     const { channel, token } = payload;
+    console.log(`Received token: ${token}`);
+
     try {
       if (!channel) {
         throw new Error('Invalid channel');
@@ -83,6 +87,9 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
       }
 
       const channel = data.join('.');
+      if (!channel) {
+        throw new Error('Invalid channel');
+      }
       console.log(`Emitting message to channel ${channel} on topic ${topic}`);
       this.server.to(channel).emit(channelAndTopic, message, (error: unknown) => this.getAckResponse(error));
     } catch (error) {

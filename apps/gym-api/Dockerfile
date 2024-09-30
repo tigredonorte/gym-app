@@ -2,6 +2,8 @@ FROM node:18-alpine AS builder
 
 WORKDIR /usr/src/app
 
+RUN apt-get update && apt-get install -y ncat
+
 COPY package.json pnpm-lock.yaml ./
 
 RUN npm install -g pnpm@9.9.0
@@ -19,7 +21,5 @@ WORKDIR /usr/src/app
 COPY --from=builder /usr/src/app/dist/apps/gym-api .
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package.json ./
-
-EXPOSE 3000
 
 CMD ["node", "main"]

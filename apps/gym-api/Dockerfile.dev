@@ -2,6 +2,8 @@ FROM node:18-alpine AS gym-api-base
 
 WORKDIR /usr/src/app
 
+RUN apk update && apk add --no-cache netcat-openbsd
+
 COPY package.json pnpm-lock.yaml ./
 
 RUN npm install -g pnpm@9.9.0
@@ -10,6 +12,4 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-EXPOSE 3000
-
-CMD ["npx", "nx", "serve", "gym-api", "--host", "0.0.0.0"]
+CMD ["npx", "nx", "serve", "gym-api"]
