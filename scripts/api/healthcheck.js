@@ -6,8 +6,8 @@ const healthCheck = async () => {
   try {
     console.info('Starting health check...');
     const [websocketResponse, apiResponse] = await Promise.allSettled([
-      checkWebSocketConnection('ws://localhost/ws'),
-      checkAPIHealth('http://localhost/api/'),
+      checkWebSocketConnection('ws://nginx/ws'),
+      checkAPIHealth('http://nginx/api/'),
     ]);
 
     if (websocketResponse.status === 'rejected' && apiResponse.status === 'rejected') {

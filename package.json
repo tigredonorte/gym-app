@@ -9,8 +9,6 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "dev": "docker compose up --build --timestamps --watch --attach api --attach web",
-    "dev:api": "yarn docker:up:db & nx serve gym-api",
-    "dev:web": "nx serve gym-web-app --open",
     "init:repo": "sudo ./scripts/init-repository.sh",
     "build": "nx run-many --target=build --all --exclude=gym-app --no-cloud",
     "lint": "nx run-many --target=lint --all --no-cloud",
