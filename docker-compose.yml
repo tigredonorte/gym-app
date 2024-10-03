@@ -15,6 +15,16 @@ services:
     networks:
       - gym-network
 
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    ports:
+      - "9113:9113"
+    command: -nginx.scrape-uri http://nginx/stub_status
+    depends_on:
+      - nginx
+    networks:
+      - gym-network
+
   web:
     build:
       context: .
@@ -31,7 +41,7 @@ services:
       dockerfile: ./apps/gym-api/Dockerfile
     healthcheck:
       test: ["CMD", "node", "./scripts/api/healthcheck.js"]
-      interval: 30s
+      interval: 300s
       timeout: 10s
       retries: 3
     restart: always

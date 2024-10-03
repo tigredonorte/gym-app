@@ -1,5 +1,6 @@
 import { AuthModule } from '@gym-app/auth/api';
 import { EventModule } from '@gym-app/events';
+import { MetricsModule } from '@gym-app/shared/api';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -12,6 +13,7 @@ import { AppService } from './app.service';
   imports: [
     AuthModule,
     UserModule,
+    MetricsModule,
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         MONGO_USER: Joi.string().required(),
