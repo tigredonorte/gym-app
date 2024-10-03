@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "shared/api": {
+      "type": "library",
+      "root": "libs/shared/api",
+      "entryFile": "index",
+      "sourceRoot": "libs/shared/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/shared/api/tsconfig.lib.json"
+      }
+    }
+  },
+  "compilerOptions": {
+    "webpack": true
+  }
+}

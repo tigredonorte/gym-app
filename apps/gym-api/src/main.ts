@@ -1,3 +1,4 @@
+import { MetricsInterceptor, MetricsService } from '@gym-app/shared/api';
 import { CustomRequestInfoMiddleware } from '@gym-app/user/api';
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
@@ -18,6 +19,7 @@ async function bootstrap() {
   });
   app.use(requestIp.mw());
   app.use(new CustomRequestInfoMiddleware().use);
+  app.useGlobalInterceptors(new MetricsInterceptor(app.get(MetricsService)));
   app.useGlobalPipes(new ValidationPipe({
     transform: true, // Automatically transform payloads to DTO instances
     whitelist: true, // Automatically remove non-whitelisted properties
