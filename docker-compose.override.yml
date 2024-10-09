@@ -15,11 +15,10 @@ services:
     build:
       context: .
       dockerfile: ./apps/gym-api/Dockerfile.dev
-    command: ["npx", "nx", "serve", "gym-api"]
+    command: ["doppler", "run", "--", "npx", "nx", "serve", "gym-api"]
     restart: "no"
     environment:
       - NODE_ENV=development
-    env_file:
-      - .env
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN} 
     volumes:
       - ./:/usr/src/app

@@ -1,16 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import { Model, Types } from 'mongoose';
 import { IAccessLog, IRequestInfo, ISession, IUser, SessionStatus } from '../interfaces';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { SessionEventsService } from './session-events.service';
 import { Session, SessionDocument } from './session.model';
 
-/**
- * Session id doesn't need to be secure, it's just a hash of the user data
- */
-const salt = '$2b$10$endMLAWCpi9NHHC0mr5Mge';
 export interface PaginationResult<T> {
   items: T[];
   currentPage: number;
@@ -70,7 +66,7 @@ export class SessionService {
   async getSessionHash(
     userData: IRequestInfo['userData']
   ): Promise<string> {
-    return await bcrypt.hash(JSON.stringify(userData), salt);
+    return await argon2.hash(JSON.stringify(userData));
   }
 
   async removeSession(id: string, accessId: string): Promise<string> {
