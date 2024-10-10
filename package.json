@@ -20,7 +20,11 @@
     "ci": "pnpm install --frozen-lockfile",
     "mongo-logs": "docker compose logs -f mongo1 | grep -oP '\"\\$date\":\"\\K[^\"]+|\"msg\":\"\\K[^\"]+' | sed -n 'N;s/\\n/ - /p'",
     "mongo-logs-health": "docker inspect --format='{{json .State.Health}}' gym-mongo1-1 | jq",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org thomfilgcom --project node ./build && sentry-cli sourcemaps upload --org thomfilgcom --project node ./build"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org thomfilgcom --project node ./build && sentry-cli sourcemaps upload --org thomfilgcom --project node ./build",
+    "kompose:convert:dev": "npm run docker:compose:merge:dev && kompose convert -f ./kubernetes/docker-compose.dev.yml --out kubernetes/dev",
+    "kompose:convert:prod": "npm run docker:compose:merge:prod && kompose convert -f ./kubernetes/docker-compose.prod.yml --out kubernetes/prod",
+    "docker:compose:merge:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml config > ./kubernetes/docker-compose.prod.yml",
+    "docker:compose:merge:dev": "docker-compose -f docker-compose.yml -f docker-compose.override.yml config > ./kubernetes/docker-compose.dev.yml"
   },
   "dependencies": {
     "@emotion/react": "^11.13.0",

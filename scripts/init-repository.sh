@@ -5,7 +5,8 @@ source ./scripts/setup/doppler.sh
 source ./scripts/setup/mongo.sh
 source ./scripts/setup/nvm.sh
 source ./scripts/setup/pnpm.sh
-
+source ./scripts/setup/kompose.sh
+source ./scripts/setup/kubernetes.sh
 
 # Ensure .nvmrc is available
 if [[ ! -f ".nvmrc" ]]; then
@@ -16,12 +17,10 @@ fi
 installDocker
 installDockerCompose
 installDoppler
-
-configureDoppler
+installKubernetes
+installKompose
 installNVM
 installPnpm
-
-pnpm install
 
 # Check if .env file exists
 if [[ ! -f .env ]]; then
@@ -29,7 +28,10 @@ if [[ ! -f .env ]]; then
     cp .env.sample .env
 fi
 
+configureDoppler
+
+pnpm install
+
 genMongoKeyFile
 
-# Use Doppler to run Docker Compose
-doppler run -- docker compose up --build -d
+pnpm dev -d
