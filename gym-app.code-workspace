@@ -1,14 +1,37 @@
 {
 	"folders": [
 		{
+			"path": "apps"
+		},
+		{
+			"path": "libs"
+		},
+		{
+			"path": "infra"
+		},
+		{
 			"path": "."
 		},
-		{
-			"path": "../ekl-logging"
-		},
-		{
-			"path": "../queuenode"
-		}
 	],
-	"settings": {}
+	"settings": {
+		"eslint.enable": true,
+		"eslint.validate": [
+				"javascript",
+				"typescript",
+				"javascriptreact",
+				"typescriptreact"
+		],
+		"search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.nx": true
+   },
+	 "files.exclude": {
+		".nx": true,
+		"dist": true,
+		"init-replica.sh": true,
+		"migrations.json": true,
+   },
+	 "search.followSymlinks": false,
+	}
 }
