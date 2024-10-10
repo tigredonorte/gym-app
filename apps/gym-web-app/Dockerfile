@@ -1,4 +1,4 @@
-FROM node:18 AS buildImg
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN npx nx build gym-web-app --prod
 
 FROM nginx:alpine AS runtime
 
-COPY --from=buildImg /app/dist/apps/gym-web-app /usr/share/nginx/html
+COPY --from=builder /app/dist/apps/gym-web-app /usr/share/nginx/html
 
 EXPOSE 80
 

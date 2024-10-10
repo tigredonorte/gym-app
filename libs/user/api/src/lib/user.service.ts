@@ -1,7 +1,7 @@
 import { EmailService } from '@gym-app/email';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
+import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { Model } from 'mongoose';
 import { sendChangeEmailCode } from './emails/sendChangeEmailCode';
@@ -25,14 +25,13 @@ export class UserService {
   ) {}
 
   private async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt();
-    const pass = await bcrypt.hash(password, salt);
-    return pass;
+    return await argon2.hash(password);
   }
 
   private async decryptPassword(password: string, hash: string): Promise<boolean> {
     try {
-      return await bcrypt.compare(password, hash);
+      const result = await argon2.verify(hash, password);
+      return result;
     } catch (error) {
       return false;
     }
