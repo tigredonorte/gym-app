@@ -2,7 +2,7 @@ FROM node:20-alpine AS gym-web-app-base
 
 WORKDIR /app
 
-RUN npm install -g pnpm@9.9.0 
+RUN npm install -g pnpm@9.12.0 
 
 COPY package.json pnpm-lock.yaml ./
 

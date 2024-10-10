@@ -4,24 +4,14 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: ./nginx/Dockerfile.nginx
+      dockerfile: ./infra/nginx/Dockerfile.nginx
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
     depends_on:
       - api
       - web
-    networks:
-      - gym-network
-
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    ports:
-      - "9113:9113"
-    command: -nginx.scrape-uri http://nginx/stub_status
-    depends_on:
-      - nginx
     networks:
       - gym-network
 
@@ -40,7 +30,7 @@ services:
       context: .
       dockerfile: ./apps/gym-api/Dockerfile
     healthcheck:
-      test: ["CMD", "node", "./scripts/api/healthcheck.js"]
+      test: ["CMD", "node", "./infra/api/healthcheck.js"]
       interval: 300s
       timeout: 10s
       retries: 3
@@ -59,7 +49,7 @@ services:
   mongo1:
     build:
       context: .
-      dockerfile: ./Dockerfile.mongo
+      dockerfile: ./infra/mongo/Dockerfile.mongo
     hostname: mongo1
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}

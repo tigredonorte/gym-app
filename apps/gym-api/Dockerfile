@@ -3,7 +3,7 @@ FROM node:20-alpine AS gym-api-base
 WORKDIR /usr/src/app
 
 RUN apk add --no-cache bash curl gnupg python3 make g++ && \
-    npm install -g pnpm@9.9.0 && \
+    npm install -g pnpm@9.12.0 && \
     curl -Ls https://cli.doppler.com/install.sh | sh
 
 COPY package.json pnpm-lock.yaml ./

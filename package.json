@@ -7,10 +7,9 @@
     "node": "20.x"
   },
   "scripts": {
-    "setup": "bash ./scripts/init-repository.sh && pnpm install",
+    "setup": "bash ./infra/local/init-repository.sh",
     "preinstall": "npx only-allow pnpm",
     "dev": "NODE_ENV=development && doppler run -- docker compose up --build --timestamps --watch --attach api --attach web",
-    "init:repo": "sudo ./scripts/init-repository.sh",
     "build": "nx run-many --target=build --all --exclude=gym-app --no-cloud",
     "lint": "nx run-many --target=lint --all --no-cloud",
     "lint:fix": "nx run-many --target=lint --all --fix",

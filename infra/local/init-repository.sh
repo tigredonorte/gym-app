@@ -1,11 +1,10 @@
 #!/bin/bash
 
-source ./scripts/setup/docker.sh
-source ./scripts/setup/doppler.sh
-source ./scripts/setup/mongo.sh
-source ./scripts/setup/nvm.sh
-source ./scripts/setup/pnpm.sh
-
+source ./infra/local/scripts/docker.sh
+source ./infra/local/scripts/doppler.sh
+source ./infra/local/scripts/mongo.sh
+source ./infra/local/scripts/nvm.sh
+source ./infra/local/scripts/pnpm.sh
 
 # Ensure .nvmrc is available
 if [[ ! -f ".nvmrc" ]]; then

@@ -1,11 +1,11 @@
 FROM mongo:8.0
 
-COPY ./scripts/mongo/healthcheck.sh /healthcheck.sh
+COPY ./infra/mongo/scripts/healthcheck.sh /healthcheck.sh
 
-COPY ./scripts/mongo/mongo-keyfile /data/keyfile
+COPY ./infra/mongo/mongo-keyfile /data/keyfile
 RUN chmod 400 /data/keyfile && chown mongodb:mongodb /data/keyfile
 
-COPY ./scripts/mongo/docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
+COPY ./infra/mongo/scripts/docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
 RUN chmod +x /docker-entrypoint-initdb.d/*.sh
 
 CMD ["mongod", "--auth", "--keyFile", "/data/keyfile", "--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
