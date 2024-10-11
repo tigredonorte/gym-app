@@ -1,4 +1,4 @@
-import { PersistentAlert } from '@gym-app/ui';
+import { PersistentAlert } from '@gym-app/shared/web';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { EnvContext } from '../EnvContext';
 import { WebSocketClient } from './WebSocketClient';

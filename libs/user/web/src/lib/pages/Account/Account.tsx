@@ -1,5 +1,5 @@
 import { ActionStatus, EnvContext, getStatussesProperty } from '@gym-app/shared/web';
-import { CrudContainer } from '@gym-app/ui';
+import { CrudContainer } from '@gym-app/shared/web';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';

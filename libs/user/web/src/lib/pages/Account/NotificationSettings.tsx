@@ -1,4 +1,4 @@
-import { Settings } from '@gym-app/ui';
+import { Settings } from '@gym-app/shared/web';
 import { Alert, AlertTitle, Switch } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 

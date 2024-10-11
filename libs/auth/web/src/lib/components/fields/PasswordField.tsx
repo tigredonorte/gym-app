@@ -1,4 +1,4 @@
-import { InputField, InputFieldProps, mergeValidators } from '@gym-app/total-form';
+import { InputField, InputFieldProps, mergeValidators } from '@gym-app/shared/web';
 import React from 'react';
 import { isPasswordValid } from './validateInput';
 

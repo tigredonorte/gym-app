@@ -1,4 +1,4 @@
-import { getEmailTemplate } from '@gym-app/email';
+import { getEmailTemplate } from '@gym-app/shared/api';
 
 interface IChangedEmail {
   revertChangeEmailLink: string

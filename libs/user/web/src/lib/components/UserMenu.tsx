@@ -1,4 +1,4 @@
-import { MenuOption, StickyMenu } from '@gym-app/ui';
+import { MenuOption, StickyMenu } from '@gym-app/shared/web';
 import { mdiAccountOutline, mdiKeyOutline } from '@mdi/js';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuid } from 'uuid';

@@ -18,12 +18,8 @@
     "paths": {
       "@gym-app/auth/api": ["libs/auth/api/src/index.ts"],
       "@gym-app/auth/web": ["libs/auth/web/src/index.ts"],
-      "@gym-app/email": ["libs/email/src/index.ts"],
-      "@gym-app/events": ["libs/events/src/index.ts"],
       "@gym-app/shared/web": ["libs/shared/web/src/index.ts"],
       "@gym-app/shared/api": ["libs/shared/api/src/index.ts"],
-      "@gym-app/total-form": ["libs/total-form/src/index.ts"],
-      "@gym-app/ui": ["libs/ui/src/index.ts"],
       "@gym-app/user/api": ["libs/user/api/src/index.ts"],
       "@gym-app/user/web": ["libs/user/web/src/index.ts"]
     }

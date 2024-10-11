@@ -1,4 +1,4 @@
-import { EventService, NotificationGateway } from '@gym-app/events';
+import { EventService, NotificationGateway } from '@gym-app/shared/api';
 import { Injectable } from '@nestjs/common';
 import { UserReturnType } from './interfaces';
 

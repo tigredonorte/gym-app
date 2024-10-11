@@ -1,6 +1,6 @@
 import { EmailField, ErrorAlert } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/total-form';
-import { CardHeader, CrudContainer, CloseButton } from '@gym-app/ui';
+import { Form, FormContainerType } from '@gym-app/shared/web';
+import { CardHeader, CrudContainer, CloseButton } from '@gym-app/shared/web';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';

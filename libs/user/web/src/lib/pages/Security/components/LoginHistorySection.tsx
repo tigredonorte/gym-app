@@ -1,5 +1,5 @@
 import { IPagination, ActionStatus } from '@gym-app/shared/web';
-import { CardHeader, CrudContainer } from '@gym-app/ui';
+import { CardHeader, CrudContainer } from '@gym-app/shared/web';
 import { Pagination } from '@mui/material';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';

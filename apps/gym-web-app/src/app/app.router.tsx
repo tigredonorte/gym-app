@@ -1,5 +1,5 @@
 import { AuthPath, AuthRouter } from '@gym-app/auth/web';
-import { Header } from '@gym-app/ui';
+import { Header } from '@gym-app/shared/web';
 import { ProfilePath, ProfileRouter, useAuth, UserPath, UserRouter } from '@gym-app/user/web';
 import { mdiCreditCardOutline } from '@mdi/js';
 import React from 'react';

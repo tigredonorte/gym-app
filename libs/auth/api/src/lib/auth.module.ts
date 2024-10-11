@@ -1,5 +1,5 @@
-import { EmailModule } from '@gym-app/email';
-import { EventModule } from '@gym-app/events';
+import { EmailModule } from '@gym-app/shared/api';
+import { EventModule } from '@gym-app/shared/api';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
 import { AuthEventListenerService } from './auth-event-listener.service';

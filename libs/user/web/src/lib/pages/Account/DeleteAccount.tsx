@@ -1,4 +1,4 @@
-import { CardHeader, ConfirmationDialog } from '@gym-app/ui';
+import { CardHeader, ConfirmationDialog } from '@gym-app/shared/web';
 import { Button, Stack, Typography } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';

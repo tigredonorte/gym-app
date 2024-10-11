@@ -1,4 +1,4 @@
-import { EmailService } from '@gym-app/email';
+import { EmailService } from '@gym-app/shared/api';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';

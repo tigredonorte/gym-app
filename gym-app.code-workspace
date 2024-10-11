@@ -1,12 +1,35 @@
 {
 	"folders": [
 		{
-			"path": "apps"
+			"name": "apps/gym-api",
+			"path": "apps/gym-api"
 		},
 		{
-			"path": "libs"
+			"name": "apps/gym-api-e2e",
+			"path": "apps/gym-api-e2e"
 		},
 		{
+			"name": "apps/gym-web-app",
+			"path": "apps/gym-web-app"
+		},
+		{
+			"name": "apps/gym-web-app-e2e",
+			"path": "apps/gym-web-app-e2e"
+		},
+		{
+			"name": "libs/auth",
+			"path": "libs/auth"
+		},
+		{
+			"name": "libs/shared",
+			"path": "libs/shared"
+		},
+		{
+			"name": "libs/user",
+			"path": "libs/user"
+		},
+		{
+			"name": "infra",
 			"path": "infra"
 		},
 		{

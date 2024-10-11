@@ -1,4 +1,4 @@
-import { EventService } from '@gym-app/events';
+import { EventService } from '@gym-app/shared/api';
 import { Injectable } from '@nestjs/common';
 
 export const SessionEventTypes = {

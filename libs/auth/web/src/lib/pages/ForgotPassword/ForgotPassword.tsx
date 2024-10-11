@@ -1,5 +1,5 @@
 import { EnvContext, postRequest } from '@gym-app/shared/web';
-import { Form, FormContainerType } from '@gym-app/total-form';
+import { Form, FormContainerType } from '@gym-app/shared/web';
 import { mdiFormTextboxPassword } from '@mdi/js';
 import { Container } from '@mui/material';
 import React from 'react';

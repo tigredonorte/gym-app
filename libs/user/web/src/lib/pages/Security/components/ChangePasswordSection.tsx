@@ -1,6 +1,6 @@
 import { ErrorAlert, PasswordField } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/total-form';
-import { CardHeader, CrudContainer } from '@gym-app/ui';
+import { Form, FormContainerType } from '@gym-app/shared/web';
+import { CardHeader, CrudContainer } from '@gym-app/shared/web';
 import { mdiLock } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
