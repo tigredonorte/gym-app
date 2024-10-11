@@ -1,4 +1,4 @@
-import { EmailModule } from '@gym-app/email';
+import { EmailModule } from '@gym-app/shared/api';
 import { EventModule } from '@gym-app/events';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';

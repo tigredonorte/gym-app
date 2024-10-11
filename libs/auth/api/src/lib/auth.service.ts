@@ -1,4 +1,4 @@
-import { EmailService } from '@gym-app/email';
+import { EmailService } from '@gym-app/shared/api';
 import { IRequestInfo, IUser, SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';

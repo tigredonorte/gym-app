@@ -1,4 +1,4 @@
-import { getEmailTemplate } from '@gym-app/email';
+import { getEmailTemplate } from '@gym-app/shared/api';
 
 export const sendChangeEmailReverted = getEmailTemplate(
   'user/api/change-email-reverted',
