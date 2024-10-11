@@ -29,10 +29,6 @@
 			"path": "libs/shared"
 		},
 		{
-			"name": "libs/ui",
-			"path": "libs/ui"
-		},
-		{
 			"name": "libs/user",
 			"path": "libs/user"
 		},
