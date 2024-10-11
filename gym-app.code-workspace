@@ -21,10 +21,6 @@
 			"path": "libs/auth"
 		},
 		{
-			"name": "libs/events",
-			"path": "libs/events"
-		},
-		{
 			"name": "libs/shared",
 			"path": "libs/shared"
 		},

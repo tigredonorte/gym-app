@@ -1,5 +1,5 @@
 import { EmailService } from '@gym-app/shared/api';
-import { EventService } from '@gym-app/events';
+import { EventService } from '@gym-app/shared/api';
 import { IRequestInfo, UserEventPayload, getUserAccessData } from '@gym-app/user/api';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { AuthEventTypes } from './auth.events';

@@ -1,5 +1,5 @@
 import { EmailModule } from '@gym-app/shared/api';
-import { EventModule } from '@gym-app/events';
+import { EventModule } from '@gym-app/shared/api';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
