@@ -1,5 +1,5 @@
 import { postRequest, WebSocketContext } from '@gym-app/shared/web';
-import { CrudBox } from '@gym-app/ui';
+import { CrudBox } from '@gym-app/shared/web';
 import { IUser } from '@gym-app/user/web';
 import { mdiLoading } from '@mdi/js';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';

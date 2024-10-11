@@ -1,5 +1,5 @@
 import { getRequest } from '@gym-app/shared/web';
-import { ConfirmDialog } from '@gym-app/ui';
+import { ConfirmDialog } from '@gym-app/shared/web';
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';

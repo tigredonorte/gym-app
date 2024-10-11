@@ -1,5 +1,5 @@
 import { IPagination } from '@gym-app/shared/web';
-import { ConfirmationDialog, CrudContainer } from '@gym-app/ui';
+import { ConfirmationDialog, CrudContainer } from '@gym-app/shared/web';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';

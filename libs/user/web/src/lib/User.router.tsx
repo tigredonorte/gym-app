@@ -1,4 +1,4 @@
-import { MenuOption } from '@gym-app/ui';
+import { MenuOption } from '@gym-app/shared/web';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { UserGrid } from './components/UserGrid';

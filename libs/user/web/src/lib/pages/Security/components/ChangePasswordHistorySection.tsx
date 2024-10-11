@@ -1,4 +1,4 @@
-import { CardHeader } from '@gym-app/ui';
+import { CardHeader } from '@gym-app/shared/web';
 import { mdiClose } from '@mdi/js';
 import Icon from '@mdi/react';
 import { IconButton, Typography } from '@mui/material';

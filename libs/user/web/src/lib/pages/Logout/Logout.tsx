@@ -1,4 +1,4 @@
-import { CrudContainer } from '@gym-app/ui';
+import { CrudContainer } from '@gym-app/shared/web';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';

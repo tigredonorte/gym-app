@@ -1,5 +1,5 @@
 import { ActionStatus } from '@gym-app/shared/web';
-import { CardHeader, CrudContainer } from '@gym-app/ui';
+import { CardHeader, CrudContainer } from '@gym-app/shared/web';
 import { mdiCellphone, mdiDesktopTower, mdiTablet } from '@mdi/js';
 import Icon from '@mdi/react';
 import Box from '@mui/material/Box';

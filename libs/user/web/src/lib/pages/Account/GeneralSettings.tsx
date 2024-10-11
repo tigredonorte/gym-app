@@ -1,6 +1,6 @@
 import { ErrorAlert, NameField } from '@gym-app/auth/web';
 import { Form, FormContainerType } from '@gym-app/shared/web';
-import { CardBody, CardHeader } from '@gym-app/ui';
+import { CardBody, CardHeader } from '@gym-app/shared/web';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
