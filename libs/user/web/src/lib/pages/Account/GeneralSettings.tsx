@@ -1,5 +1,5 @@
 import { ErrorAlert, NameField } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/total-form';
+import { Form, FormContainerType } from '@gym-app/shared/web';
 import { CardBody, CardHeader } from '@gym-app/ui';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';

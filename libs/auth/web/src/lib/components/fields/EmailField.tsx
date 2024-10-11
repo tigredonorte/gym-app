@@ -1,4 +1,4 @@
-import { Form, InputFieldProps, mergeValidators } from '@gym-app/total-form';
+import { Form, InputFieldProps, mergeValidators } from '@gym-app/shared/web';
 import React from 'react';
 import { isEmailValid } from './validateInput';
 

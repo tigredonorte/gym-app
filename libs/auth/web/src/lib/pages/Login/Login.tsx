@@ -1,4 +1,4 @@
-import { Form, FormContainerType } from '@gym-app/total-form';
+import { Form, FormContainerType } from '@gym-app/shared/web';
 import { AuthContext } from '@gym-app/user/web';
 import { mdiLogin } from '@mdi/js';
 import { Container, Grid } from '@mui/material';
