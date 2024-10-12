@@ -37,6 +37,10 @@
 			"path": "libs/user/api/src"
 		},
 		{
+			"name": "user-types",
+			"path": "libs/user/types/src"
+		},
+		{
 			"name": "user-web",
 			"path": "libs/user/web/src"
 		},
