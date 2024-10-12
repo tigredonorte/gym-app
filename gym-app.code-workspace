@@ -2,43 +2,43 @@
 	"folders": [
 		{
 			"name": "gym-api",
-			"path": "apps/gym-api"
+			"path": "apps/gym-api/src"
 		},
 		{
 			"name": "gym-api-e2e",
-			"path": "apps/gym-api-e2e"
+			"path": "apps/gym-api-e2e/src"
 		},
 		{
 			"name": "gym-web-app",
-			"path": "apps/gym-web-app"
+			"path": "apps/gym-web-app/src"
 		},
 		{
 			"name": "gym-web-app-e2e",
-			"path": "apps/gym-web-app-e2e"
+			"path": "apps/gym-web-app-e2e/src"
 		},
 		{
 			"name": "auth-api",
-			"path": "libs/auth/api",
+			"path": "libs/auth/api/src",
 		},
 		{
 			"name": "auth-web",
-			"path": "libs/auth/web",
+			"path": "libs/auth/web/src",
 		},
 		{
 			"name": "shared-api",
-			"path": "libs/shared/api"
+			"path": "libs/shared/api/src"
 		},
 		{
 			"name": "shared-web",
-			"path": "libs/shared/web"
+			"path": "libs/shared/web/src"
 		},
 		{
 			"name": "user-api",
-			"path": "libs/user/api"
+			"path": "libs/user/api/src"
 		},
 		{
 			"name": "user-web",
-			"path": "libs/user/web"
+			"path": "libs/user/web/src"
 		},
 		{
 			"name": "infra",
