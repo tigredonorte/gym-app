@@ -1,13 +1,13 @@
-import { EmailService } from '@gym-app/shared/api';
-import { EventService } from '@gym-app/shared/api';
-import { IRequestInfo, UserEventPayload, getUserAccessData } from '@gym-app/user/api';
+import { EmailService, EventService } from '@gym-app/shared/api';
+import { UserEventPayload, getUserAccessData } from '@gym-app/user/api';
+import { IRequestInfoDto } from '@gym-app/user/types';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { AuthEventTypes } from './auth.events';
 import { getEmailLoginTemplate } from './emails/loginAlertEmail';
 
 export interface LoginEventPayload {
   user: UserEventPayload;
-  userData: IRequestInfo['userData'];
+  userData: IRequestInfoDto['userData'];
   sessionId: string;
   isFirstTimeOnDevice: boolean;
 }

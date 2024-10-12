@@ -1,4 +1,5 @@
 import { EmailService } from '@gym-app/shared/api';
+import { IRequestUserDataDto, IUserDto, UserReturnType } from '@gym-app/user/types';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
@@ -9,7 +10,6 @@ import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
 import { sendEmailChanged } from './emails/sendEmailChanged';
 import { sendPasswordChanged } from './emails/sendPasswordChanged';
-import { IRequestUserData, IUser, UserReturnType } from './interfaces';
 import { getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
 import { IChangePassword, IUpdateEmail } from './user.dto';
@@ -156,7 +156,7 @@ export class UserService {
     return recoverCode.code;
   }
 
-  async changePasswordStart(id: string, { newPassword, oldPassword, confirmPassword }: IChangePassword, userData: IRequestUserData): Promise<IUser['passwordHistory']> {
+  async changePasswordStart(id: string, { newPassword, oldPassword, confirmPassword }: IChangePassword, userData: IRequestUserDataDto): Promise<IUserDto['passwordHistory']> {
     const user = await this.userModel.findById(id).select('+password').select('+passwordHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -195,10 +195,10 @@ export class UserService {
       changePasswordLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-password/${id}/${code}`,
     }));
     await user.save();
-    return this.getUserReturnData({ passwordHistory: user.passwordHistory }) as IUser['passwordHistory'];
+    return this.getUserReturnData({ passwordHistory: user.passwordHistory }) as IUserDto['passwordHistory'];
   }
 
-  async changePasswordComplete(id: string, code: string, userData: IRequestUserData): Promise<void> {
+  async changePasswordComplete(id: string, code: string, userData: IRequestUserDataDto): Promise<void> {
     const user = await this.userModel.findById(id).select('+passwordHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -331,7 +331,7 @@ export class UserService {
     return result as UserReturnType;
   }
 
-  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestUserData): Promise<IUser['emailHistory']> {
+  public async updateEmail(id: string, { newEmail, oldEmail }: IUpdateEmail, userData: IRequestUserDataDto): Promise<IUserDto['emailHistory']> {
     const user = await this.userModel.findById(id).select('+emailHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');
@@ -358,7 +358,7 @@ export class UserService {
     return user.emailHistory;
   }
 
-  async confirmChangeEmail(id: string, changeEmailCode: string, userData: IRequestUserData): Promise<{ message: string, title: string }> {
+  async confirmChangeEmail(id: string, changeEmailCode: string, userData: IRequestUserDataDto): Promise<{ message: string, title: string }> {
     const user = await this.userModel.findById(id).select('+emailHistory').exec();
     if (!user) {
       throw new NotFoundException('User not found');

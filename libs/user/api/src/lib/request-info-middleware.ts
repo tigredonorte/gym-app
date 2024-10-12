@@ -1,14 +1,14 @@
+import { IRequestInfoDto, IUserDto, IUserDataInfo } from '@gym-app/user/types';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 import { extractTokenFromHeader } from './guards/extractTokenFromHeader';
-import { IRequestInfo, IUser } from './interfaces';
 
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
-  use(req: IRequestInfo & Request, res: Response, next: () => void) {
+  use(req: IRequestInfoDto & Request, res: Response, next: () => void) {
     req.userData = getUserData(req);
     const user = getUser(req, new JwtService());
     req.user = user || undefined;
@@ -16,7 +16,7 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
   }
 }
 
-function getUser(req: IRequestInfo & Request, jwtService: JwtService): IUser | null {
+function getUser(req: IRequestInfoDto & Request, jwtService: JwtService): IUserDto | null {
   const token = extractTokenFromHeader(req);
   if (!token) {
     return null;
@@ -30,7 +30,7 @@ function getUser(req: IRequestInfo & Request, jwtService: JwtService): IUser | n
   }
 }
 
-function getUserData(req: IRequestInfo & Request): IRequestInfo['userData'] {
+function getUserData(req: IRequestInfoDto & Request): IRequestInfoDto['userData'] {
   const temp = req.headers['user-agent'] || undefined;
   const ua = new UAParser(temp).getResult();
   const ip = getIp(req);
@@ -50,7 +50,7 @@ function getUserData(req: IRequestInfo & Request): IRequestInfo['userData'] {
   };
 }
 
-function getIp(req: Request & IRequestInfo): string | undefined {
+function getIp(req: Request & IRequestInfoDto): string | undefined {
   if (req.clientIp) {
     return req.clientIp;
   }
@@ -70,14 +70,7 @@ function getIp(req: Request & IRequestInfo): string | undefined {
   return undefined;
 }
 
-export interface IUserDataInfo {
-  browser: string;
-  location: string;
-  os: string;
-  device: string;
-}
-
-export function getUserAccessData(userData: IRequestInfo['userData']): IUserDataInfo {
+export function getUserAccessData(userData: IRequestInfoDto['userData']): IUserDataInfo {
   const location = userData.location ? `${userData.location?.city}, ${userData.location?.region}, ${userData.location?.country}`: '';
   const browser = `${userData.deviceInfo?.browser?.name} ${userData.deviceInfo?.browser?.major }`;
   const os = `${userData.deviceInfo?.os?.name} ${userData.deviceInfo?.os?.version}`;

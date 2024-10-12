@@ -1,4 +1,5 @@
-import { IRequestInfo, JwtAuthGuard, User } from '@gym-app/user/api';
+import { JwtAuthGuard, User } from '@gym-app/user/api';
+import { IRequestInfoDto } from '@gym-app/user/types';
 import {
   Body,
   Controller,
@@ -28,7 +29,7 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() data: LoginDto, @Req() req: IRequestInfo) {
+  async login(@Body() data: LoginDto, @Req() req: IRequestInfoDto) {
     return this.authService.login(data, req.userData);
   }
 
@@ -37,26 +38,26 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async refreshToken(
     @Headers('authorization') token: string,
-      @Req() req: IRequestInfo
+      @Req() req: IRequestInfoDto
   ): Promise<{ token: string }> {
     return this.authService.refreshToken(req.user?.id || '', token, req.userData);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Body() data: LogoutDto, @Req() req: IRequestInfo) {
+  async logout(@Body() data: LogoutDto, @Req() req: IRequestInfoDto) {
     return this.authService.logout(data, req.userData);
   }
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() data: SignupDto, @Req() req: IRequestInfo): Promise<Omit<User, 'password'>> {
+  async signup(@Body() data: SignupDto, @Req() req: IRequestInfoDto): Promise<Omit<User, 'password'>> {
     return this.authService.signup(data, req.userData);
   }
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(new ValidationPipe()) data: ForgotPasswordDto, @Req() req: IRequestInfo) {
+  async forgotPassword(@Body(new ValidationPipe()) data: ForgotPasswordDto, @Req() req: IRequestInfoDto) {
     return this.authService.forgotPassword(data, req.userData);
   }
 
@@ -68,7 +69,7 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
-  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto, @Req() req: IRequestInfo) {
+  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto, @Req() req: IRequestInfoDto) {
     return this.authService.changePassword(data, req.ip);
   }
 

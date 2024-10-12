@@ -1,7 +1,7 @@
 import { EventService } from '@gym-app/shared/api';
 import { UserEventPayload } from '@gym-app/user/api';
+import { IRequestInfoDto } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';
-import { IRequestInfo } from '@gym-app/user/api';
 
 export const AuthEventTypes = {
   login: 'auth.login',
@@ -13,15 +13,15 @@ export const AuthEventTypes = {
 export class AuthEventsService {
   constructor(private eventService: EventService) {}
 
-  emitLogout(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string }) {
+  emitLogout(data: { user: UserEventPayload, userData: IRequestInfoDto['userData'], sessionId: string }) {
     return this.eventService.create(AuthEventTypes.logout, data);
   }
 
-  emitLogin(data: { user: UserEventPayload, userData: IRequestInfo['userData'], sessionId: string, isFirstTimeOnDevice: boolean }) {
+  emitLogin(data: { user: UserEventPayload, userData: IRequestInfoDto['userData'], sessionId: string, isFirstTimeOnDevice: boolean }) {
     return this.eventService.create(AuthEventTypes.login, data);
   }
 
-  emitSignup(data: { user: UserEventPayload, userData: IRequestInfo['userData'] }) {
+  emitSignup(data: { user: UserEventPayload, userData: IRequestInfoDto['userData'] }) {
     return this.eventService.create(AuthEventTypes.signup, data);
   }
 }

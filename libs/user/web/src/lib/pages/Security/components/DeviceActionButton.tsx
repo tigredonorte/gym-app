@@ -1,10 +1,10 @@
+import { IDeviceInfo } from '@gym-app/user/types';
 import { mdiClose } from '@mdi/js';
 import Icon from '@mdi/react';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IDeviceInfo } from '../../../reducer/session.types';
 
 interface DeviceActionButtonProps {
   isCurrentDevice: boolean;

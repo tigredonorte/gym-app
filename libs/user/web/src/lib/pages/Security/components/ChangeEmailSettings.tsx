@@ -1,12 +1,11 @@
 import { EmailField, ErrorAlert } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/shared/web';
-import { CardHeader, CrudContainer, CloseButton } from '@gym-app/shared/web';
+import { CardHeader, CloseButton, CrudContainer, Form, FormContainerType } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUser } from '../../../reducer';
 import { ChangeEmailSettingFormType } from '../../../reducer/UserActions';
 import { PendingChangeChange } from './PendingChangeConfirmation';
 

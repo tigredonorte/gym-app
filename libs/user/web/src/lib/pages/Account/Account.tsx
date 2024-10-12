@@ -1,10 +1,10 @@
-import { ActionStatus, EnvContext, getStatussesProperty } from '@gym-app/shared/web';
-import { CrudContainer } from '@gym-app/shared/web';
+import { ActionStatus, CrudContainer, EnvContext, getStatussesProperty } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { getUser, getUserState, getUserStatus, IUser, UserActionTypes } from '../../reducer';
+import { getUser, getUserState, getUserStatus, UserActionTypes } from '../../reducer';
 import { loadUser, saveProfileInfo, uploadUserImage } from '../../reducer/UserActions';
 import './Account.scss';
 import { DeleteAccount } from './DeleteAccount';

@@ -1,39 +1,5 @@
-export interface IDeviceInfo {
-  sessionId: string;
-  accessId: string;
-  updatedAt: string;
-  isCurrentDevice: boolean;
-  browser: { name?: string; version?: string; major?: string; };
-  os: { name?: string; version?: string; };
-  device: { model?: string; type?: string; vendor?: string; };
-  mappedDevice: {
-    browser: string;
-    os: string;
-    device: string;
-  }
-}
+import { IDeviceInfo, ILocation } from '@gym-app/user/types';
 
-export interface ILocation {
-  range?: [number, number];
-  country?: string;
-  region?: string;
-  eu?: '0' | '1';
-  timezone?: string;
-  city?: string;
-  ll?: [number, number];
-  metro?: number;
-  area?: number;
-}
-
-export interface IRequestInfo {
-  ip: string;
-  clientIp?: string;
-  userData: {
-    deviceInfo?: IDeviceInfo;
-    location?: ILocation | null;
-    ip?: string;
-  }
-}
 export interface IAccessLog {
   id: string;
   createdAt: string;

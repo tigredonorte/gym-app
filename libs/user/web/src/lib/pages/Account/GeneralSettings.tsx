@@ -1,13 +1,12 @@
 import { ErrorAlert, NameField } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/shared/web';
-import { CardBody, CardHeader } from '@gym-app/shared/web';
+import { CardBody, CardHeader, Form, FormContainerType } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import { mdiContentSaveOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import { Stack } from '@mui/system';
 import { useTranslation } from 'react-i18next';
-import { IUser } from '../../reducer';
 import './Account.scss';
 import { UserAvatarSection } from './components/UserAvatar';
 

@@ -1,4 +1,5 @@
 import { CardHeader } from '@gym-app/shared/web';
+import { IPasswordHistoryItem, IUser } from '@gym-app/user/types';
 import { mdiClose } from '@mdi/js';
 import Icon from '@mdi/react';
 import { IconButton, Typography } from '@mui/material';
@@ -11,7 +12,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IPasswordHistoryItem, IUser } from '../../../reducer';
 
 interface ChangePasswordHistorySectionProps {
   user: IUser | undefined;

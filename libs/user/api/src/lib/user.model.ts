@@ -1,7 +1,7 @@
+import { IRecoveredCode, IUserDto, IUserEmailHistory, IUserPasswordHistory } from '@gym-app/user/types';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Exclude, Type } from 'class-transformer';
 import { Document } from 'mongoose';
-import { IRecoveredCode, IUser, IUserEmailHistory, IUserPasswordHistory } from './interfaces/IUser';
 
 class RecoverCode implements IRecoveredCode {
   @Prop() code?: string;
@@ -29,7 +29,7 @@ class UserPasswordHistory implements IUserPasswordHistory {
 }
 
 @Schema()
-export class User implements Omit<IUser, 'id'> {
+export class User implements Omit<IUserDto, 'id'> {
   @Prop({ required: false, minlength: 3 }) name!: string;
 
   @Prop({ required: false, unique: true }) email!: string;

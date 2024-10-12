@@ -1,6 +1,6 @@
 import { EventService, NotificationGateway } from '@gym-app/shared/api';
+import { UserReturnType } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';
-import { UserReturnType } from './interfaces';
 
 export const UserEventTypes = {
   created: 'user.created',

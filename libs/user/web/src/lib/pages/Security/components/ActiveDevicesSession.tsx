@@ -1,5 +1,5 @@
-import { ActionStatus } from '@gym-app/shared/web';
-import { CardHeader, CrudContainer } from '@gym-app/shared/web';
+import { ActionStatus, CardHeader, CrudContainer } from '@gym-app/shared/web';
+import { IDeviceInfo } from '@gym-app/user/types';
 import { mdiCellphone, mdiDesktopTower, mdiTablet } from '@mdi/js';
 import Icon from '@mdi/react';
 import Box from '@mui/material/Box';
@@ -10,7 +10,6 @@ import Typography from '@mui/material/Typography';
 import { differenceInDays, format, formatDistanceToNow, isBefore, subWeeks } from 'date-fns';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IDeviceInfo } from '../../../reducer/session.types';
 import { DeviceActionButton } from './DeviceActionButton';
 
 export interface HistoryRow {

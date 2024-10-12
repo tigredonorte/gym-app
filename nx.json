@@ -41,6 +41,11 @@
         "{workspaceRoot}/eslint.config.js"
       ],
       "cache": true
+    },
+    "@nx/js:tsc": {
+      "cache": true,
+      "dependsOn": ["^build"],
+      "inputs": ["production", "^production"]
     }
   },
   "namedInputs": {
@@ -77,5 +82,13 @@
   },
   "nxCloud": {
     "enabled": false
-  }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "eslint:lint"
+      }
+    }
+  ]
 }

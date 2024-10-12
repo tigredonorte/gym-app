@@ -1,10 +1,10 @@
-import { IDeviceInfo, ILocation } from './IRequestInfo';
+import { IDeviceInfoDto, ILocationDto } from './IRequestInfo';
 
 export interface IAccessLog {
   _id: string;
   createdAt: Date;
   ip: string;
-  location: ILocation;
+  location: ILocationDto;
   logoutDate?: Date;
 }
 
@@ -18,7 +18,7 @@ export enum SessionStatus {
 
 export interface ISession {
   userId: string;
-  deviceInfo: IDeviceInfo;
+  deviceInfo: IDeviceInfoDto;
   sessionId: string;
   status: SessionStatus;
   access: IAccessLog[];

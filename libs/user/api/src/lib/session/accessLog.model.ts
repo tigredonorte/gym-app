@@ -1,6 +1,6 @@
+import { AccessLogType, ILocationDto } from '@gym-app/user/types';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { AccessLogType, ILocation } from '../interfaces';
 
 @Schema({ timestamps: true })
 export class AccessLog implements AccessLogType {
@@ -8,7 +8,7 @@ export class AccessLog implements AccessLogType {
     ip!: string;
 
   @Prop({ type: Object, required: true })
-    location!: ILocation;
+    location!: ILocationDto;
 
   @Prop()
     logoutDate?: Date;

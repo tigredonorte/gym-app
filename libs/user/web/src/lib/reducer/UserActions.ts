@@ -1,8 +1,9 @@
 import { deleteRequest, getRequest, IPaginationRequest, postRequest, requestData } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import { Dispatch } from '@reduxjs/toolkit';
 import { IAccessLog, IFetchedSession } from './session.types';
 import { UserActions } from './UserReducer';
-import { IUser, UserActionTypes, UserState } from './UserReducer.types';
+import { UserActionTypes, UserState } from './UserReducer.types';
 
 export const { setActionType } = UserActions;
 
@@ -194,6 +195,6 @@ export const uploadUserImage = (file: File) => async (dispatch: Dispatch, getSta
 
       const response = await postRequest<{ fileUrl: string }>(`user/${id}/upload-avatar`, formData);
 
-      dispatch(UserActions.updateUser({ avatar: response.fileUrl }));
+      dispatch(UserActions.updateUser({ userAvatar: response.fileUrl }));
     }
   });

@@ -16,14 +16,14 @@ export interface IUserEmailHistory {
 
 export interface IUserPasswordHistory {
   password?: string;
+  code?: string;
   createdAt: Date;
   expiresAt: Date;
-  code?: string;
   confirmed: boolean;
   ip: string;
 }
 
-export interface IUser {
+export interface IUserDto {
   id: string;
   name: string;
   email: string;
@@ -36,4 +36,21 @@ export interface IUser {
   passwordHistory?: IUserPasswordHistory[];
 }
 
-export type UserReturnType = Omit<IUser, 'password'> & { id?: string };
+export interface IPasswordHistoryItem extends Omit<IUserPasswordHistory, 'password' | 'code' | 'createdAt' | 'expiresAt'> {
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface IUser extends Omit<IUserDto, 'password' | 'passwordHistory'> {
+  emailHistory?: IUserEmailHistory[];
+  passwordHistory?: IPasswordHistoryItem[];
+}
+
+export interface IUserDataInfo {
+  browser: string;
+  location: string;
+  os: string;
+  device: string;
+}
+
+export type UserReturnType = Omit<IUserDto, 'password'> & { id?: string };
