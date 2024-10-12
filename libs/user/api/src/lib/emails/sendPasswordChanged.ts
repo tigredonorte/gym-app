@@ -1,5 +1,5 @@
 import { getEmailTemplate } from '@gym-app/shared/api';
-import { IUserDataInfo } from '../request-info-middleware';
+import { IUserDataInfo } from '@gym-app/user/types';
 
 interface ISendPasswordChanged {
   recoverLink: string

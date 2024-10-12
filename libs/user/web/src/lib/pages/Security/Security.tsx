@@ -1,11 +1,11 @@
-import { IPagination } from '@gym-app/shared/web';
-import { ConfirmationDialog, CrudContainer } from '@gym-app/shared/web';
+import { ConfirmationDialog, CrudContainer, IPagination } from '@gym-app/shared/web';
+import { IDeviceInfo, IUser } from '@gym-app/user/types';
 import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation, WithTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { getAccesses, getDevices, getSessions, getUser, getUserState, IUser, UserRequestStatusses } from '../../reducer';
-import { IAccessLog, IDeviceInfo, ISession } from '../../reducer/session.types';
+import { getAccesses, getDevices, getSessions, getUser, getUserState, UserRequestStatusses } from '../../reducer';
+import { IAccessLog, ISession } from '../../reducer/session.types';
 import {
   cancelChangeEmail,
   cancelChangePassword,
@@ -19,10 +19,10 @@ import {
   logoutDevice,
 } from '../../reducer/UserActions';
 import { ActiveDevicesSession } from './components/ActiveDevicesSession';
+import { ChangeEmailSettings } from './components/ChangeEmailSettings';
 import { ChangePasswordHistorySection } from './components/ChangePasswordHistorySection';
 import { ChangePassworSection } from './components/ChangePasswordSection';
 import { LoginHistorySection } from './components/LoginHistorySection';
-import { ChangeEmailSettings } from './components/ChangeEmailSettings';
 
 interface SecurityPropsActions {
   loadUser: () => void;

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
 import { Model, Types } from 'mongoose';
-import { IAccessLog, IRequestInfo, ISession, IUser, SessionStatus } from '../interfaces';
+import { IAccessLog, IRequestInfoDto, ISession, IUserDto, SessionStatus } from '@gym-app/user/types';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { SessionEventsService } from './session-events.service';
 import { Session, SessionDocument } from './session.model';
@@ -21,10 +21,10 @@ export class SessionService {
     private readonly sessionEvents: SessionEventsService,
   ) {}
 
-  async createSession(userId: string, userData: IRequestInfo['userData'], token: string): Promise<{ sessionId: string, accessId: string }> {
+  async createSession(userId: string, userData: IRequestInfoDto['userData'], token: string): Promise<{ sessionId: string, accessId: string }> {
     const accessData: IAccessLog = {  _id: new Types.ObjectId().toString(), ip: userData.ip || '' , location: userData.location } as IAccessLog;
     const sessionId = await this.getSessionHash(userData);
-    const deviceInfo = userData.deviceInfo || ({} as IRequestInfo['userData']['deviceInfo']);
+    const deviceInfo = userData.deviceInfo || ({} as IRequestInfoDto['userData']['deviceInfo']);
 
     const session = await this.sessionModel.findOneAndUpdate(
       { sessionId, status: { $ne: SessionStatus.DELETED } },
@@ -64,7 +64,7 @@ export class SessionService {
   }
 
   async getSessionHash(
-    userData: IRequestInfo['userData']
+    userData: IRequestInfoDto['userData']
   ): Promise<string> {
     return await argon2.hash(JSON.stringify(userData));
   }
@@ -97,7 +97,7 @@ export class SessionService {
     return session.userId;
   }
 
-  async isFirstTimeOnDevice(userDataOrSessionId: IRequestInfo['userData'] | string): Promise<boolean> {
+  async isFirstTimeOnDevice(userDataOrSessionId: IRequestInfoDto['userData'] | string): Promise<boolean> {
     console.info('Checking if user is first time on device', userDataOrSessionId);
     const sessionId = (typeof userDataOrSessionId === 'string') ? userDataOrSessionId : await this.getSessionHash(userDataOrSessionId);
     const session = await this.sessionModel.findOne({ sessionId }).select('_id').exec();
@@ -148,7 +148,7 @@ export class SessionService {
     return { items, currentPage, totalPages, totalItems };
   }
 
-  async logoutDevice(sessionId: string, accessId: string, userData: IUser): Promise<void> {
+  async logoutDevice(sessionId: string, accessId: string, userData: IUserDto): Promise<void> {
     const session = await this.sessionModel.findOneAndUpdate(
       {
         sessionId,

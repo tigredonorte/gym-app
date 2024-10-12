@@ -1,7 +1,7 @@
+import { IUserDto } from '@gym-app/user/types';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { IUser } from '../interfaces/IUser';
 import { UserService } from '../user.service';
 import { IS_PUBLIC_KEY } from './public.decorator';
 
@@ -20,7 +20,7 @@ export class AuthorGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
-    const request = context.switchToHttp().getRequest<Request & { user: IUser }>();
+    const request = context.switchToHttp().getRequest<Request & { user: IUserDto }>();
     const user = request.user;
 
     if (!user) {

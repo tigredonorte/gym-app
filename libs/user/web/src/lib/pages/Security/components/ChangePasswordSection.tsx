@@ -1,12 +1,11 @@
 import { ErrorAlert, PasswordField } from '@gym-app/auth/web';
-import { Form, FormContainerType } from '@gym-app/shared/web';
-import { CardHeader, CrudContainer } from '@gym-app/shared/web';
+import { CardHeader, CrudContainer, Form, FormContainerType } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import { mdiLock } from '@mdi/js';
 import Icon from '@mdi/react';
 import Card from '@mui/material/Card';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IUser } from '../../../reducer';
 import { ChangePasswordFormType } from '../../../reducer/UserActions';
 import { PendingChangeChange } from './PendingChangeConfirmation';
 

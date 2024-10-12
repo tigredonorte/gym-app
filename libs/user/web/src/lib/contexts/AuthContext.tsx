@@ -1,6 +1,5 @@
-import { postRequest, WebSocketContext } from '@gym-app/shared/web';
-import { CrudBox } from '@gym-app/shared/web';
-import { IUser } from '@gym-app/user/web';
+import { CrudBox, postRequest, WebSocketContext } from '@gym-app/shared/web';
+import { IUser } from '@gym-app/user/types';
 import { mdiLoading } from '@mdi/js';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { connect } from 'react-redux';

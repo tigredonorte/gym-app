@@ -1,5 +1,6 @@
 import { EmailService } from '@gym-app/shared/api';
-import { IRequestInfo, IUser, SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
+import { SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
+import { IRequestInfoDto, IUserDto } from '@gym-app/user/types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { jwtDecode } from 'jwt-decode';
@@ -21,7 +22,7 @@ export class AuthService {
     private sessionService: SessionService,
   ) {}
 
-  async signup(data: SignupDto, userData: IRequestInfo['userData']): Promise<Omit<User, 'password'>> {
+  async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
     const result = await this.userService.create(data);
     const { name, id, email } = result;
     await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
@@ -32,7 +33,7 @@ export class AuthService {
     return this.userService.emailExists(data.email);
   }
 
-  async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfo['userData']) {
+  async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfoDto['userData']) {
     const id = await this.sessionService.removeSession(sessionId, accessId);
     const user = await this.userService.findById(id);
     if (!user || !user.id) {
@@ -42,7 +43,7 @@ export class AuthService {
     return {};
   }
 
-  async login({ email, password }: LoginDto, userData: IRequestInfo['userData']) {
+  async login({ email, password }: LoginDto, userData: IRequestInfoDto['userData']) {
     const result = await this.userService.findByEmailAndPassword(email, password);
 
     if (!result || !result.id) {
@@ -65,7 +66,7 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfo['userData']) {
+  async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfoDto['userData']) {
     const response = await this.userService.createRecoverCode(data.email);
     const emailData = getUserAccessData(userData);
     await this.emailService.sendRenderedEmail(
@@ -106,7 +107,7 @@ export class AuthService {
     return {};
   }
 
-  async refreshToken(userId: string, oldToken: string, userData: IRequestInfo['userData']): Promise<{ token: string }> {
+  async refreshToken(userId: string, oldToken: string, userData: IRequestInfoDto['userData']): Promise<{ token: string }> {
 
     if (!userId) {
       throw new UnauthorizedError('You must inform the user id');
@@ -116,7 +117,7 @@ export class AuthService {
       throw new UnauthorizedError('User not found');
     }
 
-    const tokenData = jwtDecode<IUser>(oldToken);
+    const tokenData = jwtDecode<IUserDto>(oldToken);
     if (tokenData?.id !== userId) {
       throw new UnauthorizedError('Invalid token');
     }
@@ -144,7 +145,7 @@ export class AuthService {
     };
   }
 
-  private getToken(user: IUser): string {
+  private getToken(user: IUserDto): string {
     return jwt.sign(
       user,
       JWT_SECRET,

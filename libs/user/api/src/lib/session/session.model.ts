@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { IAccessLog, IDeviceInfo, ISession, SessionStatus } from '../interfaces';
+import { IAccessLog, IDeviceInfoDto, ISession, SessionStatus } from '@gym-app/user/types';
 import { AccessLogSchema } from './accessLog.model';
 
 @Schema({ timestamps: true })
@@ -9,7 +9,7 @@ export class Session implements ISession {
     userId!: string;
 
   @Prop({ type: Object })
-    deviceInfo!: IDeviceInfo;
+    deviceInfo!: IDeviceInfoDto;
 
   @Prop({ required: true })
     sessionId!: string;
