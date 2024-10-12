@@ -29,6 +29,16 @@ const request = async <RequestData, RequestResponse>({
       headers.Authorization = `Bearer ${token}`;
     }
 
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) {
+      headers['Session-Id'] = sessionId;
+    }
+
+    const accessId = localStorage.getItem('accessId');
+    if (accessId) {
+      headers['Access-Id'] = accessId;
+    }
+
     path = path.startsWith('/') ? path.slice(1) : path;
     const response = await fetch(`${context.backendEndpoint}/${path}`, {
       method,
