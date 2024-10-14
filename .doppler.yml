@@ -1,0 +1,4 @@
+setup:
+  token: ${DOPPLER_TOKEN}
+  project: ${DOPPLER_PROJECT}
+  config: ${DOPPLER_CONFIG}

@@ -31,8 +31,10 @@ start_mongo() {
   local hasReplicaSet=${MONGO_ENABLE_REPLICA_SET:-false}
   local allowExternalConnections=${MONGO_ALLOW_EXTERNAL_CONNECTIONS:-false}
 
-  if check_mongo_started $auth; then
-    stop_mongo $auth
+  if _check_mongo_started "true"; then
+    stop_mongo "true"
+  elif _check_mongo_started "false"; then
+    stop_mongo "false"
   fi
 
   echo "@@Starting MongoDB with auth={$auth}"
@@ -63,6 +65,19 @@ _wait_mongo_start() {
 }
 
 check_mongo_started() {
+  if _check_mongo_started "true"; then
+    echo "@@Mongo started with authentication"
+    return 0
+  elif _check_mongo_started "false"; then
+    echo "@@Mongo started without authentication"
+    return 0
+  else
+    echo "@@Mongo not started"
+    return 1
+  fi
+}
+
+_check_mongo_started() {
   local auth=$1
   echo "@@Checking mongo status. Authenticated=($auth) "
 
@@ -71,7 +86,7 @@ check_mongo_started() {
     authString="--username ${MONGO_INITDB_ROOT_USERNAME} --password ${MONGO_INITDB_ROOT_PASSWORD} --authenticationDatabase admin"
   fi
   
-  status=$(mongosh --quiet $authString --eval "db.adminCommand('ping').ok")
+  status=$(mongosh --quiet --host localhost --port 27017 $authString --eval "db.adminCommand('ping').ok")
 
   echo "@@mongo status: $status"
 
