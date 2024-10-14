@@ -9,7 +9,7 @@
   "scripts": {
     "setup": "bash ./infra/local/init-repository.sh",
     "preinstall": "npx only-allow pnpm",
-    "dev": "NODE_ENV=development && doppler run -- docker compose up --build --timestamps --watch --attach api --attach web",
+    "dev": "NODE_ENV=development && doppler setup && doppler run -- docker compose up --build --timestamps --watch --attach api --attach web",
     "build": "nx run-many --target=build --all --exclude=gym-app --no-cloud",
     "lint": "nx run-many --target=lint --all --no-cloud",
     "lint:fix": "nx run-many --target=lint --all --fix",
