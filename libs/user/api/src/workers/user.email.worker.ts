@@ -18,8 +18,8 @@ export class UserEmailWorker {
     this.queueName = this.configService.get<string>('QUEUE_NAME') || 'default';
   }
 
-  @Process('sendChangeEmailCode')
-  async handleSendChangeEmailCode(job: Job<{
+  @Process('changeEmailCode')
+  async changeEmailCode(job: Job<{
     user: IUser,
     userData: IUserDataInfo,
     oldEmail: string,
@@ -44,55 +44,24 @@ export class UserEmailWorker {
 
     return result;
   }
-  @Process('sendDeviceLoginAlert')
-  async handleSendDeviceLoginAlert(job: Job<{ user: IUser }>) {
-    const { user } = job.data;
-    return await this.sendEmail({
-      ejsFile: 'auth/api/login.email',
-      subject: 'New login on your account',
-      featureFlag: process.env['ENABLE_LOGIN_EMAIL'] === 'true',
-      title: 'New Login Alert',
-      email: user.email,
-      emailData: {
-        securitySettingsLink: `${process.env['FRONTEND_URL']}/user/security`,
-      },
-    });
-  }
-
-  @Process('sendPasswordChanged')
-  async handleSendPasswordChanged(job: Job<any>) {
-    const { email, userData } = job.data;
-    return await this.sendEmail({
-      ejsFile: 'user/api/change-password-success',
-      subject: 'Password successfully changed',
-      featureFlag: true,
-      title: 'Password changed',
-      email,
-      emailData: {
-        recoverLink: `${process.env['FRONTEND_URL']}/auth/forgot-password?email=${email}`,
-        ...userData,
-      },
-    });
-  }
-
-  private async sendEmail(data: {
-    ejsFile: string,
-    subject: string,
-    featureFlag: boolean,
-    title: string,
+  
+  @Process('revertChangeEmailCode')
+  async revertChangeEmailCode(job: Job<{
     email: string,
-    emailData: { [key: string]: any }
-  }) {
-    const { ejsFile, subject, featureFlag, title, email, emailData } = data;
-    const getEmailDataFn = getEmailTemplate(ejsFile, subject, { title }, featureFlag);
-    if (!getEmailDataFn) {
-      throw new Error('Error getting email template');
-    }
+  }>) {
+    console.log(`Processing job on queue ${this.queueName}:`, job.data);
 
-    await this.emailService.sendRenderedEmail(getEmailDataFn(email, {
-      title,
-      ...emailData,
-    }));
-    return true;
+    // await this.emailService.sendRenderedEmail(sendChangeEmailReverted(oldEmail, {}));
+    // const { email } = job.data;
+
+    // const html = await renderRevertChangeEmailCode()
+
+    // const result = await this.emailService.sendEmail({
+    //   to: oldEmail,
+    //   subject: 'Change email reverted successfully',
+    //   html,
+    // });
+
+    // return result;
   }
 }

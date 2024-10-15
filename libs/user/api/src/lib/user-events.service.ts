@@ -58,7 +58,11 @@ export class UserEventsService {
     userData: IUserDataInfo;
   }) {
     this.emitUserEdited(data.user);
-    await this.queueService.addJob('sendChangeEmailCode', data);
+    await this.queueService.addJob('changeEmailCode', data);
+  }
+  async emitRevertUpdateEmail(data: { user: Partial<UserReturnType>; email: string }) {
+    this.emitUserEdited(data.user);
+    await this.queueService.addJob('revertChangeEmailCode', { email: data.email });
   }
 
   getEventName(id: string, event: string) {

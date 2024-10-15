@@ -3,6 +3,7 @@ import { AccessDetails } from '../base/AccessDetails';
 import { Email } from '../base/Email';
 import { DefaultEmailProps } from '../base/Email.model';
 import { tailwindConfig, typography } from '../base/tailwind.config';
+import { defaultProps } from '../base/defaultProps.config';
 
 export interface ChangeEmailAttemptProps extends DefaultEmailProps {
   changeEmailLink: string;
@@ -64,6 +65,7 @@ ChangeEmailAttempt.defaultProps = {
 };
 
 ChangeEmailAttempt.PreviewProps = {
+  ...defaultProps,
   changeEmailLink: 'https://thomfilg.com',
   changePasswordLink: 'https://thomfilg.com',
   location: 'Lagos, Nigeria',
@@ -71,16 +73,6 @@ ChangeEmailAttempt.PreviewProps = {
   browser: 'Chrome',
   os: 'iOS',
   title: 'Change Email Attempt',
-
-  companyName: 'Tech Solutions Inc.',
-  tagline: 'Innovate Your World',
-  logoSrc: 'https://picsum.photos/90',
-  address: '456 Innovation Drive, Tech City, TX 78901',
-  email: 'contact@techsolutions.com',
-  phoneNumber: '+1234567890',
-  facebookLink: 'https://facebook.com/techsolutions',
-  xLink: 'https://x.com/techsolutions',
-  instagramLink: 'https://instagram.com/techsolutions',
 };
 
 

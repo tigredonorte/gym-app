@@ -365,7 +365,7 @@ export class UserService {
     }
 
     const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => changeEmailCode === emailHistoryItem.changeEmailCode);
-    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
+    if (emailHistoryItemIndex === -1 || emailHistoryItemIndex === undefined) {
       throw new BadRequestException('Invalid change email code');
     }
 
@@ -437,7 +437,8 @@ export class UserService {
     }
 
     const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => revertChangeEmailCode === emailHistoryItem.revertChangeEmailCode);
-    if (!emailHistoryItemIndex || emailHistoryItemIndex === -1) {
+    if (emailHistoryItemIndex === -1 || emailHistoryItemIndex === undefined) {
+      console.log('Invalid revert change email code', revertChangeEmailCode, user.emailHistory);
       throw new BadRequestException('Invalid revert change email code');
     }
 
@@ -449,12 +450,12 @@ export class UserService {
       throw new BadRequestException('Old email not found');
     }
 
-    await this.emailService.sendRenderedEmail(sendChangeEmailReverted(user.email, {}));
+    const oldEmail = user.email;
     user.email = user.emailHistory?.[emailHistoryItemIndex].oldEmail;
     user.emailHistory = user.emailHistory?.filter((emailHistoryItem) => emailHistoryItem.email !== user.email);
 
     await user.save();
-    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
+    await this.userEventService.emitRevertUpdateEmail({ user: this.getUserReturnData(user) as UserReturnType, email: oldEmail });
   }
 
   private addEmailToHistory(emailHistory: UserDocument['emailHistory'], newEmail: string, oldEmail: string) {
