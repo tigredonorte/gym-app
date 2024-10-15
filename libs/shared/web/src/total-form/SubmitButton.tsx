@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import { Button, ButtonOwnProps } from '@mui/material';
 import { useFormContext } from './FormContext';
 

@@ -50,7 +50,6 @@ export const UserAvatarSection: React.FC<UserAvatarSectionProps> = ({ onChangeIm
           ref={inputRef}
           type="file"
           accept="image/*"
-          // eslint-disable-next-line react-native/no-inline-styles
           style={{ display: 'none' }}
           onChange={handleFileChange}
         />

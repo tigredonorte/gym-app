@@ -8,17 +8,14 @@ module.exports = {
     'ecmaVersion': 12,
     'sourceType': 'module'
   },
-  plugins: ['@typescript-eslint', 'react', 'react-native'],
+  plugins: ['@typescript-eslint', 'react'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
-    'plugin:react-native/all',
   ],
   rules: {
     'react/display-name': 0,
-    'react-native/no-raw-text': 0,
-    'react-native/split-platform-components': 0,
     'react/jsx-uses-react': 'off',
     'react/react-in-jsx-scope': 'off',
     'react/no-unescaped-entities': 'off',
@@ -39,9 +36,6 @@ module.exports = {
     }],
     '@typescript-eslint/no-unused-vars': ['error', { 'ignoreRestSiblings': true }],
     'no-trailing-spaces': ['error']
-  },
-  env: {
-    'react-native/react-native': true,
   },
   'settings': {
     'react': {
