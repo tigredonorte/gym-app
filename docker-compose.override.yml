@@ -19,6 +19,18 @@ services:
     restart: "no"
     environment:
       - NODE_ENV=development
-      - DOPPLER_TOKEN=${DOPPLER_TOKEN} 
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
+    volumes:
+      - ./:/usr/src/app
+  
+  workers:
+    build:
+      context: .
+      dockerfile: ./apps/workers/Dockerfile.dev
+    command: ["doppler", "run", "--", "npx", "nx", "serve", "workers"]
+    restart: "no"
+    environment:
+      - NODE_ENV=development
+      - DOPPLER_TOKEN=${DOPPLER_TOKEN}
     volumes:
       - ./:/usr/src/app

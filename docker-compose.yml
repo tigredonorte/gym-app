@@ -12,6 +12,7 @@ services:
     depends_on:
       - api
       - web
+      - workers
     networks:
       - gym-network
 
@@ -45,6 +46,41 @@ services:
     expose:
       - "3000"
       - "5000"
+
+  workers:
+    build:
+      context: .
+      dockerfile: ./apps/workers/Dockerfile
+    healthcheck:
+      test: ["CMD", "node", "./infra/workers/healthcheck.js"]
+      interval: 300s
+      timeout: 10s
+      retries: 3
+    restart: always
+    networks:
+      - gym-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    expose:
+      - "3333"
+
+  redis:
+    image: redis:latest
+    ports:
+      # - "6379:6379"
+      - "6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - gym-network
 
   mongo1:
     build:
@@ -81,6 +117,8 @@ services:
       - mongo1_configdb:/data/configdb
 
 volumes:
+  redis-data:
+    driver: local
   mongo1_db:
   mongo1_configdb:
 

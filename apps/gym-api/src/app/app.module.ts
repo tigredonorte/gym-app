@@ -1,5 +1,5 @@
 import { AuthModule } from '@gym-app/auth/api';
-import { EventModule, MetricsModule } from '@gym-app/shared/api';
+import { EventModule, MetricsModule, QueueModule } from '@gym-app/shared/api';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -20,8 +20,12 @@ import { AppService } from './app.service';
         MONGO_DB: Joi.string().required(),
         MONGO_URI: Joi.string(),
         MONGO_ENABLE_REPLICA_SET: Joi.string(),
+        REDIS_HOST: Joi.string().required(),
+        REDIS_PORT: Joi.number().required(),
+        QUEUE_NAME: Joi.string().required(),
       }),
     }),
+    QueueModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => {
