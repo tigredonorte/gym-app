@@ -1,31 +1,15 @@
-import { AuthModule } from '@gym-app/auth/api';
-import { EventModule, MetricsModule, QueueModule } from '@gym-app/shared/api';
-import { UserModule } from '@gym-app/user/api';
+import { QueueModule } from '@gym-app/shared/api';
+import { UserWorkerModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import Joi from 'joi';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    AuthModule,
-    UserModule,
-    MetricsModule,
     ConfigModule.forRoot({
-      validationSchema: Joi.object({
-        MONGO_USER: Joi.string().required(),
-        MONGO_PASSWORD: Joi.string().required(),
-        MONGO_DB: Joi.string().required(),
-        MONGO_URI: Joi.string(),
-        MONGO_ENABLE_REPLICA_SET: Joi.string(),
-        REDIS_HOST: Joi.string().required(),
-        REDIS_PORT: Joi.number().required(),
-        QUEUE_NAME: Joi.string().required(),
-      }),
+      isGlobal: true,
     }),
-    QueueModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => {
@@ -41,9 +25,10 @@ import { AppService } from './app.service';
       },
       inject: [ConfigService],
     }),
-    EventModule,
+    QueueModule,
+    UserWorkerModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}

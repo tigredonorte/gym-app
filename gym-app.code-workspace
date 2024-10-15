@@ -17,12 +17,20 @@
 			"path": "apps/gym-web-app-e2e/src"
 		},
 		{
+			"name": "workers-app",
+			"path": "apps/workers/src"
+		},
+		{
+			"name": "workers-app-e2e",
+			"path": "apps/workers-e2e/src"
+		},
+		{
 			"name": "auth-api",
-			"path": "libs/auth/api/src",
+			"path": "libs/auth/api/src"
 		},
 		{
 			"name": "auth-web",
-			"path": "libs/auth/web/src",
+			"path": "libs/auth/web/src"
 		},
 		{
 			"name": "shared-api",
@@ -50,7 +58,7 @@
 		},
 		{
 			"path": "."
-		},
+		}
 	],
 	"settings": {
 		"eslint.enable": true,
