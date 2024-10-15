@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { EmailService, getEmailTemplate } from '@gym-app/shared/api';
+import { renderChangeEmailAttempt } from '@gym-app/user/emails';
 import { IUser, IUserDataInfo } from '@gym-app/user/types';
 import { Process, Processor } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
@@ -18,7 +18,7 @@ export class UserEmailWorker {
     this.queueName = this.configService.get<string>('QUEUE_NAME') || 'default';
   }
 
-  @Process('sendChangeEmailCode') // Job name
+  @Process('sendChangeEmailCode')
   async handleSendChangeEmailCode(job: Job<{
     user: IUser,
     userData: IUserDataInfo,
@@ -28,18 +28,21 @@ export class UserEmailWorker {
     console.log(`Processing job on queue ${this.queueName}:`, job.data);
     const { userData, user, oldEmail, changeEmailCode } = job.data;
     const { id } = user;
-    return await this.sendEmail({
-      ejsFile: 'user/api/change-email-attempt',
-      subject: 'Attempt to change your email',
-      featureFlag: true,
+
+    const html = await renderChangeEmailAttempt({
+      ...userData,
       title: 'Change your email',
-      email: oldEmail,
-      emailData: {
-        ...userData,
-        changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${changeEmailCode}`,
-        changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`,
-      },
+      changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${changeEmailCode}`,
+      changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
+    })
+
+    const result = await this.emailService.sendEmail({
+      to: oldEmail,
+      subject: 'Attempt to change your email',
+      html,
     });
+
+    return result;
   }
   @Process('sendDeviceLoginAlert')
   async handleSendDeviceLoginAlert(job: Job<{ user: IUser }>) {

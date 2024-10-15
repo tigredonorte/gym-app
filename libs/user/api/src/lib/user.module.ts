@@ -1,5 +1,4 @@
-import { EmailModule } from '@gym-app/shared/api';
-import { EventModule } from '@gym-app/shared/api';
+import { EmailModule, EventModule, QueueModule } from '@gym-app/shared/api';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -17,7 +16,8 @@ import { UserService } from './user.service';
     MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     EmailModule,
     EventModule,
-    JwtModule
+    JwtModule,
+    QueueModule,
   ],
   controllers: [UserController],
   providers: [UserService, UserEventsService, SessionService, JwtAuthGuard, SessionEventsService],

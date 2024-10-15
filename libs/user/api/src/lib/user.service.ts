@@ -1,12 +1,10 @@
 import { EmailService } from '@gym-app/shared/api';
-import { renderChangeEmailAttempt } from '@gym-app/user/emails';
 import { IRequestUserDataDto, IUserDto, UserReturnType } from '@gym-app/user/types';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import { Model } from 'mongoose';
-import { sendChangeEmailCode } from './emails/sendChangeEmailCode';
 import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
 import { sendEmailChanged } from './emails/sendEmailChanged';
@@ -350,19 +348,11 @@ export class UserService {
     user.emailHistory = this.addEmailToHistory(user.emailHistory, newEmail, oldEmail);
     await user.save();
 
-    this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
-
-    const html = await renderChangeEmailAttempt({
-      title: 'Change your email',
-      ...getUserAccessData(userData),
-      changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${user.emailHistory[user.emailHistory.length - 1].changeEmailCode}`,
-      changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
-    })
-
-    await this.emailService.sendEmail({
-      to: oldEmail,
-      subject: 'Attempt to change your email',
-      html,
+    await this.userEventService.emitUpdateEmail({
+      user: this.getUserReturnData(user) as UserReturnType,
+      oldEmail,
+      changeEmailCode: user.emailHistory[user.emailHistory.length - 1].changeEmailCode as string,
+      userData: getUserAccessData(userData),
     });
 
     return user.emailHistory;
