@@ -1,0 +1,9 @@
+{
+  "name": "user-emails",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/user/emails/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project user-emails --web",
+  "targets": {}
+}

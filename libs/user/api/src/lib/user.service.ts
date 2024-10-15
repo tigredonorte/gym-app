@@ -1,4 +1,5 @@
 import { EmailService } from '@gym-app/shared/api';
+import { renderChangeEmailAttempt } from '@gym-app/user/emails';
 import { IRequestUserDataDto, IUserDto, UserReturnType } from '@gym-app/user/types';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -350,11 +351,20 @@ export class UserService {
     await user.save();
 
     this.userEventService.emitUserEdited(this.getUserReturnData(user) as UserReturnType);
-    await this.emailService.sendRenderedEmail(sendChangeEmailCode(oldEmail, {
+
+    const html = await renderChangeEmailAttempt({
+      title: 'Change your email',
       ...getUserAccessData(userData),
       changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${user.emailHistory[user.emailHistory.length - 1].changeEmailCode}`,
       changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
-    }));
+    })
+
+    await this.emailService.sendEmail({
+      to: oldEmail,
+      subject: 'Attempt to change your email',
+      html,
+    });
+
     return user.emailHistory;
   }
 

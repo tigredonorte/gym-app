@@ -1,8 +1,8 @@
 import { Img, Link, Section } from '@react-email/components';
 import React from 'react';
-import { DefaultProps } from './Email.model';
+import { DefaultEmailProps } from './Email.model';
 
-export const Footer: React.FC<DefaultProps> = ({
+export const Footer: React.FC<DefaultEmailProps> = ({
   companyName,
   tagline,
   logoSrc,
@@ -17,7 +17,6 @@ export const Footer: React.FC<DefaultProps> = ({
     <Section className="w-full">
       <table className="w-full text-center">
         <tbody>
-          {/* Logo Row */}
           {logoSrc && (
             <tr>
               <td align="center">
@@ -26,7 +25,6 @@ export const Footer: React.FC<DefaultProps> = ({
             </tr>
           )}
 
-          {/* Company Name and Tagline as Inputs */}
           {(companyName || tagline) && (
             <tr>
               <td>
@@ -50,7 +48,6 @@ export const Footer: React.FC<DefaultProps> = ({
             </tr>
           )}
 
-          {/* Social Media Icons Row */}
           {(facebookLink || xLink || instagramLink) && (
             <tr>
               <td align="center">
@@ -90,7 +87,6 @@ export const Footer: React.FC<DefaultProps> = ({
             </tr>
           )}
 
-          {/* Address and Contact Info as Inputs */}
           {(address || email || phoneNumber) && (
             <tr>
               <td>

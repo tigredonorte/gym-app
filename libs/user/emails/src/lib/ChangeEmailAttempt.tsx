@@ -1,9 +1,10 @@
 import { Button, Container, Heading, Section, Text } from '@react-email/components';
-import React from 'react';
-import { AccessDetails } from './utils/AccessDetails';
-import { Email } from './utils/Email';
+import { AccessDetails } from '../base/AccessDetails';
+import { Email } from '../base/Email';
+import { DefaultEmailProps } from '../base/Email.model';
+import { tailwindConfig, typography } from '../base/tailwind.config';
 
-interface ChangeEmailAttemptProps {
+export interface ChangeEmailAttemptProps extends DefaultEmailProps {
   changeEmailLink: string;
   changePasswordLink: string;
   location?: string;
@@ -18,10 +19,8 @@ export default function ChangeEmailAttempt(props: ChangeEmailAttemptProps) {
 
   return (
     <Email {...props}>
-      {/* Use Tailwind classes to define container styles */}
       <Container className="max-w-lg mx-auto p-5 pt-0">
 
-        {/* Title and content section */}
         <Section className="text-center mt-8">
           <Section className="mt-8 text-center">
             <Heading className="text-3xl font-semibold leading-10 tracking-wide text-gray-900">
@@ -31,7 +30,6 @@ export default function ChangeEmailAttempt(props: ChangeEmailAttemptProps) {
               We received one request to change your account email. You can click on the link below to confirm the new email address.
             </Text>
 
-            {/* Primary button for "Change Email" */}
             <Button
               className="mt-4 rounded-lg bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6"
               href={changeEmailLink}
@@ -60,6 +58,11 @@ export default function ChangeEmailAttempt(props: ChangeEmailAttemptProps) {
   );
 }
 
+ChangeEmailAttempt.defaultProps = {
+  tailwindConfig,
+  typography,
+};
+
 ChangeEmailAttempt.PreviewProps = {
   changeEmailLink: 'https://thomfilg.com',
   changePasswordLink: 'https://thomfilg.com',
@@ -79,3 +82,5 @@ ChangeEmailAttempt.PreviewProps = {
   xLink: 'https://x.com/techsolutions',
   instagramLink: 'https://instagram.com/techsolutions',
 };
+
+

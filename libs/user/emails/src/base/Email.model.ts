@@ -1,5 +1,4 @@
-
-export interface DefaultProps {
+export interface DefaultEmailProps {
   companyName?: string;
   tagline?: string;
   logoSrc?: string;
@@ -9,4 +8,6 @@ export interface DefaultProps {
   facebookLink?: string;
   xLink?: string;
   instagramLink?: string;
+  typography?: any;
+  tailwindConfig?: any;
 }

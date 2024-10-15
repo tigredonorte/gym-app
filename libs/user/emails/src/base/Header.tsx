@@ -1,6 +1,5 @@
 import { Column, Head, Img, Link, Row, Section } from '@react-email/components';
-import React from 'react';
-import { DefaultProps } from './Email.model';
+import { DefaultEmailProps } from './Email.model';
 
 export const Header = ({
   facebookLink,
@@ -8,7 +7,7 @@ export const Header = ({
   instagramLink,
   logoSrc,
   companyName,
-}: DefaultProps) => (
+}: DefaultEmailProps) => (
   <Head>
     <Section className="px-8 pt-10 pb-0">
       <Row>
