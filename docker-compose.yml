@@ -114,12 +114,57 @@ services:
       - mongo1_db:/data/db
       - mongo1_configdb:/data/configdb
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    command: start
+    environment:
+      - KC_DB_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - KC_HOSTNAME_URL=http://${KC_HOSTNAME}:${NGINX_HOST_PORT}
+    env_file:
+      - .env
+      - .doppler.env
+    ports:
+      - "${KEYCLOAK_PORT}"
+      - "9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gym-network
+      - auth-network
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}"
+    env_file:
+      - .env
+      - .doppler.env
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   redis-data:
     driver: local
+  pgdata:
   mongo1_db:
   mongo1_configdb:
 
 networks:
   gym-network:
   mongo-cluster:
+  auth-network:
+    driver: bridge

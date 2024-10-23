@@ -57,6 +57,7 @@
 			"path": "infra"
 		},
 		{
+			"name": "gym-app",
 			"path": "."
 		}
 	],
@@ -80,5 +81,8 @@
 		"migrations.json": true,
    },
 	 "search.followSymlinks": false,
+	 "cSpell.words": [
+	 	"keycloak"
+	 ],
 	}
 }

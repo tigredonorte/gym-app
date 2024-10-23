@@ -1,6 +1,7 @@
 {
   "jest.useDashedArgs": true,
   "cSpell.words": [
+    "keycloak",
     "linebreak",
     "preinstall"
   ]
