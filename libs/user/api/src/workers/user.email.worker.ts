@@ -1,4 +1,4 @@
-import { EmailService, getEmailTemplate } from '@gym-app/shared/api';
+import { EmailService } from '@gym-app/shared/api';
 import { renderChangeEmailAttempt } from '@gym-app/user/emails';
 import { IUser, IUserDataInfo } from '@gym-app/user/types';
 import { Process, Processor } from '@nestjs/bull';
@@ -34,7 +34,7 @@ export class UserEmailWorker {
       title: 'Change your email',
       changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${changeEmailCode}`,
       changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
-    })
+    });
 
     const result = await this.emailService.sendEmail({
       to: oldEmail,
@@ -44,7 +44,7 @@ export class UserEmailWorker {
 
     return result;
   }
-  
+
   @Process('revertChangeEmailCode')
   async revertChangeEmailCode(job: Job<{
     email: string,

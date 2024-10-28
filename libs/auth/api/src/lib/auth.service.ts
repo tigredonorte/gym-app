@@ -4,11 +4,11 @@ import { IRequestInfoDto, IUserDto } from '@gym-app/user/types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { jwtDecode } from 'jwt-decode';
+import * as _ from 'lodash';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
 import { UnauthorizedError } from './errors/UnauthorizedError';
-import _ = require('lodash');
 
 const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';
 

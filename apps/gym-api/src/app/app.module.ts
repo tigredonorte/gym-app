@@ -1,4 +1,5 @@
 import { AuthModule } from '@gym-app/auth/api';
+import { KeycloakModule } from '@gym-app/keycloak';
 import { EventModule, MetricsModule, QueueModule } from '@gym-app/shared/api';
 import { UserModule } from '@gym-app/user/api';
 import { Module } from '@nestjs/common';
@@ -7,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { clientId, getRealmConfig } from './realm.config';
 
 @Module({
   imports: [
@@ -40,6 +42,11 @@ import { AppService } from './app.service';
         return configuration;
       },
       inject: [ConfigService],
+    }),
+    KeycloakModule.forRoot({
+      realmConfig: getRealmConfig(),
+      clientId,
+      upsertRealmOnInit: true,
     }),
     EventModule,
   ],
