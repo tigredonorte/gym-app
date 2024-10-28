@@ -2,15 +2,15 @@ import { IAccessLog, IRequestInfoDto, IRequestInfoWithUser, ISession, IUserDto, 
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
+import * as fs from 'fs';
 import { diskStorage } from 'multer';
+import * as path from 'path';
 import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
 import { PaginationResult, SessionService } from './session';
 import { ChangePasswordDto, LogoutDeviceDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
-import path = require('path');
-import fs = require('fs');
 
 @Controller('user')
 @UseGuards(AuthorGuard)

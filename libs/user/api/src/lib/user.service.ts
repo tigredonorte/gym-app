@@ -4,8 +4,8 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
+import * as _ from 'lodash';
 import { Model } from 'mongoose';
-import { sendChangeEmailReverted } from './emails/sendChangeEmailReverted';
 import { sendChangePasswordCode } from './emails/sendChangePasswordCode';
 import { sendEmailChanged } from './emails/sendEmailChanged';
 import { sendPasswordChanged } from './emails/sendPasswordChanged';
@@ -13,7 +13,6 @@ import { getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
 import { IChangePassword, IUpdateEmail } from './user.dto';
 import { User, UserDocument } from './user.model';
-import _ = require('lodash');
 
 @Injectable()
 export class UserService {

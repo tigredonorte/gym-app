@@ -1,3 +1,4 @@
+import { KeycloakModule } from '@gym-app/keycloak';
 import { EmailModule, EventModule, QueueModule } from '@gym-app/shared/api';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -18,6 +19,7 @@ import { UserService } from './user.service';
     EventModule,
     JwtModule,
     QueueModule,
+    KeycloakModule
   ],
   controllers: [UserController],
   providers: [UserService, UserEventsService, SessionService, JwtAuthGuard, SessionEventsService],
