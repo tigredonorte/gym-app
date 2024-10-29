@@ -29,9 +29,11 @@ services:
       dockerfile: ./apps/gym-api/Dockerfile
     healthcheck:
       test: ["CMD", "node", "./infra/api/healthcheck.js"]
-      interval: 300s
+      interval: 5m
       timeout: 10s
       retries: 3
+      start_period: 1m
+      start_interval: 10s
     restart: always
     networks:
       - mongo-cluster
@@ -50,9 +52,11 @@ services:
       dockerfile: ./apps/workers/Dockerfile
     healthcheck:
       test: ["CMD", "node", "./infra/workers/healthcheck.js"]
-      interval: 300s
+      interval: 5m
       timeout: 10s
       retries: 3
+      start_period: 1m
+      start_interval: 10s
     restart: always
     networks:
       - gym-network
@@ -66,7 +70,6 @@ services:
   redis:
     image: redis:latest
     ports:
-      # - "6379:6379"
       - "6379"
     volumes:
       - redis-data:/data

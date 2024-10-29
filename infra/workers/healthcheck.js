@@ -5,7 +5,7 @@ const healthCheck = async () => {
   try {
     console.info('Starting health check...');
     const [apiResponse] = await Promise.allSettled([
-      checkAPIHealth('http://nginx/api/'),
+      checkAPIHealth('http://localhost:3333'),
     ]);
 
     if (apiResponse.status === 'rejected') {
