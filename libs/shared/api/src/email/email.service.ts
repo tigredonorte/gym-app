@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import sgMail from '@sendgrid/mail';
 import { renderFile } from 'ejs';
 import * as _ from 'lodash';
+import { logger } from '../logger';
 import { EmailLoggerService } from './emailLogger.service';
 
 export interface ISendMail {
@@ -70,7 +71,7 @@ export class EmailService {
       return response;
     } catch (error) {
       const logError = _.get(error, 'response.body') || error;
-      console.error('Email sending error:', logError);
+      logger.error('Email sending error:', logError);
       return logError;
     }
   }

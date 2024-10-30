@@ -1,13 +1,15 @@
 import { Request } from 'express';
-import util from 'util';
-import winston, { Logger } from 'winston';
+import * as util from 'util';
+import * as winston from 'winston';
 import { getSession } from './logger.metrics';
 
-const isDevelopment = () => process.env.NODE_ENV === 'development';
+type Logger = winston.Logger;
+
+const isDevelopment = () => process.env['NODE_ENV'] === 'development';
 
 const splatSymbol = Symbol.for('splat');
 export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env['LOG_LEVEL'] || 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message, [splatSymbol]: splatArgs = [] }) => {

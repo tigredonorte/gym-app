@@ -1,8 +1,9 @@
+import { logger } from '@gym-app/shared/api';
+import { IAccessLog, IRequestInfoDto, ISession, IUserDto, SessionStatus } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
 import { Model, Types } from 'mongoose';
-import { IAccessLog, IRequestInfoDto, ISession, IUserDto, SessionStatus } from '@gym-app/user/types';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { SessionEventsService } from './session-events.service';
 import { Session, SessionDocument } from './session.model';
@@ -48,7 +49,7 @@ export class SessionService {
     const isNew = session.createdAt.getTime() === session.updatedAt.getTime();
     const id: string = session._id.toString();
     const accessId: string = session.access[session.access.length - 1]._id.toString();
-    console.info(`Session with id ${id} and access id ${accessId} was ${isNew ? 'created' : 'updated'} for user ${userId}`);
+    logger.info(`Session with id ${id} and access id ${accessId} was ${isNew ? 'created' : 'updated'} for user ${userId}`);
     return {
       sessionId: id,
       accessId,
@@ -98,7 +99,7 @@ export class SessionService {
   }
 
   async isFirstTimeOnDevice(userDataOrSessionId: IRequestInfoDto['userData'] | string): Promise<boolean> {
-    console.info('Checking if user is first time on device', userDataOrSessionId);
+    logger.info('Checking if user is first time on device', userDataOrSessionId);
     const sessionId = (typeof userDataOrSessionId === 'string') ? userDataOrSessionId : await this.getSessionHash(userDataOrSessionId);
     const session = await this.sessionModel.findOne({ sessionId }).select('_id').exec();
     return !session;

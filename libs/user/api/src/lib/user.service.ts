@@ -1,4 +1,4 @@
-import { EmailService } from '@gym-app/shared/api';
+import { EmailService, logger } from '@gym-app/shared/api';
 import { IRequestUserDataDto, IUserDto, UserReturnType } from '@gym-app/user/types';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -131,13 +131,13 @@ export class UserService {
     }).select('+recoverCode').exec();
 
     if (!user?.recoverCode?.code) {
-      console.error('No recover code found');
+      logger.error('No recover code found');
       return false;
     }
 
     const isSameCode = await this.decryptPassword(code, user.recoverCode.code);
     if (!isSameCode) {
-      console.error('Failure to decrypt code');
+      logger.error('Failure to decrypt code');
       return false;
     }
 
@@ -257,13 +257,13 @@ export class UserService {
     }).select('+passwordHistory').select('+recoverCode').exec();
 
     if (!user?.recoverCode?.changePasswordCode) {
-      console.error('No recover code found');
+      logger.error('No recover code found');
       return false;
     }
 
     const isSameCode = await this.decryptPassword(token, user.recoverCode.changePasswordCode);
     if (!isSameCode) {
-      console.error('Failure to decrypt code' + token);
+      logger.error('Failure to decrypt code' + token);
       return false;
     }
 
@@ -437,7 +437,7 @@ export class UserService {
 
     const emailHistoryItemIndex = user.emailHistory?.findIndex((emailHistoryItem) => revertChangeEmailCode === emailHistoryItem.revertChangeEmailCode);
     if (emailHistoryItemIndex === -1 || emailHistoryItemIndex === undefined) {
-      console.log('Invalid revert change email code', revertChangeEmailCode, user.emailHistory);
+      logger.info('Invalid revert change email code', revertChangeEmailCode, user.emailHistory);
       throw new BadRequestException('Invalid revert change email code');
     }
 

@@ -1,4 +1,4 @@
-import { EmailService } from '@gym-app/shared/api';
+import { EmailService, logger } from '@gym-app/shared/api';
 import { renderChangeEmailAttempt } from '@gym-app/user/emails';
 import { IUser, IUserDataInfo } from '@gym-app/user/types';
 import { Process, Processor } from '@nestjs/bull';
@@ -25,7 +25,7 @@ export class UserEmailWorker {
     oldEmail: string,
     changeEmailCode: string,
   }>) {
-    console.log(`Processing job on queue ${this.queueName}:`, job.data);
+    logger.info(`Processing job on queue ${this.queueName}:`, job.data);
     const { userData, user, oldEmail, changeEmailCode } = job.data;
     const { id } = user;
 
@@ -49,7 +49,7 @@ export class UserEmailWorker {
   async revertChangeEmailCode(job: Job<{
     email: string,
   }>) {
-    console.log(`Processing job on queue ${this.queueName}:`, job.data);
+    logger.info(`Processing job on queue ${this.queueName}:`, job.data);
 
     // await this.emailService.sendRenderedEmail(sendChangeEmailReverted(oldEmail, {}));
     // const { email } = job.data;
