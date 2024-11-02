@@ -1,6 +1,6 @@
+import { getCachedHash, getConfigHash, logger, setCachedHash } from '@gym-app/shared/api';
 import { Inject, Injectable } from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
-import axiosRetry from 'axios-retry';
+import { KeycloakBaseService } from './keycloak-base.service';
 import {
   ClientRepresentation,
   IdentityProviderRepresentation,
@@ -8,98 +8,45 @@ import {
   RoleRepresentation,
 } from './keycloak.model';
 
+const cacheFilePath = './realmConfigHashCache.txt';
+
 @Injectable()
 export class KeycloakService {
-  private axiosInstance: AxiosInstance;
-  private token: string;
-  private tokenExpiresAtMS: number;
-
   constructor(
     @Inject('KEYCLOAK_REALM_CONFIG') private realmConfig: RealmRepresentation,
     @Inject('KEYCLOAK_REALM') private realm: string,
-    @Inject('KEYCLOAK_BASE_URL') private baseUrl: string,
     @Inject('KEYCLOAK_LIVE_UPSERT_REALM') private enableLiveUpsertRealm: boolean,
+    public kc: KeycloakBaseService,
   ) {
-    this.axiosInstance = axios.create({
-      baseURL: this.baseUrl,
-    });
-    axiosRetry(this.axiosInstance, {
-      retries: 3,
-      retryDelay: axiosRetry.exponentialDelay,
-      retryCondition: (error) => {
-        return axiosRetry.isNetworkOrIdempotentRequestError(error);
-      },
-      onMaxRetryTimesExceeded: (error, retryCount) => {
-        console.error(`Failed to make the request after ${retryCount} retries.`);
-        throw error;
-      }
-    });
-
     this.init();
   }
 
   private async init() {
-    await this.authenticateKeycloak();
-    if (this.enableLiveUpsertRealm) {
-      await this.upsertRealm(this.realmConfig);
-    }
-  }
-
-  public getToken(): string {
-    return this.token;
-  }
-
-  public async authenticateKeycloak() {
     try {
-      if (this.token && Date.now() < this.tokenExpiresAtMS) {
-        console.log('Already authenticated with Keycloak.');
-        return;
+      await this.kc.authenticateKeycloak();
+      if (this.enableLiveUpsertRealm) {
+        await this.upsertRealm(this.realmConfig);
       }
-
-      const response = await this.axiosInstance.post(
-        '/realms/master/protocol/openid-connect/token',
-        new URLSearchParams({
-          username: process.env.KC_BOOTSTRAP_ADMIN_USERNAME,
-          password: process.env.KC_BOOTSTRAP_ADMIN_PASSWORD,
-          grant_type: 'password',
-          client_id: 'admin-cli',
-        }),
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
-      );
-
-      const data = response.data;
-      this.token = data.access_token;
-
-      this.tokenExpiresAtMS = Date.now() + data.expires_in * 1000;
-
-      this.axiosInstance.defaults.headers.common[
-        'Authorization'
-      ] = `Bearer ${this.token}`;
-
-      console.log('Authenticated with Keycloak realm: master');
     } catch (error) {
-      console.error('Failed to authenticate with Keycloak:', error.response, error);
-      throw error;
-    }
-  }
-
-  public async ensureAuthenticated() {
-    if (!this.token || Date.now() >= this.tokenExpiresAtMS) {
-      await this.authenticateKeycloak();
+      logger.error('Failed to initialize Keycloak service:', error.response?.data || error);
     }
   }
 
   async upsertRealm(realmConfig: RealmRepresentation) {
     try {
-      await this.ensureAuthenticated();
+      const currentHash = await getConfigHash(realmConfig);
+      const cachedHash = await getCachedHash(cacheFilePath);
+
+      if (currentHash === cachedHash) {
+        logger.info(`Realm configuration for ${realmConfig.realm} has not changed. Skipping upsert.`);
+        return;
+      }
+
+      await this.kc.ensureAuthenticated();
 
       let realmExists = false;
       try {
-        await this.axiosInstance.get(`/admin/realms/${realmConfig.realm}`);
+        await this.kc.getAxios().get(`/admin/realms/${realmConfig.realm}`);
         realmExists = true;
       } catch (error) {
         if (error.response && error.response.status === 404) {
@@ -109,74 +56,46 @@ export class KeycloakService {
         }
       }
 
+      logger.info(realmConfig['clients']);
+
       if (realmExists) {
-        await this.axiosInstance.put(
-          `/admin/realms/${realmConfig.realm}`,
-          realmConfig,
-        );
-        console.log(`Realm ${realmConfig.realm} updated successfully.`);
+        await Promise.all([
+          this.kc.getAxios().put(`/admin/realms/${realmConfig.realm}`, realmConfig),
+          ...(realmConfig['clients']?.map((client) => this.createClient(client)) || []),
+          ...(realmConfig['identityProviders']?.map((client) => this.createIdentityProvider(client)) || []),
+        ]);
+
+        logger.info(`Realm ${realmConfig.realm} updated successfully.`);
+
       } else {
-        await this.axiosInstance.post('/admin/realms', realmConfig);
-        console.log(`Realm ${realmConfig.realm} created successfully.`);
+        await this.kc.getAxios().post('/admin/realms', realmConfig);
+        logger.info(`Realm ${realmConfig.realm} created successfully.`);
       }
+
+      await setCachedHash(cacheFilePath, currentHash);
     } catch (error) {
-      console.error(`Failed to upsert realm ${realmConfig.realm}:`, error.response?.data || error);
+      logger.error(`Failed to upsert realm ${realmConfig.realm}:`, error.response?.data || error);
       throw error;
     }
   }
 
   async deleteRealm(realmName: string) {
     try {
-      await this.ensureAuthenticated();
+      await this.kc.ensureAuthenticated();
 
-      await this.axiosInstance.delete(`/admin/realms/${realmName}`);
-      console.log(`Realm ${realmName} deleted successfully.`);
+      await this.kc.getAxios().delete(`/admin/realms/${realmName}`);
+      logger.info(`Realm ${realmName} deleted successfully.`);
     } catch (error) {
-      console.error(`Failed to delete realm ${realmName}:`, error.response?.data || error);
-      throw error;
-    }
-  }
-
-  async createClient(clientConfig: ClientRepresentation) {
-    try {
-      await this.ensureAuthenticated();
-
-      // Get clients with matching clientId
-      const response = await this.axiosInstance.get<ClientRepresentation[]>(
-        `/admin/realms/${this.realm}/clients`,
-        {
-          params: {
-            clientId: clientConfig.clientId,
-          },
-        },
-      );
-      const clients = response.data;
-
-      if (clients.length === 0) {
-        // Create the client
-        await this.axiosInstance.post(
-          `/admin/realms/${this.realm}/clients`,
-          clientConfig,
-        );
-        console.log(`Client ${clientConfig.clientId} created successfully.`);
-      } else {
-        console.log(`Client ${clientConfig.clientId} already exists.`);
-      }
-    } catch (error) {
-      console.error(
-        `Failed to create client ${clientConfig.clientId}:`,
-        error.response?.data || error,
-      );
+      logger.error(`Failed to delete realm ${realmName}:`, error.response?.data || error);
       throw error;
     }
   }
 
   async updateAdminRole() {
     try {
-      await this.ensureAuthenticated();
+      await this.kc.ensureAuthenticated();
 
-      // Get roles
-      const response = await this.axiosInstance.get<RoleRepresentation[]>(
+      const response = await this.kc.getAxios().get<RoleRepresentation[]>(
         `/admin/realms/${this.realm}/roles`,
         {
           params: {
@@ -190,51 +109,87 @@ export class KeycloakService {
 
       if (adminRole) {
         const roleId = adminRole.id!;
-        await this.axiosInstance.put(
+        await this.kc.getAxios().put(
           `/admin/realms/${this.realm}/roles-by-id/${roleId}`,
           { description: 'Updated admin role' },
         );
-        console.log('Admin role updated.');
+        logger.info('Admin role updated.');
       } else {
-        console.log('Admin role not found.');
+        logger.info('Admin role not found.');
       }
     } catch (error) {
-      console.error('Failed to update admin role:', error.response?.data || error);
+      logger.error('Failed to update admin role:', error.response?.data || error);
       throw error;
     }
   }
 
-  async createIdentityProvider(
+  private async createClient(clientConfig: ClientRepresentation) {
+    try {
+      const response = await this.kc.getAxios().get<ClientRepresentation[]>(
+        `/admin/realms/${this.realm}/clients`,
+        {
+          params: {
+            clientId: clientConfig.clientId,
+          },
+        },
+      );
+      const clients = response.data;
+
+      if (clients.length === 0) {
+        await this.kc.getAxios().post(
+          `/admin/realms/${this.realm}/clients`,
+          clientConfig,
+        );
+        logger.info(`Client ${clientConfig.clientId} created successfully.`);
+      } else {
+        const existingClientId = clients[0].id;
+        await this.kc.getAxios().put(
+          `/admin/realms/${this.realm}/clients/${existingClientId}`,
+          clientConfig,
+        );
+        logger.info(`Client ${clientConfig.clientId} updated successfully.`);
+      }
+    } catch (error) {
+      logger.error(
+        `Failed to create client ${clientConfig.clientId}:`,
+        error.response?.data || error,
+      );
+      throw error;
+    }
+  }
+
+  private async createIdentityProvider(
     identityProviderConfig: IdentityProviderRepresentation,
   ) {
     try {
-      await this.ensureAuthenticated();
-
-      // Get existing identity providers
-      const response = await this.axiosInstance.get<IdentityProviderRepresentation[]>(
+      const response = await this.kc.getAxios().get<IdentityProviderRepresentation[]>(
         `/admin/realms/${this.realm}/identity-provider/instances`,
       );
       const identityProviders = response.data;
 
-      const identityProviderExists = identityProviders.some(
+      const existingProvider = identityProviders.find(
         (provider) => provider.alias === identityProviderConfig.alias,
       );
 
-      if (!identityProviderExists) {
-        await this.axiosInstance.post(
+      if (!existingProvider) {
+        await this.kc.getAxios().post(
           `/admin/realms/${this.realm}/identity-provider/instances`,
           identityProviderConfig,
         );
-        console.log(
+        logger.info(
           `Identity provider ${identityProviderConfig.alias} created successfully.`,
         );
       } else {
-        console.log(
-          `Identity provider ${identityProviderConfig.alias} already exists.`,
+        await this.kc.getAxios().put(
+          `/admin/realms/${this.realm}/identity-provider/instances/${existingProvider.alias}`,
+          identityProviderConfig,
+        );
+        logger.info(
+          `Identity provider ${identityProviderConfig.alias} updated successfully.`,
         );
       }
     } catch (error) {
-      console.error(
+      logger.error(
         `Failed to create identity provider ${identityProviderConfig.alias}:`,
         error.response?.data || error,
       );

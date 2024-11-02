@@ -50,7 +50,7 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
     const sessionId = localStorage.getItem('sessionId');
     const accessId = localStorage.getItem('accessId');
     try {
-      webSocketClient?.disconnect();
+      webSocketClient?.channelClear();
       await logoutUser(sessionId as string, accessId as string);
     } catch (error) {
       console.error('Failed to logout:', error);
@@ -95,13 +95,19 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
   }) => {
     const { userId, accessId } = data;
     if (!webSocketClient) {
-      console.warn('WebSocket context not available or userId not provided');
+      console.warn('WebSocket client not available');
       return;
     }
 
-    if (!userId || !isConnected) {
+    if (!userId) {
+      console.warn('userId not provided, clearing channels');
       webSocketClient?.channelClear();
-      console.warn('WebSocket context not available or userId not provided');
+      return;
+    }
+
+    if (!isConnected) {
+      console.warn('WebSocket not connected, clearing channels');
+      webSocketClient?.channelClear();
       return;
     }
 

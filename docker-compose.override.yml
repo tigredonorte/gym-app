@@ -24,6 +24,8 @@ services:
       - DOPPLER_CONFIG=${DOPPLER_CONFIG}
     volumes:
       - ./:/usr/src/app
+    extra_hosts:
+      - "auth.localhost:172.17.0.1"
 
   workers:
     build:

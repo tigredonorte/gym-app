@@ -14,22 +14,28 @@ export const WebSocketContext = createContext<WebSocketContextType>({
 
 export const WebSocketProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [webSocketClient, setWebSocketClient] = useState<WebSocketClient | null>(null);
-  const { websocketEndpoint } = useContext(EnvContext);
+  const { websocketEndpoint } = useContext<{ websocketEndpoint?: string }>(EnvContext);
   const [isConnected, setIsConnected] = useState<boolean>();
 
   useEffect(() => {
     if (websocketEndpoint) {
-      const client = new WebSocketClient(websocketEndpoint as string);
-      client.connect();
-      setWebSocketClient(client);
-      return () => {
-        client.disconnect();
-      };
+      setWebSocketClient(new WebSocketClient(websocketEndpoint));
     }
   }, [websocketEndpoint]);
 
   useEffect(() => {
-    webSocketClient?.connectionStatusChange(setIsConnected);
+    if (!webSocketClient) {
+      return;
+    }
+    webSocketClient.connect();
+    webSocketClient.connectionStatusChange((status) => {
+      setIsConnected(status);
+    });
+
+    return () => {
+      console.warn('Disconnecting WebSocket client');
+      webSocketClient?.disconnect();
+    };
   }, [webSocketClient]);
 
   return (

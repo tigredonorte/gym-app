@@ -58,3 +58,4 @@ mongo-keyfile
 .env.sentry-build-plugin
 .nx
 .doppler.env
+realmConfigHashCache.txt

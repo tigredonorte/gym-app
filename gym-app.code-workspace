@@ -53,6 +53,10 @@
 			"path": "libs/user/web/src"
 		},
 		{
+			"name": "keycloak",
+			"path": "libs/keycloak/src"
+		},
+		{
 			"name": "infra",
 			"path": "infra"
 		},

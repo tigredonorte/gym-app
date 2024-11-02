@@ -43,6 +43,8 @@ export interface PolicyRepresentation {
 export interface ClientRepresentation {
   id?: string;
   clientId?: string;
+  secret?: string;
+  rootUrl?: string;
   name?: string;
   description?: string;
   enabled?: boolean;
@@ -52,14 +54,12 @@ export interface ClientRepresentation {
   protocol?: string;
   attributes?: { [key: string]: any };
   publicClient?: boolean;
-  secret?: string;
   serviceAccountsEnabled?: boolean;
   standardFlowEnabled?: boolean;
   directAccessGrantsEnabled?: boolean;
   implicitFlowEnabled?: boolean;
   bearerOnly?: boolean;
   consentRequired?: boolean;
-  [propName: string]: any;
 }
 
 export interface GroupRepresentation {
@@ -187,4 +187,15 @@ export enum GroupConfigEnum {
   admin = 'Admin',
   manager = 'Manager',
   user = 'User',
+}
+
+export interface IKeycloakLoginResponse {
+  access_token: string;
+  expires_in: number;
+  refresh_expires_in: number;
+  refresh_token: string;
+  token_type: string;
+  'not-before-policy': number;
+  session_state: string;
+  scope: string;
 }

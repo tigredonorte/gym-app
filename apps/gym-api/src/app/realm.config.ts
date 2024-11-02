@@ -1,8 +1,6 @@
 import { IdentityProviderRepresentation, RealmRepresentation } from '@gym-app/keycloak';
 
-export const clientId = 'backend-client';
-
-export const getRealmConfig = (): RealmRepresentation => ({
+export const getRealmConfig = (): RealmRepresentation & { clients } => ({
   realm: process.env.REALM,
   enabled: true,
   registrationAllowed: true,
@@ -28,6 +26,19 @@ export const getRealmConfig = (): RealmRepresentation => ({
   userManagedAccessAllowed: true,
   clients: [
     {
+      clientId: 'backend-client',
+      secret: process.env.BACKEND_CLIENT_SECRET,
+      enabled: true,
+      protocol: 'openid-connect',
+      publicClient: false,
+      rootUrl: `${process.env.KC_HOSTNAME}/realms/${process.env.REALM}`,
+      // rootUrl: `${process.env.KC_HOSTNAME_INTERNAL}:${process.env.KEYCLOAK_PORT}/realms/${process.env.REALM}`,
+      directAccessGrantsEnabled: true,
+      standardFlowEnabled: true,
+      serviceAccountsEnabled: true,
+      clientAuthenticatorType: 'client-secret',
+    },
+    {
       clientId: 'frontend-client',
       enabled: true,
       protocol: 'openid-connect',
@@ -39,17 +50,6 @@ export const getRealmConfig = (): RealmRepresentation => ({
       standardFlowEnabled: true,
       implicitFlowEnabled: false,
       serviceAccountsEnabled: false,
-      clientAuthenticatorType: 'client-secret',
-    },
-    {
-      clientId,
-      enabled: true,
-      protocol: 'openid-connect',
-      publicClient: false,
-      secret: process.env.BACKEND_CLIENT_SECRET,
-      directAccessGrantsEnabled: false,
-      standardFlowEnabled: true,
-      serviceAccountsEnabled: true,
       clientAuthenticatorType: 'client-secret',
     },
   ],

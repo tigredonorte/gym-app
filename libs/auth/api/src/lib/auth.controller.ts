@@ -11,6 +11,7 @@ import {
   Req, UseGuards,
   ValidationPipe
 } from '@nestjs/common';
+import { Public } from 'nest-keycloak-connect';
 import {
   CheckEmailDto,
   ConfirmRecoverPasswordDto,
@@ -22,6 +23,7 @@ import {
 } from './auth.dto';
 import { AuthService } from './auth.service';
 
+@Public()
 @Controller('auth')
 export class AuthController {
 
@@ -29,8 +31,9 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() data: LoginDto, @Req() req: IRequestInfoDto) {
-    return this.authService.login(data, req.userData);
+  async login(@Body() data: LoginDto) {
+    return this.authService.login(data);
+    // return this.authService.login(data, req.userData);
   }
 
   @Post('refreshToken')

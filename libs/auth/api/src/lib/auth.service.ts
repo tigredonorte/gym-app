@@ -1,4 +1,5 @@
-import { EmailService } from '@gym-app/shared/api';
+import { KeycloakAuthService } from '@gym-app/keycloak';
+import { EmailService, logger } from '@gym-app/shared/api';
 import { SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
 import { IRequestInfoDto, IUserDto } from '@gym-app/user/types';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
@@ -20,13 +21,24 @@ export class AuthService {
     private emailService: EmailService,
     private authEventsService: AuthEventsService,
     private sessionService: SessionService,
+    private kcAuth: KeycloakAuthService
   ) {}
 
   async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
-    const result = await this.userService.create(data);
-    const { name, id, email } = result;
-    await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
-    return result;
+  // async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
+    try {
+      const { email, password, name } = data;
+      const [firstName, lastName] = name.split(' ');
+      const result = await this.kcAuth.signup(email, password, email, firstName, lastName);
+      // const { name, id, email } = result;
+      // await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
+      logger.debug(result, userData);
+      // const { name, id, email } = result;
+      return result;
+    } catch (error) {
+      logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
+      throw new UnauthorizedError();
+    }
   }
 
   async checkEmail(data: CheckEmailDto): Promise<boolean> {
@@ -34,36 +46,61 @@ export class AuthService {
   }
 
   async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfoDto['userData']) {
-    const id = await this.sessionService.removeSession(sessionId, accessId);
-    const user = await this.userService.findById(id);
-    if (!user || !user.id) {
-      throw new Error('User not found');
-    }
-    await this.authEventsService.emitLogout({ sessionId, user: { email: user.email, name: user.name, id: `${user.id}` }, userData });
+    // const id = await this.sessionService.removeSession(sessionId, accessId);
+    // const user = await this.userService.findById(id);
+    // if (!user || !user.id) {
+    //   throw new Error('User not found');
+    // }
+    // await this.authEventsService.emitLogout({ sessionId, user: { email: user.email, name: user.name, id: `${user.id}` }, userData });
     return {};
   }
 
-  async login({ email, password }: LoginDto, userData: IRequestInfoDto['userData']) {
-    const result = await this.userService.findByEmailAndPassword(email, password);
+  async login({ email, password }: LoginDto) {
+    try {
+      logger.info('Login with keycloak');
+      const data = await this.kcAuth.login(email, password);
+      logger.info(data);
+      // Decode the access token
+      const decodedAccessToken = jwt.decode(data.access_token) as { sid: string, name: string, email_verified: boolean, sub: string };
+      logger.info('Decoded Access Token:', decodedAccessToken);
 
-    if (!result || !result.id) {
+      // Decode the refresh token if needed
+      const decodedRefreshToken = jwt.decode(data.refresh_token);
+      logger.info('Decoded Refresh Token:', decodedRefreshToken);
+
+      return {
+        id: decodedAccessToken.sub,
+        name: decodedAccessToken.name,
+        email,
+        confirmed: decodedAccessToken.email_verified,
+        sessionId: decodedAccessToken.sid,
+        token: data.access_token,
+      };
+    } catch (error) {
+      logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
       throw new UnauthorizedError();
     }
 
-    const { name, id } = result;
+    // const result = await this.userService.findByEmailAndPassword(email, password);
 
-    const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
+    // if (!result || !result.id) {
+    //   throw new UnauthorizedError();
+    // }
 
-    const token = this.getToken(result);
-    const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
-    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
+    // const { name, id } = result;
 
-    return {
-      ...result,
-      sessionId,
-      accessId,
-      token,
-    };
+    // const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
+
+    // const token = this.getToken(result);
+    // const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
+    // await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
+
+    // return {
+    //   ...result,
+    //   sessionId,
+    //   accessId,
+    //   token,
+    // };
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfoDto['userData']) {

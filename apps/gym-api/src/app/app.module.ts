@@ -8,8 +8,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { clientId, getRealmConfig } from './realm.config';
+import { getRealmConfig } from './realm.config';
 
+const realmConfig = getRealmConfig();
 @Module({
   imports: [
     AuthModule,
@@ -44,9 +45,9 @@ import { clientId, getRealmConfig } from './realm.config';
       inject: [ConfigService],
     }),
     KeycloakModule.forRoot({
-      realmConfig: getRealmConfig(),
-      clientId,
+      realmConfig,
       upsertRealmOnInit: true,
+      client: realmConfig.clients.find((client) => client.clientId === 'backend-client'),
     }),
     EventModule,
   ],

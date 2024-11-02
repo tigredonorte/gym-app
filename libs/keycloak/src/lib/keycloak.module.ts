@@ -1,13 +1,15 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
+import { KeycloakAuthService } from './keycloak-auth.service';
+import { KeycloakBaseService } from './keycloak-base.service';
 import { KeycloakResourceService } from './keycloak-resource.service';
-import { PolicyRepresentation, RealmRepresentation, RoleRepresentation, ScopeRepresentation } from './keycloak.model';
+import { ClientRepresentation, PolicyRepresentation, RealmRepresentation, RoleRepresentation, ScopeRepresentation } from './keycloak.model';
 import { KeycloakService } from './keycloak.service';
 
 interface KeycloakRootOptions {
   realmConfig: RealmRepresentation
-  clientId: string
+  client: ClientRepresentation
   upsertRealmOnInit?: boolean
 }
 
@@ -22,25 +24,33 @@ interface KeycloakChildOptions {
 @Module({})
 export class KeycloakModule {
   static forRoot(options: KeycloakRootOptions): DynamicModule {
+    const authServerUrl = options.client.rootUrl?.split('/realms')[0];
+    console.log('config', {
+      authServerUrl,
+      clientId: options.client.clientId,
+      secret: options.client.secret,
+      realm: options.realmConfig.realm,
+    });
     return {
       module: KeycloakModule,
       imports: [
         KeycloakConnectModule.register({
-          authServerUrl: process.env.KC_HOSTNAME_INTERNAL,
-          realm: process.env.REALM,
-          clientId: process.env.KEYCLOAK_CLIENT_ID,
-          secret: process.env.KEYCLOAK_CLIENT_SECRET,
+          authServerUrl,
+          clientId: options.client.clientId,
+          secret: options.client.secret,
+          realm: options.realmConfig.realm,
         }),
       ],
       providers: [
         KeycloakService,
+        KeycloakBaseService,
         {
           provide: 'KEYCLOAK_REALM_CONFIG',
           useValue: options.realmConfig,
         },
         {
           provide: 'KEYCLOAK_CLIENT_ID',
-          useValue: options.clientId,
+          useValue: options.client.clientId,
         },
         {
           provide: 'KEYCLOAK_REALM',
@@ -48,11 +58,17 @@ export class KeycloakModule {
         },
         {
           provide: 'KEYCLOAK_BASE_URL',
-          useValue: `${process.env.KC_HOSTNAME_INTERNAL}:${process.env.KEYCLOAK_PORT}`,
+          // @TODO() it should work with this external url: process.env.KC_HOSTNAME,
+          // useValue: process.env.KC_HOSTNAME,
+          useValue: authServerUrl,
         },
         {
           provide: 'KEYCLOAK_LIVE_UPSERT_REALM', // use this one to update realm on the fly
           useValue: options.upsertRealmOnInit ?? false,
+        },
+        {
+          provide: 'KEYCLOAK_CLIENT_SECRET',
+          useValue: process.env.KEYCLOAK_CLIENT_SECRET,
         },
         {
           provide: APP_GUARD,
@@ -69,10 +85,13 @@ export class KeycloakModule {
       ],
       exports: [
         KeycloakService,
+        KeycloakBaseService,
         'KEYCLOAK_CLIENT_ID',
         'KEYCLOAK_REALM',
+        'KEYCLOAK_REALM_CONFIG',
         'KEYCLOAK_BASE_URL',
-        'KEYCLOAK_LIVE_UPSERT_REALM'
+        'KEYCLOAK_LIVE_UPSERT_REALM',
+        'KEYCLOAK_CLIENT_SECRET'
       ],
     };
   }
@@ -81,13 +100,16 @@ export class KeycloakModule {
     return {
       module: KeycloakModule,
       providers: [
+        KeycloakAuthService,
         KeycloakResourceService,
         {
           provide: 'KEYCLOAK_CHILD_CONFIG',
           useValue: options,
         },
       ],
-      exports: [KeycloakResourceService],
+      exports: [
+        KeycloakAuthService,
+      ]
     };
   }
 }
