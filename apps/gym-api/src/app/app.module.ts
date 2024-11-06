@@ -17,6 +17,7 @@ const realmConfig = getRealmConfig();
     UserModule,
     MetricsModule,
     ConfigModule.forRoot({
+      isGlobal: true,
       validationSchema: Joi.object({
         MONGO_USER: Joi.string().required(),
         MONGO_PASSWORD: Joi.string().required(),
