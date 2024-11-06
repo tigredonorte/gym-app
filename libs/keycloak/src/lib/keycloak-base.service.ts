@@ -101,6 +101,7 @@ export class KeycloakBaseService {
     } finally {
       if (KeycloakBaseService.authState.token) {
         this.axiosInstance.defaults.headers.common[ 'Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
+        this.axiosInstanceRealm.defaults.headers.common[ 'Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
       }
     }
   }

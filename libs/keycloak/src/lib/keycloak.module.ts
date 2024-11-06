@@ -1,6 +1,6 @@
 import { DynamicModule, Global, Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard } from 'nest-keycloak-connect';
+import { AuthGuard, KeycloakConnectModule, ResourceGuard, RoleGuard, TokenValidation } from 'nest-keycloak-connect';
 import { KeycloakAuthService } from './keycloak-auth.service';
 import { KeycloakBaseService } from './keycloak-base.service';
 import { KeycloakResourceService } from './keycloak-resource.service';
@@ -25,12 +25,6 @@ interface KeycloakChildOptions {
 export class KeycloakModule {
   static forRoot(options: KeycloakRootOptions): DynamicModule {
     const authServerUrl = options.client.rootUrl?.split('/realms')[0];
-    console.log('config', {
-      authServerUrl,
-      clientId: options.client.clientId,
-      secret: options.client.secret,
-      realm: options.realmConfig.realm,
-    });
     return {
       module: KeycloakModule,
       imports: [
@@ -39,6 +33,7 @@ export class KeycloakModule {
           clientId: options.client.clientId,
           secret: options.client.secret,
           realm: options.realmConfig.realm,
+          tokenValidation: TokenValidation.OFFLINE
         }),
       ],
       providers: [
@@ -86,6 +81,7 @@ export class KeycloakModule {
       exports: [
         KeycloakService,
         KeycloakBaseService,
+        KeycloakConnectModule,
         'KEYCLOAK_CLIENT_ID',
         'KEYCLOAK_REALM',
         'KEYCLOAK_REALM_CONFIG',
@@ -109,6 +105,7 @@ export class KeycloakModule {
       ],
       exports: [
         KeycloakAuthService,
+        KeycloakResourceService,
       ]
     };
   }

@@ -1,17 +1,13 @@
-import { KeycloakAuthService } from '@gym-app/keycloak';
+
+import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
 import { EmailService, logger } from '@gym-app/shared/api';
-import { SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
-import { IRequestInfoDto, IUserDto } from '@gym-app/user/types';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { SessionService, UserService, getUserAccessData } from '@gym-app/user/api';
+import { IRequestInfoDto } from '@gym-app/user/types';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { jwtDecode } from 'jwt-decode';
-import * as _ from 'lodash';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
-import { UnauthorizedError } from './errors/UnauthorizedError';
-
-const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';
 
 @Injectable()
 export class AuthService {
@@ -24,34 +20,46 @@ export class AuthService {
     private kcAuth: KeycloakAuthService
   ) {}
 
-  async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
-  // async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
+  async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<CreatedUser> {
+    let result: CreatedUser;
     try {
       const { email, password, name } = data;
       const [firstName, lastName] = name.split(' ');
-      const result = await this.kcAuth.signup(email, password, email, firstName, lastName);
-      // const { name, id, email } = result;
-      // await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
-      logger.debug(result, userData);
-      // const { name, id, email } = result;
-      return result;
+      result = await this.kcAuth.signup({ email, password, firstName, lastName });
+      const { id } = result;
+      await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
     } catch (error) {
       logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
-      throw new UnauthorizedError();
+      throw new UnauthorizedException();
     }
+
+    try {
+      await this.kcAuth.createResource({
+        name: 'user',
+        uri: `/user/${result.id}`,
+        type: 'user',
+        owner: { id: result.id, name: result.name },
+      });
+    } catch (error) {
+      logger.error('Failed to create resource in Keycloak', this.kcAuth.kc.getErrorDetails(error));
+      throw new InternalServerErrorException();
+    }
+    return result;
+
   }
 
   async checkEmail(data: CheckEmailDto): Promise<boolean> {
-    return this.userService.emailExists(data.email);
+    return this.kcAuth.checkUserExistsByEmail(data.email);
   }
 
-  async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfoDto['userData']) {
-    // const id = await this.sessionService.removeSession(sessionId, accessId);
-    // const user = await this.userService.findById(id);
-    // if (!user || !user.id) {
-    //   throw new Error('User not found');
-    // }
-    // await this.authEventsService.emitLogout({ sessionId, user: { email: user.email, name: user.name, id: `${user.id}` }, userData });
+  async logout({ sessionId, refreshToken }: LogoutDto, token: string, userData: IRequestInfoDto['userData']) {
+    try {
+      const { email, name, sub: id } = jwt.decode(token) as { sub: string, name: string, email: string };
+      await this.kcAuth.logout(refreshToken);
+      await this.authEventsService.emitLogout({ sessionId, user: { email, name, id }, userData });
+    } catch (error) {
+      logger.error('Failed to logout on keycloak', this.kcAuth.kc.getErrorDetails(error));
+    }
     return {};
   }
 
@@ -59,48 +67,25 @@ export class AuthService {
     try {
       logger.info('Login with keycloak');
       const data = await this.kcAuth.login(email, password);
-      logger.info(data);
-      // Decode the access token
-      const decodedAccessToken = jwt.decode(data.access_token) as { sid: string, name: string, email_verified: boolean, sub: string };
-      logger.info('Decoded Access Token:', decodedAccessToken);
-
-      // Decode the refresh token if needed
-      const decodedRefreshToken = jwt.decode(data.refresh_token);
-      logger.info('Decoded Refresh Token:', decodedRefreshToken);
+      const {
+        sub: id,
+        name, email_verified: confirmed,
+        sid: sessionId,
+      } = jwt.decode(data.access_token) as { sid: string, name: string, email_verified: boolean, sub: string };
 
       return {
-        id: decodedAccessToken.sub,
-        name: decodedAccessToken.name,
+        id,
+        name,
         email,
-        confirmed: decodedAccessToken.email_verified,
-        sessionId: decodedAccessToken.sid,
+        confirmed,
+        sessionId,
         token: data.access_token,
+        refreshToken: data.refresh_token,
       };
     } catch (error) {
       logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
-      throw new UnauthorizedError();
+      throw new UnauthorizedException();
     }
-
-    // const result = await this.userService.findByEmailAndPassword(email, password);
-
-    // if (!result || !result.id) {
-    //   throw new UnauthorizedError();
-    // }
-
-    // const { name, id } = result;
-
-    // const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
-
-    // const token = this.getToken(result);
-    // const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
-    // await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
-
-    // return {
-    //   ...result,
-    //   sessionId,
-    //   accessId,
-    //   token,
-    // };
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfoDto['userData']) {
@@ -144,49 +129,17 @@ export class AuthService {
     return {};
   }
 
-  async refreshToken(userId: string, oldToken: string, userData: IRequestInfoDto['userData']): Promise<{ token: string }> {
-
-    if (!userId) {
-      throw new UnauthorizedError('You must inform the user id');
-    }
-    const user = await this.userService.findById(userId);
-    if (!user) {
-      throw new UnauthorizedError('User not found');
+  async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {
+    if (!refreshToken) {
+      throw new HttpException('Refresh token is required to refresh the token.', HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    const tokenData = jwtDecode<IUserDto>(oldToken);
-    if (tokenData?.id !== userId) {
-      throw new UnauthorizedError('Invalid token');
+    try {
+      const result = await this.kcAuth.refreshToken(refreshToken);
+      return result;
+    } catch (error) {
+      logger.error('Failed to refresh token', this.kcAuth.kc.getErrorDetails(error));
+      throw new UnauthorizedException('Failed to refresh token');
     }
-
-    oldToken = oldToken.replace('Bearer ', '');
-    const session = await this.sessionService.getSessionByToken(oldToken);
-
-    if (!session) {
-      throw new UnauthorizedError('Session not found');
-    }
-
-    if (!_.isEqual(session.deviceInfo, userData.deviceInfo)) {
-      throw new UnauthorizedError('Invalid device');
-    }
-
-    const token = this.getToken(user);
-    if (!token) {
-      throw new InternalServerErrorException('Unable to generate token');
-    }
-
-    await this.sessionService.updateSessionToken(session._id, token);
-
-    return {
-      token,
-    };
-  }
-
-  private getToken(user: IUserDto): string {
-    return jwt.sign(
-      user,
-      JWT_SECRET,
-      { expiresIn: process.env['JWT_EXPIRATION'] || '15min' }
-    );
   }
 }

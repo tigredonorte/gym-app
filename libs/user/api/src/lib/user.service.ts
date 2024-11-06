@@ -1,3 +1,4 @@
+import { KeycloakAuthService } from '@gym-app/keycloak';
 import { EmailService, logger } from '@gym-app/shared/api';
 import { IRequestUserDataDto, IUserDto, UserReturnType } from '@gym-app/user/types';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
@@ -20,6 +21,7 @@ export class UserService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private userEventService: UserEventsService,
     private emailService: EmailService,
+    private kcAuth: KeycloakAuthService,
   ) {}
 
   private async hashPassword(password: string): Promise<string> {
@@ -309,13 +311,20 @@ export class UserService {
     return this.getUserReturnData(user) as UserReturnType;
   }
 
-  async getUserProfile(id: string): Promise<UserReturnType | null> {
-    const user = await this.userModel.findById(id).select('+emailHistory').select('+passwordHistory').lean();
-    if (!user) {
+  async getUserProfile(id: string): Promise<UserReturnType> {
+    const data = await this.kcAuth.loadProfile(id);
+    if (!data) {
       throw new NotFoundException('User not found');
     }
 
-    return this.getUserReturnData(user) as UserReturnType;
+    return {
+      id,
+      name: `${data.firstName} ${data.lastName}`,
+      email: data.email as string,
+      userAvatar: '',
+      confirmed: data.emailVerified || false,
+      blocked: !data.enabled,
+    };
   }
 
   public async updateUser(id: string, data: Partial<Omit<User, 'password' | 'recoverCode' | 'email'>>): Promise<UserReturnType> {

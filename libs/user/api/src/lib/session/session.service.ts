@@ -1,9 +1,10 @@
+import { KeycloakAuthService } from '@gym-app/keycloak';
 import { logger } from '@gym-app/shared/api';
 import { IAccessLog, IRequestInfoDto, ISession, IUserDto, SessionStatus } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { SessionNotFoundError } from './SessionNotFoundError';
 import { SessionEventsService } from './session-events.service';
 import { Session, SessionDocument } from './session.model';
@@ -20,40 +21,43 @@ export class SessionService {
   constructor(
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
     private readonly sessionEvents: SessionEventsService,
+    private kc: KeycloakAuthService,
   ) {}
 
   async createSession(userId: string, userData: IRequestInfoDto['userData'], token: string): Promise<{ sessionId: string, accessId: string }> {
-    const accessData: IAccessLog = {  _id: new Types.ObjectId().toString(), ip: userData.ip || '' , location: userData.location } as IAccessLog;
-    const sessionId = await this.getSessionHash(userData);
-    const deviceInfo = userData.deviceInfo || ({} as IRequestInfoDto['userData']['deviceInfo']);
+    // const accessData: IAccessLog = {  _id: new Types.ObjectId().toString(), ip: userData.ip || '' , location: userData.location } as IAccessLog;
+    // const sessionId = await this.getSessionHash(userData);
+    // const deviceInfo = userData.deviceInfo || ({} as IRequestInfoDto['userData']['deviceInfo']);
 
-    const session = await this.sessionModel.findOneAndUpdate(
-      { sessionId, status: { $ne: SessionStatus.DELETED } },
-      {
-        $set: {
-          userId,
-          sessionId,
-          token,
-          deviceInfo,
-          status: SessionStatus.ACTIVE,
-          currentAccessId: accessData._id,
-        },
-        $push: { access: accessData },
-      },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    ).exec();
+    // const session = await this.sessionModel.findOneAndUpdate(
+    //   { sessionId, status: { $ne: SessionStatus.DELETED } },
+    //   {
+    //     $set: {
+    //       userId,
+    //       sessionId,
+    //       token,
+    //       deviceInfo,
+    //       status: SessionStatus.ACTIVE,
+    //       currentAccessId: accessData._id,
+    //     },
+    //     $push: { access: accessData },
+    //   },
+    //   { upsert: true, new: true, setDefaultsOnInsert: true }
+    // ).exec();
 
-    if (!session) {
-      throw new Error('Session creation failed');
-    }
-    const isNew = session.createdAt.getTime() === session.updatedAt.getTime();
-    const id: string = session._id.toString();
-    const accessId: string = session.access[session.access.length - 1]._id.toString();
-    logger.info(`Session with id ${id} and access id ${accessId} was ${isNew ? 'created' : 'updated'} for user ${userId}`);
-    return {
-      sessionId: id,
-      accessId,
-    };
+    // if (!session) {
+    //   throw new Error('Session creation failed');
+    // }
+    // const isNew = session.createdAt.getTime() === session.updatedAt.getTime();
+    // const id: string = session._id.toString();
+    // const accessId: string = session.access[session.access.length - 1]._id.toString();
+    // logger.info(`Session with id ${id} and access id ${accessId} was ${isNew ? 'created' : 'updated'} for user ${userId}`);
+    // return {
+    //   sessionId: id,
+    //   accessId,
+    // };
+    console.log('createSession', userId, userData, token);
+    throw new Error('Method not implemented');
   }
 
   async getSessionByToken(token: string): Promise<ISession & { _id: string } | null> {
@@ -110,11 +114,33 @@ export class SessionService {
   }
 
   async getUserSession(userId: string): Promise<ISession[]> {
-    const data = await this.sessionModel
-      .find({ userId }, { access: 0 })
-      .exec();
+    const sessions = await this.kc.getUserSessions(userId);
+    function isSessionActive(lastAccess: number, idleTimeoutMinutes: number): boolean {
+      const currentTime = Date.now();
+      const idleTimeoutMs = idleTimeoutMinutes * 60 * 1000;
+      return currentTime - lastAccess < idleTimeoutMs;
+    }
 
-    return data.map((session) => session.toJSON());
+    const result = sessions.map((session) => {
+      const active = isSessionActive(session.lastAccess, 15);
+      const updatedAt = new Date(session.lastAccess).toISOString();
+      return ({
+        userId: session.userId,
+        sessionId: session.id,
+        status: active ? SessionStatus.ACTIVE : SessionStatus.INACTIVE,
+        createdAt: new Date(session.start).toISOString(),
+        updatedAt,
+        currentAccessId: session.id,
+        access: [{
+          createdAt: new Date(session.start).toISOString(),
+          ip: session.ipAddress,
+          location: null,
+          logoutDate: active ? undefined : updatedAt,
+        }],
+        deviceInfo: {} as ISession['deviceInfo'],
+      } as unknown as ISession);
+    });
+    return result;
   }
 
   async getAccessInfo(userId: string, offset: number, limit: number): Promise<PaginationResult<IAccessLog[]>> {

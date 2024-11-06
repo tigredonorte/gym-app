@@ -1,4 +1,5 @@
 import { getEnvData } from '@gym-app/shared/web';
+import { HttpError } from './errors';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 interface RequestInput<RequestData> {
@@ -62,7 +63,7 @@ const request = async <RequestData, RequestResponse>({
 
     if (!response.ok) {
       const errorMessage: string = result && typeof result === 'object' && 'message' in result ? (result.message as string) : 'Failed to fetch data';
-      const error = new Error(errorMessage || 'Failed to fetch data');
+      const error = new HttpError(errorMessage || 'Failed to fetch data', response.status);
       if (result && typeof result === 'object') {
         Object.assign(error, result);
       }

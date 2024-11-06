@@ -149,6 +149,16 @@ export interface UserRepresentation {
   [propName: string]: any;
 }
 
+export interface UserSession {
+  id: string;
+  userId: string;
+  username: string;
+  ipAddress: string;
+  start: number;
+  lastAccess: number;
+  clients: Record<string, { clientId: string; userSessions: string[] }>;
+}
+
 export interface CredentialRepresentation {
   type?: string;
   value?: string;
@@ -198,4 +208,18 @@ export interface IKeycloakLoginResponse {
   'not-before-policy': number;
   session_state: string;
   scope: string;
+}
+
+export interface SignupUser {
+  password: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}
+
+export interface CreatedUser {
+  id: string;
+  email: string;
+  name: string;
+  createdTimestamp: number;
 }

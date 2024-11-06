@@ -19,7 +19,7 @@ const getUserId = (id?: string) => {
 
 type getUserStateType = () => { user: UserState };
 
-export const logoutUser = (sessionId: string, accessId: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
+export const logoutUser = (sessionId: string, accessId: string, refreshToken: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
     actionName: UserActionTypes.Logout,
     defaultErrorMessage: 'logging out user',
@@ -29,7 +29,7 @@ export const logoutUser = (sessionId: string, accessId: string) => async (dispat
     skipLoadingUpdate: true,
     request: async() => {
       dispatch(UserActions.logout());
-      await postRequest('/auth/logout', { sessionId, accessId });
+      await postRequest('/auth/logout', { sessionId, accessId, refreshToken });
     }
   });
 

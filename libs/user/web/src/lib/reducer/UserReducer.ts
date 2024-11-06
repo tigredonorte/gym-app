@@ -34,9 +34,9 @@ export const userSlice = createSlice({
       const { sessions } = action.payload;
 
       const mapDevice = (deviceInfo: IFetchedSession['deviceInfo']) => ({
-        browser: `${deviceInfo.browser.name} ${deviceInfo.browser.major}`,
-        os: `${deviceInfo.os.name} ${deviceInfo.os.version}`,
-        device: deviceInfo.device.type ? `${deviceInfo.device.vendor} ${deviceInfo.device.model}` : '',
+        browser: `${deviceInfo?.browser?.name} ${deviceInfo?.browser?.major}`,
+        os: `${deviceInfo?.os?.name} ${deviceInfo?.os?.version}`,
+        device: deviceInfo?.device?.type ? `${deviceInfo?.device.vendor} ${deviceInfo?.device?.model}` : '',
       });
       const parser = new UAParser();
       const result = parser.getResult();

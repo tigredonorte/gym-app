@@ -22,8 +22,8 @@ export class UserController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getMe(@Req() req: { user: IUserDto }): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
-    return await this.userService.getUserProfile(req.user?.id || '');
+  async getMe( @Param('id') id: string): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
+    return await this.userService.getUserProfile(id);
   }
 
   @Get(':id/session')
