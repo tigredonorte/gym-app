@@ -3,7 +3,6 @@ import { EmailModule, EventModule, QueueModule } from '@gym-app/shared/api';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { JwtAuthGuard } from './guards';
 import { Session, SessionSchema, SessionService } from './session';
 import { SessionEventsService } from './session/session-events.service';
 import { UserEventsService } from './user-events.service';
@@ -22,7 +21,7 @@ import { UserService } from './user.service';
     KeycloakModule
   ],
   controllers: [UserController],
-  providers: [UserService, UserEventsService, SessionService, JwtAuthGuard, SessionEventsService],
-  exports: [SessionService, UserService, JwtAuthGuard, JwtModule],
+  providers: [UserService, UserEventsService, SessionService, SessionEventsService],
+  exports: [SessionService, UserService, JwtModule],
 })
 export class UserModule {}

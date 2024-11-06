@@ -4,8 +4,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import * as fs from 'fs';
 import { diskStorage } from 'multer';
+import { AuthGuard } from 'nest-keycloak-connect';
 import * as path from 'path';
-import { AuthorGuard, JwtAuthGuard } from './guards';
 import { Public } from './guards/public.decorator';
 import { PaginationResult, SessionService } from './session';
 import { ChangePasswordDto, LogoutDeviceDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
@@ -13,10 +13,8 @@ import { User } from './user.model';
 import { UserService } from './user.service';
 
 @Controller('user')
-@UseGuards(AuthorGuard)
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard)
 export class UserController {
-
   constructor(
     private userService: UserService,
     private sessionService: SessionService
