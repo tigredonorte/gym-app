@@ -54,7 +54,7 @@ export class UserController {
     await this.sessionService.logoutDevice(data.sessionId, data.accessId, req.user);
   }
 
-  @Post('edit/:id')
+  @Post(':id/edit')
   @HttpCode(HttpStatus.OK)
   async updateUser(
     @Param('id') id: string,
@@ -63,7 +63,7 @@ export class UserController {
     return await this.userService.updateUser(id, data);
   }
 
-  @Post('update-email/:id')
+  @Post(':id/update-email')
   @HttpCode(HttpStatus.OK)
   async updateEmail(
     @Param('id') id: string,
@@ -112,7 +112,7 @@ export class UserController {
     return await this.userService.updateAvatar(id, avatarUrl);
   }
 
-  @Get('change-email/:id/:code')
+  @Get(':id/change-email/:code')
   @Public()
   @HttpCode(HttpStatus.OK)
   async changeEmail(
@@ -123,7 +123,7 @@ export class UserController {
     return await this.userService.confirmChangeEmail(id, code, req.userData);
   }
 
-  @Delete('change-email/:id/:code')
+  @Delete(':id/change-email/:code')
   @HttpCode(HttpStatus.OK)
   async changeEmailDelete(
     @Param('id') id: string,
@@ -132,7 +132,7 @@ export class UserController {
     await this.userService.deleteChangeEmail(id, code);
   }
 
-  @Get('revert-change-email/:id/:code')
+  @Get(':id/revert-change-email/:code')
   @Public()
   @HttpCode(HttpStatus.OK)
   async revertChangeEmail(
@@ -142,7 +142,7 @@ export class UserController {
     await this.userService.revertChangeEmail(id, code);
   }
 
-  @Post('change-password/:id')
+  @Post(':id/change-password')
   @HttpCode(HttpStatus.OK)
   async changePassword(
     @Param('id') id: string,
@@ -152,7 +152,7 @@ export class UserController {
     return await this.userService.changePasswordStart(id, data, req.userData);
   }
 
-  @Get('change-password/:id/:code')
+  @Get(':id/change-password/:code')
   @HttpCode(HttpStatus.OK)
   async confirmChangePassword(
     @Param('id') id: string,
@@ -166,7 +166,7 @@ export class UserController {
     };
   }
 
-  @Delete('change-password/:id')
+  @Delete(':id/change-password')
   @HttpCode(HttpStatus.OK)
   async cancelChangePassword(
     @Param('id') id: string,

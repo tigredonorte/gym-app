@@ -32,7 +32,7 @@ export class UserEmailWorker {
     const html = await renderChangeEmailAttempt({
       ...userData,
       title: 'Change your email',
-      changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-email/${id}/${changeEmailCode}`,
+      changeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/${id}/change-email/${changeEmailCode}`,
       changePasswordLink: `${process.env['FRONTEND_URL']}/profile/change-password/${id}`
     });
 

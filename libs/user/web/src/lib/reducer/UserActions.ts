@@ -111,7 +111,7 @@ export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Di
     setActionType,
     request: async() => {
       const id = getUserId();
-      await postRequest(`user/edit/${id}`, userData);
+      await postRequest(`user/${id}/edit`, userData);
       dispatch(UserActions.updateUser(userData));
     }
   });
@@ -129,7 +129,7 @@ export const changeEmail = (userData: ChangeEmailSettingFormType) => async (disp
     setActionType,
     request: async() => {
       const id = getUserId();
-      const emailHistory = await postRequest<IUser['emailHistory']>(`user/update-email/${id}`, userData);
+      const emailHistory = await postRequest<IUser['emailHistory']>(`user/${id}/update-email`, userData);
       dispatch(UserActions.updateUser({ emailHistory }));
     }
   });
@@ -143,7 +143,7 @@ export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: D
     setActionType,
     request: async() => {
       const id = getUserId();
-      await deleteRequest(`user/change-email/${id}/${changeEmailCode}`);
+      await deleteRequest(`user/${id}/change-email/${changeEmailCode}`);
       dispatch(UserActions.removeFromEmailHistory(changeEmailCode));
     },
   });
@@ -162,7 +162,7 @@ export const changePassword = (changePasswordData: ChangePasswordFormType) => as
     setActionType,
     request: async () => {
       const id = getUserId();
-      const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/change-password/${id}`, changePasswordData);
+      const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/${id}/change-password`, changePasswordData);
       dispatch(UserActions.updateUser({ passwordHistory }));
     },
   });
@@ -176,7 +176,7 @@ export const cancelChangePassword = () => async (dispatch: Dispatch, getState: g
     setActionType,
     request: async() => {
       const id = getUserId();
-      await deleteRequest(`user/change-password/${id}`);
+      await deleteRequest(`user/${id}/change-password`);
       dispatch(UserActions.removePasswordChangeRequest());
     },
   });

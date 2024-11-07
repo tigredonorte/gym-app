@@ -192,7 +192,7 @@ export class UserService {
 
     await this.emailService.sendRenderedEmail(sendChangePasswordCode(user.email, {
       ...getUserAccessData(userData),
-      changePasswordLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/change-password/${id}/${code}`,
+      changePasswordLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/${id}/change-password/${code}`,
     }));
     await user.save();
     return this.getUserReturnData({ passwordHistory: user.passwordHistory }) as IUserDto['passwordHistory'];
@@ -392,7 +392,7 @@ export class UserService {
     const revertChangeEmailCode = this.getRandomString();
     await this.emailService.sendRenderedEmail(sendEmailChanged(user.email, {
       ...getUserAccessData(userData),
-      revertChangeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/revert-change-email/${id}/${revertChangeEmailCode}`,
+      revertChangeEmailLink: `${process.env['FRONTEND_URL']}/user/confirm?url=user/${id}/revert-change-email/${revertChangeEmailCode}`,
     }));
 
     user.email = user.emailHistory?.[emailHistoryItemIndex].email;
