@@ -1,13 +1,15 @@
 import { MenuOption } from '@gym-app/shared/web';
+import { mdiLoading } from '@mdi/js';
+import Icon from '@mdi/react';
 import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { loadUserTranslations } from '../locales';
 import { UserGrid } from './components/UserGrid';
 import { UserMenu } from './components/UserMenu';
 import { Account } from './pages/Account/Account';
 import { Confirm } from './pages/Confirm/Confirm';
 import { Logout } from './pages/Logout/Logout';
 import { Security } from './pages/Security/Security';
-import { loadUserTranslations } from '../locales';
 
 interface ProfileRouterProps {
   children: React.ReactNode;
@@ -15,7 +17,24 @@ interface ProfileRouterProps {
 }
 export const ProfilePath = 'profile';
 export const ProfileRouter: React.FC<ProfileRouterProps> = (props: ProfileRouterProps) => {
-  loadUserTranslations();
+  const [loading, setLoading] = React.useState(false);
+  React.useEffect(() => {
+    setLoading(true);
+    (async () => {
+      await loadUserTranslations();
+      setLoading(false);
+    })();
+    return () => {
+      setLoading(false);
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <Icon path={mdiLoading} size={2} spin={true}/>
+    );
+  }
+
   return (
     <UserGrid menu={<UserMenu extraMenu={props.extraMenu} />}>
       <Routes>

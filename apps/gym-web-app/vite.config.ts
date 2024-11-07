@@ -9,8 +9,16 @@ export default defineConfig({
   cacheDir: '../../node_modules/.vite/gym-web-app',
 
   server: {
-    port: 80,
+    port: 4200, // port exposed by vite
     host: '0.0.0.0',
+    hmr: {
+      host: 'localhost', // The hostname where the frontend is accessed
+      port: 80,          // The port exposed by Nginx
+      protocol: 'ws',    // Use 'wss' if using HTTPS
+    },
+    watch: {
+      usePolling: true,  // Necessary for file changes to be detected in Docker
+    },
   },
 
   preview: {
