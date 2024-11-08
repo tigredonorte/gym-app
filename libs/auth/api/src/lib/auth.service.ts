@@ -3,7 +3,7 @@ import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
 import { EmailService, logger } from '@gym-app/shared/api';
 import { SessionService, UserService, getUserAccessData } from '@gym-app/user/api';
 import { IRequestInfoDto } from '@gym-app/user/types';
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
@@ -113,20 +113,22 @@ export class AuthService {
   }
 
   async changePassword(data: changePasswordDto, ip: string) {
-    if (data.password !== data.confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
+    // if (data.password !== data.confirmPassword) {
+    //   throw new Error('Passwords do not match');
+    // }
 
-    if (!data.email || !data.token) {
-      throw new Error('Invalid request');
-    }
+    // if (!data.email || !data.token) {
+    //   throw new Error('Invalid request');
+    // }
 
-    const changePassword = await this.userService.changePassword(data.email, data.password, data.token, ip);
-    if (!changePassword) {
-      throw new Error('Invalid request');
-    }
+    // const changePassword = await this.userService.changePassword(data.email, data.password, data.token, ip);
+    // if (!changePassword) {
+    //   throw new Error('Invalid request');
+    // }
 
-    return {};
+    // return {};
+    console.log({ data, ip });
+    throw new NotImplementedException('Change password is not implemented');
   }
 
   async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {

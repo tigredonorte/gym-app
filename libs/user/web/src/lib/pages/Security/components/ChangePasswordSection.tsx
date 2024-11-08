@@ -7,32 +7,19 @@ import Card from '@mui/material/Card';
 import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChangePasswordFormType } from '../../../reducer/UserActions';
-import { PendingChangeChange } from './PendingChangeConfirmation';
 
-interface ChangePassworSectionProps {
+interface ChangePasswordSectionProps {
   error: string;
   loading: boolean;
   user: IUser;
   onSave: (formData: ChangePasswordFormType & FormContainerType) => void;
-  onCancel: () => void;
 }
 
-export const ChangePassworSection: React.FC<ChangePassworSectionProps> = React.memo(({ error, onSave, loading, user, onCancel }: ChangePassworSectionProps) => {
+export const ChangePasswordSection: React.FC<ChangePasswordSectionProps> = React.memo(({ error, onSave, loading, user }: ChangePasswordSectionProps) => {
   const { t } = useTranslation('user');
   const handleSave = useCallback((formData: ChangePasswordFormType & FormContainerType) => {
     onSave(formData);
   }, [onSave]);
-
-  const hasPendingRequest = user?.passwordHistory?.some((item) => !item.confirmed && new Date(item.expiresAt) > new Date());
-  if (hasPendingRequest) {
-    return (
-      <PendingChangeChange
-        title={t('ChangePasswordSection.title')}
-        subtitle={t('ChangePasswordSection.pendingRequest')}
-        onCancel={onCancel}
-      />
-    );
-  }
 
   return (
     <CrudContainer

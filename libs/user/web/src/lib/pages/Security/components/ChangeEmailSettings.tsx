@@ -7,7 +7,6 @@ import Card from '@mui/material/Card';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChangeEmailSettingFormType } from '../../../reducer/UserActions';
-import { PendingChangeChange } from './PendingChangeConfirmation';
 
 interface IUserForm extends IUser, FormContainerType {}
 
@@ -16,35 +15,17 @@ interface ChangeEmailSettingsProps {
   user: IUser;
   loading: boolean;
   onSave: (formData: ChangeEmailSettingFormType) => void;
-  onCancel: (data: { changeEmailCode: string }) => void;
 }
 
 export const ChangeEmailSettings: React.FC<ChangeEmailSettingsProps> = (props: ChangeEmailSettingsProps) => {
   const [cancelError, setCancelError] = React.useState('');
-  const { errorMessage, user, onSave, onCancel, loading } = props;
+  const { errorMessage, user, onSave, loading } = props;
   const { t } = useTranslation('user');
 
   const saveFn = React.useCallback(async ({ email }: IUserForm) => onSave({ newEmail: email, oldEmail: user.email }), [onSave, user]);
   React.useEffect(() => {
     setCancelError(errorMessage);
   }, [errorMessage, setCancelError]);
-
-  const pendingEmail = (user.emailHistory || [])?.find(
-    (email) => email.confirmed === false && user.email === email.oldEmail && !email.revertChangeEmailCode
-  );
-
-  if (pendingEmail) {
-    return (
-      <>
-        <ErrorAlert message={t(errorMessage)} />
-        <PendingChangeChange
-          title={t('ChangeEmailSetting.title')}
-          subtitle={t('ChangeEmailSetting.pendingRequest')}
-          onCancel={() => onCancel({ changeEmailCode: pendingEmail.changeEmailCode || '' })}
-        />
-      </>
-    );
-  }
 
   return (
     <CrudContainer

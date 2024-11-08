@@ -1,14 +1,13 @@
-import { IAccessLog, IRequestInfoDto, IRequestInfoWithUser, ISession, IUserDto, UserReturnType } from '@gym-app/user/types';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { IAccessLog, IRequestInfoDto, IRequestInfoWithUser, ISession, UserReturnType } from '@gym-app/user/types';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import * as fs from 'fs';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'nest-keycloak-connect';
 import * as path from 'path';
-import { Public } from './guards/public.decorator';
 import { PaginationResult, SessionService } from './session';
-import { ChangePasswordDto, LogoutDeviceDto, UpdateEmailDto, UpdateUserDto } from './user.dto';
+import { ChangePasswordDto, LogoutDeviceDto, ChangeEmailDto as ChangeEmailDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
 
@@ -24,6 +23,15 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async getMe( @Param('id') id: string): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
     return await this.userService.getUserProfile(id);
+  }
+
+  @Post(':id/edit')
+  @HttpCode(HttpStatus.OK)
+  async updateUser(
+    @Param('id') id: string,
+      @Body() data: UpdateUserDto
+  ): Promise<UserReturnType> {
+    return await this.userService.updateUser(id, data);
   }
 
   @Get(':id/session')
@@ -52,25 +60,6 @@ export class UserController {
       @Req() req: IRequestInfoWithUser
   ): Promise<void> {
     await this.sessionService.logoutDevice(data.sessionId, data.accessId, req.user);
-  }
-
-  @Post(':id/edit')
-  @HttpCode(HttpStatus.OK)
-  async updateUser(
-    @Param('id') id: string,
-      @Body() data: UpdateUserDto
-  ): Promise<UserReturnType> {
-    return await this.userService.updateUser(id, data);
-  }
-
-  @Post(':id/update-email')
-  @HttpCode(HttpStatus.OK)
-  async updateEmail(
-    @Param('id') id: string,
-      @Body() data: UpdateEmailDto,
-      @Req() req: IRequestInfoDto
-  ): Promise<IUserDto['emailHistory']> {
-    return await this.userService.updateEmail(id, data, req.userData);
   }
 
   @Post(':id/upload-avatar')
@@ -112,34 +101,14 @@ export class UserController {
     return await this.userService.updateAvatar(id, avatarUrl);
   }
 
-  @Get(':id/change-email/:code')
-  @Public()
+  @Post(':id/change-email')
   @HttpCode(HttpStatus.OK)
   async changeEmail(
     @Param('id') id: string,
-      @Param('code') code: string,
-      @Req() req: IRequestInfoDto
-  ): Promise<{ title: string; message: string }> {
-    return await this.userService.confirmChangeEmail(id, code, req.userData);
-  }
-
-  @Delete(':id/change-email/:code')
-  @HttpCode(HttpStatus.OK)
-  async changeEmailDelete(
-    @Param('id') id: string,
-      @Param('code') code: string
-  ): Promise<void> {
-    await this.userService.deleteChangeEmail(id, code);
-  }
-
-  @Get(':id/revert-change-email/:code')
-  @Public()
-  @HttpCode(HttpStatus.OK)
-  async revertChangeEmail(
-    @Param('id') id: string,
-      @Param('code') code: string
-  ): Promise<void> {
-    await this.userService.revertChangeEmail(id, code);
+      @Body() data: ChangeEmailDto,
+      @Req() req: Request & IRequestInfoDto
+  ): Promise<boolean> {
+    return await this.userService.changeEmail(id, data, req.userData);
   }
 
   @Post(':id/change-password')
@@ -148,29 +117,7 @@ export class UserController {
     @Param('id') id: string,
       @Body() data: ChangePasswordDto,
       @Req() req: IRequestInfoDto
-  ): Promise<IUserDto['passwordHistory']> {
-    return await this.userService.changePasswordStart(id, data, req.userData);
-  }
-
-  @Get(':id/change-password/:code')
-  @HttpCode(HttpStatus.OK)
-  async confirmChangePassword(
-    @Param('id') id: string,
-      @Param('code') code: string,
-      @Req() req: IRequestInfoDto
-  ): Promise<{ title: string; message: string }> {
-    await this.userService.changePasswordComplete(id, code, req.userData);
-    return {
-      title: 'Password Changed',
-      message: 'Your password has been successfully changed.',
-    };
-  }
-
-  @Delete(':id/change-password')
-  @HttpCode(HttpStatus.OK)
-  async cancelChangePassword(
-    @Param('id') id: string,
-  ): Promise<void> {
-    await this.userService.deleteChangePassword(id);
+  ): Promise<boolean> {
+    return await this.userService.changePassword(id, data, req.userData);
   }
 }

@@ -5,12 +5,12 @@ export interface ActionStatus {
   error: string | null;
 }
 
-export type RequestStatusses<ActionTypes extends string> = {
+export type RequestStatuses<ActionTypes extends string> = {
   [key in ActionTypes]?: ActionStatus;
 };
 
 export interface StateWithStatus<ActionTypes extends string> {
-  statuses: RequestStatusses<ActionTypes>;
+  statuses: RequestStatuses<ActionTypes>;
 }
 
 interface RequestDataType<ActionTypes extends string, State extends StateWithStatus<ActionTypes>> {
@@ -50,7 +50,7 @@ export const requestData = async<ActionTypes extends string, State extends State
   }
 };
 
-export function getStatussesProperty<ActionTypes extends string, Statusses extends RequestStatusses<ActionTypes>>(statuses: Statusses, actions: ActionTypes[]) {
+export function getStatusesProperty<ActionTypes extends string, Statuses extends RequestStatuses<ActionTypes>>(statuses: Statuses, actions: ActionTypes[]) {
   return <Key extends keyof ActionStatus>(property: Key): ActionStatus[Key] | null => {
     for (const action of actions) {
       const value = statuses[action]?.[property];

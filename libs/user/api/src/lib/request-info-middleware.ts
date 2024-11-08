@@ -1,4 +1,5 @@
-import { IRequestInfoDto, IUserDto, IUserDataInfo } from '@gym-app/user/types';
+import { logger } from '@gym-app/shared/api';
+import { IRequestInfoDto, IUserDataInfo, IUserDto } from '@gym-app/user/types';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
@@ -23,9 +24,16 @@ function getUser(req: IRequestInfoDto & Request, jwtService: JwtService): IUserD
   }
 
   try {
-    const payload = jwtService.verify(token, { secret: process.env['JWT_SECRET'] });
-    return payload;
+    const decoded = jwtService.decode(token.toString());
+    return {
+      id: decoded?.sub,
+      email: decoded?.email,
+      name: decoded?.name,
+      blocked: decoded?.blocked,
+      confirmed: decoded?.email_verified,
+    };
   } catch (e) {
+    logger.error('Failed to decode token', e);
     return null;
   }
 }

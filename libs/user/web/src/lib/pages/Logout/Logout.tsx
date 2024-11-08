@@ -4,10 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
-import { getUserState, UserRequestStatusses } from '../../reducer';
+import { getUserState, UserRequestStatuses } from '../../reducer';
 
 interface LogoutProps {
-  logoutStatus: UserRequestStatusses['logout'];
+  logoutStatus: UserRequestStatuses['logout'];
 }
 
 const LogoutFn: React.FC<LogoutProps> = ({ logoutStatus }: LogoutProps) => {

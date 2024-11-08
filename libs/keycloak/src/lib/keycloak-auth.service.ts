@@ -218,6 +218,21 @@ export class KeycloakAuthService {
     }
   }
 
+  async checkPassword(userEmail: string, password: string): Promise<boolean> {
+    try {
+      await this.login(userEmail, password);
+      return true;
+    } catch (error) {
+      if (error.response?.status === 401) {
+        logger.info(`Password check failed for userEmail ${userEmail}: Incorrect password.`);
+        return false;
+      } else {
+        logger.error(`Error during password check for userEmail ${userEmail}:`, this.kc.getErrorDetails(error));
+        throw error;
+      }
+    }
+  }
+
   async createResource(payload: ResourceRepresentation): Promise<ResourceRepresentation> {
     try {
       await this.kc.ensureAuthenticated();

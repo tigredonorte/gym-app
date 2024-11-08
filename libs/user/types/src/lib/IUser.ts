@@ -5,24 +5,6 @@ export interface IRecoveredCode {
   changePasswordCode?: string;
 }
 
-export interface IUserEmailHistory {
-  email: string;
-  createdAt: Date;
-  confirmed: boolean;
-  changeEmailCode?: string;
-  revertChangeEmailCode?: string;
-  oldEmail: string;
-}
-
-export interface IUserPasswordHistory {
-  password?: string;
-  code?: string;
-  createdAt: Date;
-  expiresAt: Date;
-  confirmed: boolean;
-  ip: string;
-}
-
 export interface IUserDto {
   id: string;
   name: string;
@@ -32,18 +14,10 @@ export interface IUserDto {
   recoverCode?: IRecoveredCode;
   confirmed: boolean;
   blocked: boolean;
-  emailHistory?: IUserEmailHistory[];
-  passwordHistory?: IUserPasswordHistory[];
 }
 
-export interface IPasswordHistoryItem extends Omit<IUserPasswordHistory, 'password' | 'code' | 'createdAt' | 'expiresAt'> {
-  createdAt: string;
-  expiresAt: string;
-}
 
-export interface IUser extends Omit<IUserDto, 'password' | 'passwordHistory'> {
-  emailHistory?: IUserEmailHistory[];
-  passwordHistory?: IPasswordHistoryItem[];
+export interface IUser extends Omit<IUserDto, 'password'> {
 }
 
 export interface IUserDataInfo {

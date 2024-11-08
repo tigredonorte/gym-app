@@ -1,4 +1,4 @@
-import { deleteRequest, getRequest, IPaginationRequest, postRequest, requestData } from '@gym-app/shared/web';
+import { getRequest, IPaginationRequest, postRequest, requestData } from '@gym-app/shared/web';
 import { IUser } from '@gym-app/user/types';
 import { Dispatch } from '@reduxjs/toolkit';
 import { IAccessLog, IFetchedSession } from './session.types';
@@ -129,23 +129,9 @@ export const changeEmail = (userData: ChangeEmailSettingFormType) => async (disp
     setActionType,
     request: async() => {
       const id = getUserId();
-      const emailHistory = await postRequest<IUser['emailHistory']>(`user/${id}/update-email`, userData);
-      dispatch(UserActions.updateUser({ emailHistory }));
+      await postRequest<boolean>(`user/${id}/change-email`, userData);
+      dispatch(UserActions.updateUser({ email: userData.newEmail }));
     }
-  });
-
-export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
-  requestData({
-    actionName: UserActionTypes.RemoveFromEmailHistory,
-    defaultErrorMessage: 'removing email from history',
-    dispatch,
-    getState: () => getState()?.user,
-    setActionType,
-    request: async() => {
-      const id = getUserId();
-      await deleteRequest(`user/${id}/change-email/${changeEmailCode}`);
-      dispatch(UserActions.removeFromEmailHistory(changeEmailCode));
-    },
   });
 
 export interface ChangePasswordFormType  {
@@ -162,22 +148,7 @@ export const changePassword = (changePasswordData: ChangePasswordFormType) => as
     setActionType,
     request: async () => {
       const id = getUserId();
-      const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/${id}/change-password`, changePasswordData);
-      dispatch(UserActions.updateUser({ passwordHistory }));
-    },
-  });
-
-export const cancelChangePassword = () => async (dispatch: Dispatch, getState: getUserStateType) =>
-  requestData({
-    actionName:  UserActionTypes.CancelChangePassword,
-    defaultErrorMessage: 'cancel change password',
-    dispatch,
-    getState: () => getState()?.user,
-    setActionType,
-    request: async() => {
-      const id = getUserId();
-      await deleteRequest(`user/${id}/change-password`);
-      dispatch(UserActions.removePasswordChangeRequest());
+      await postRequest<boolean>(`user/${id}/change-password`, changePasswordData);
     },
   });
 

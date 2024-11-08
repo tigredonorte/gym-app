@@ -1,5 +1,5 @@
 import { EventService, NotificationGateway, QueueService } from '@gym-app/shared/api';
-import { IUser, IUserDataInfo, UserReturnType } from '@gym-app/user/types';
+import { IUserDataInfo, UserReturnType } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';
 
 export const UserEventTypes = {
@@ -44,25 +44,21 @@ export class UserEventsService {
     this.notificationGateway.emitToChannel(this.getEventName(user.id as string, UserEventTypes.edited), user);
   }
 
-  emitPasswordChanged(id: string) {
-    return this.notificationGateway.emitToChannel(`user.${id}.passwordChanged`, { id });
+  emitPasswordChanged(id: string, userData: IUserDataInfo) {
+    return this.notificationGateway.emitToChannel(`user.${id}.passwordChanged`, { id, userData });
   }
 
   /**
    * email change
    */
-  async emitUpdateEmail(data: {
-    user: Partial<UserReturnType>;
+  async emitChangeEmail(data: {
+    userId: string;
     oldEmail: string;
-    changeEmailCode: string;
+    newEmail: string;
     userData: IUserDataInfo;
   }) {
-    this.emitUserEdited(data.user);
+    this.emitUserEdited({ id: data.userId, email: data.newEmail });
     await this.queueService.addJob('changeEmailCode', data);
-  }
-  async emitRevertUpdateEmail(data: { user: Partial<UserReturnType>; email: string }) {
-    this.emitUserEdited(data.user);
-    await this.queueService.addJob('revertChangeEmailCode', { email: data.email });
   }
 
   getEventName(id: string, event: string) {

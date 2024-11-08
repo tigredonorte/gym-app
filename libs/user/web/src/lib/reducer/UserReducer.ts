@@ -73,16 +73,6 @@ export const userSlice = createSlice({
     removeDevice: (state: UserState, action: PayloadAction<string>) => {
       state.devices = state.devices?.filter((device) => device.sessionId !== action.payload);
     },
-    removeFromEmailHistory: (state: UserState, action: PayloadAction<string>) => {
-      if (state.user) {
-        state.user.emailHistory = state.user.emailHistory?.filter((email) => email.changeEmailCode !== action.payload);
-      }
-    },
-    removePasswordChangeRequest: (state: UserState) => {
-      if (state.user) {
-        state.user.passwordHistory = state.user.passwordHistory?.filter((request) => request.confirmed !== false);
-      }
-    }
   },
 });
 

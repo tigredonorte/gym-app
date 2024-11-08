@@ -16,11 +16,11 @@ export class LogoutDeviceDto implements LogoutDevice {
   @IsString() accessId!: string;
 }
 
-export interface IUpdateEmail {
+export interface IChangeEmail {
   newEmail: string;
   oldEmail: string;
 }
-export class UpdateEmailDto implements IUpdateEmail {
+export class ChangeEmailDto implements IChangeEmail {
   @IsEmail() newEmail!: string;
   @IsEmail() oldEmail!: string;
 }

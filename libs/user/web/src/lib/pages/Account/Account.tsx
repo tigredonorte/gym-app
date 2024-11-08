@@ -1,4 +1,4 @@
-import { ActionStatus, CrudContainer, EnvContext, getStatussesProperty } from '@gym-app/shared/web';
+import { ActionStatus, CrudContainer, EnvContext, getStatusesProperty } from '@gym-app/shared/web';
 import { IUser } from '@gym-app/user/types';
 import Stack from '@mui/material/Stack';
 import React from 'react';
@@ -11,7 +11,7 @@ import { DeleteAccount } from './DeleteAccount';
 import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
 import { NotificationSettings } from './NotificationSettings';
 
-const subjectStatusses = [UserActionTypes.LoadUser, UserActionTypes.UploadUserImage];
+const subjectStatuses = [UserActionTypes.LoadUser, UserActionTypes.UploadUserImage];
 
 interface AccountProps {
   t: (key: string) => string;
@@ -115,7 +115,7 @@ export const Account = connect(
     user: getUser(state as never),
     loading: getUserStatus(state as never, UserActionTypes.LoadUser)?.loading || false,
     errorMessage: getUserStatus(state as never, UserActionTypes.LoadUser)?.error || '',
-    getUserStatusProperty: getStatussesProperty(getUserState(state as never).statuses, subjectStatusses),
+    getUserStatusProperty: getStatusesProperty(getUserState(state as never).statuses, subjectStatuses),
   }),
   {
     loadUser,
