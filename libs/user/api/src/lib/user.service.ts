@@ -1,7 +1,7 @@
-import { KeycloakAuthService } from '@gym-app/keycloak';
-import { EmailService, logger } from '@gym-app/shared/api';
-import { IRequestUserDataDto, UserReturnType } from '@gym-app/user/types';
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
+import { EmailService, genHttpError, logger } from '@gym-app/shared/api';
+import { IRequestUserDataDto, IUser, UserReturnType } from '@gym-app/user/types';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 import { Model } from 'mongoose';
 import { getUserAccessData } from './request-info-middleware';
 import { UserEventsService } from './user-events.service';
-import { IChangePassword, IChangeEmail } from './user.dto';
+import { IChangeEmail, IChangePassword } from './user.dto';
 import { User, UserDocument } from './user.model';
 
 @Injectable()
@@ -34,22 +34,41 @@ export class UserService {
     }
   }
 
-  async create(userData: Partial<User>): Promise<UserReturnType> {
+  async create({ email, password, name }: { email: string, password: string, name: string }): Promise<CreatedUser> {
+    let result: CreatedUser;
     try {
-      if (userData?.password) {
-        userData.password = await this.hashPassword(userData.password);
-      }
+      const [firstName, lastName] = name.split(' ');
+      result = await this.kcAuth.signup({ email, password, firstName, lastName });
 
-      const createdUser = new this.userModel(userData);
-      await createdUser.save();
-      const user = this.getUserReturnData(createdUser) as UserReturnType;
-      this.userEventService.emitUserCreated(user);
-      return user;
-    } catch (error) {
-      if (_.get(error, 'code') === 11000) {
-        throw new ConflictException('Email already exists');
+      if (!result.id) {
+        logger.error('UserId not found', result);
+        throw new NotFoundException('User id not found');
       }
+      await this.userEventService.emitUserCreated(result);
+    } catch (error) {
+      logger.error('Failed to create user', error);
       throw error;
+    }
+
+    try {
+      await this.kcAuth.createResource({
+        name: 'user',
+        uri: `/user/${result.id}`,
+        type: 'user',
+        owner: { id: result.id, name: result.name },
+      });
+    } catch (error) {
+      logger.error('Failed to create resource in Keycloak', genHttpError(error));
+      throw new InternalServerErrorException('Failed to create user resource');
+    }
+
+    try {
+      const createdUser = new this.userModel({ _id: result.id });
+      await createdUser.save();
+      return result;
+    } catch (error) {
+      logger.error('Failed to create user in database', error);
+      throw new InternalServerErrorException('Failed to create user');
     }
   }
 
@@ -61,24 +80,6 @@ export class UserService {
 
     user.userAvatar = avatarUrl;
     await user.save();
-
-    return this.getUserReturnData(user) as UserReturnType;
-  }
-
-  async findByEmailAndPassword(email: string, password: string): Promise<UserReturnType | null> {
-    if (!email || !password) {
-      throw new BadRequestException('Email and password are required');
-    }
-
-    const user = await this.userModel.findOne({ email }).select('+password').exec();
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const isPasswordCorrect = await this.decryptPassword(password, user.password);
-    if (!isPasswordCorrect) {
-      throw new BadRequestException('Incorrect email or password');
-    }
 
     return this.getUserReturnData(user) as UserReturnType;
   }
@@ -202,7 +203,7 @@ export class UserService {
     };
   }
 
-  public async updateUser(id: string, data: Partial<Omit<User, 'password' | 'recoverCode' | 'email'>>): Promise<UserReturnType> {
+  public async updateUser(id: string, data: Partial<Omit<IUser, 'email'>>): Promise<UserReturnType> {
     const kcData: Record<string, unknown> = {};
     if (data.name) {
       const [firstName, lastName] = data.name.split(' ');
@@ -215,7 +216,7 @@ export class UserService {
       this.userEventService.emitUserEdited({ id, ...kcData});
     }
 
-    return kcData as UserReturnType;
+    return kcData as unknown as UserReturnType;
   }
 
   public async changeEmail(id: string, { newEmail, oldEmail }: IChangeEmail, userData: IRequestUserDataDto): Promise<boolean> {

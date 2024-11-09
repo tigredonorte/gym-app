@@ -1,7 +1,7 @@
 
 import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
 import { EmailService, logger } from '@gym-app/shared/api';
-import { SessionService, UserService, getUserAccessData } from '@gym-app/user/api';
+import { UserService, getUserAccessData } from '@gym-app/user/api';
 import { IRequestInfoDto } from '@gym-app/user/types';
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -16,36 +16,21 @@ export class AuthService {
     private userService: UserService,
     private emailService: EmailService,
     private authEventsService: AuthEventsService,
-    private sessionService: SessionService,
     private kcAuth: KeycloakAuthService
   ) {}
 
   async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<CreatedUser> {
-    let result: CreatedUser;
     try {
-      const { email, password, name } = data;
-      const [firstName, lastName] = name.split(' ');
-      result = await this.kcAuth.signup({ email, password, firstName, lastName });
-      const { id } = result;
-      await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
+      const result = await this.userService.create(data);
+      await this.authEventsService.emitSignup({ user: { name: data.name, email: data.email, id: `${result.id}` }, userData });
+      return result;
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
-      throw new UnauthorizedException();
+      logger.error('Signup failed', error);
+      if (error instanceof HttpException && error.getStatus() === 409) {
+        throw new HttpException('Email already exists', HttpStatus.CONFLICT);
+      }
+      throw new InternalServerErrorException('Failed to create user');
     }
-
-    try {
-      await this.kcAuth.createResource({
-        name: 'user',
-        uri: `/user/${result.id}`,
-        type: 'user',
-        owner: { id: result.id, name: result.name },
-      });
-    } catch (error) {
-      logger.error('Failed to create resource in Keycloak', this.kcAuth.kc.getErrorDetails(error));
-      throw new InternalServerErrorException();
-    }
-    return result;
-
   }
 
   async checkEmail(data: CheckEmailDto): Promise<boolean> {
@@ -58,7 +43,7 @@ export class AuthService {
       await this.kcAuth.logout(refreshToken);
       await this.authEventsService.emitLogout({ sessionId, user: { email, name, id }, userData });
     } catch (error) {
-      logger.error('Failed to logout on keycloak', this.kcAuth.kc.getErrorDetails(error));
+      logger.error('Failed to logout on keycloak', error);
     }
     return {};
   }
@@ -83,7 +68,7 @@ export class AuthService {
         refreshToken: data.refresh_token,
       };
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak', this.kcAuth.kc.getErrorDetails(error));
+      logger.error('Failed to login', error);
       throw new UnauthorizedException();
     }
   }
@@ -140,7 +125,7 @@ export class AuthService {
       const result = await this.kcAuth.refreshToken(refreshToken);
       return result;
     } catch (error) {
-      logger.error('Failed to refresh token', this.kcAuth.kc.getErrorDetails(error));
+      logger.error('Failed to refresh token', error);
       throw new UnauthorizedException('Failed to refresh token');
     }
   }

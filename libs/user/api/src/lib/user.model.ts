@@ -12,19 +12,11 @@ class RecoverCode implements IRecoveredCode {
 
 @Schema()
 export class User implements Omit<IUserDto, 'id'> {
-  @Prop({ required: false, minlength: 3 }) name!: string;
-
-  @Prop({ required: false, unique: true }) email!: string;
-
-  @Exclude()
-  @Prop({ required: false, minlength: 10, select: false }) password!: string;
+  @Prop({ type: String, required: true }) _id!: string;
 
   @Exclude()
   @Type(() => RecoverCode)
   @Prop({ type: RecoverCode, required: false, select: false }) recoverCode?: IRecoveredCode;
-
-  @Prop({ required: false, default: false }) confirmed!: boolean;
-  @Prop({ required: false, default: false }) blocked!: boolean;
 
   @Type(() => String)
   @Prop({ required: false }) userAvatar?: string;

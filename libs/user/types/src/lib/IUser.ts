@@ -7,17 +7,15 @@ export interface IRecoveredCode {
 
 export interface IUserDto {
   id: string;
-  name: string;
-  email: string;
   userAvatar?: string;
-  password?: string;
   recoverCode?: IRecoveredCode;
-  confirmed: boolean;
-  blocked: boolean;
 }
 
-
-export interface IUser extends Omit<IUserDto, 'password'> {
+export interface IUser extends IUserDto {
+  name: string;
+  email: string;
+  confirmed: boolean;
+  blocked: boolean;
 }
 
 export interface IUserDataInfo {
@@ -27,4 +25,4 @@ export interface IUserDataInfo {
   device: string;
 }
 
-export type UserReturnType = Omit<IUserDto, 'password'> & { id?: string };
+export type UserReturnType = IUser & { id?: string };

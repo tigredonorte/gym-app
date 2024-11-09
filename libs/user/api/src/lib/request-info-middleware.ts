@@ -1,5 +1,5 @@
 import { logger } from '@gym-app/shared/api';
-import { IRequestInfoDto, IUserDataInfo, IUserDto } from '@gym-app/user/types';
+import { IRequestInfoDto, IUser, IUserDataInfo } from '@gym-app/user/types';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
@@ -17,7 +17,7 @@ export class CustomRequestInfoMiddleware implements NestMiddleware {
   }
 }
 
-function getUser(req: IRequestInfoDto & Request, jwtService: JwtService): IUserDto | null {
+function getUser(req: IRequestInfoDto & Request, jwtService: JwtService): IUser | null {
   const token = extractTokenFromHeader(req);
   if (!token) {
     return null;

@@ -1,13 +1,13 @@
-import { IAccessLog, IRequestInfoDto, IRequestInfoWithUser, ISession, UserReturnType } from '@gym-app/user/types';
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { IRequestInfoDto, UserReturnType } from '@gym-app/user/types';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
 import * as fs from 'fs';
 import { diskStorage } from 'multer';
 import { AuthGuard } from 'nest-keycloak-connect';
 import * as path from 'path';
-import { PaginationResult, SessionService } from './session';
-import { ChangePasswordDto, LogoutDeviceDto, ChangeEmailDto as ChangeEmailDto, UpdateUserDto } from './user.dto';
+// import { PaginationResult, SessionService } from './session';
+import { ChangeEmailDto, ChangePasswordDto, UpdateUserDto } from './user.dto';
 import { User } from './user.model';
 import { UserService } from './user.service';
 
@@ -16,12 +16,12 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(
     private userService: UserService,
-    private sessionService: SessionService
+    // private sessionService: SessionService
   ) {}
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  async getMe( @Param('id') id: string): Promise<Omit<User, 'password' | 'email' | 'recoverCode'> | null> {
+  async getMe( @Param('id') id: string): Promise<Omit<User, '_id' | 'password' | 'email' | 'recoverCode'> | null> {
     return await this.userService.getUserProfile(id);
   }
 
@@ -34,33 +34,33 @@ export class UserController {
     return await this.userService.updateUser(id, data);
   }
 
-  @Get(':id/session')
-  @HttpCode(HttpStatus.OK)
-  async getSessionInfo(
-    @Param('id') id: string,
-  ): Promise<ISession[]> {
-    return await this.sessionService.getUserSession(id);
-  }
+  // @Get(':id/session')
+  // @HttpCode(HttpStatus.OK)
+  // async getSessionInfo(
+  //   @Param('id') id: string,
+  // ): Promise<ISession[]> {
+  //   return await this.sessionService.getUserSession(id);
+  // }
 
-  @Get(':id/access')
-  @HttpCode(HttpStatus.OK)
-  async getAccessInfo(
-    @Param('id') id: string,
-      @Query('page') page = 1,
-      @Query('limit') limit = 10,
-  ): Promise<PaginationResult<IAccessLog[]>> {
-    const offset = (page - 1) * limit;
-    return await this.sessionService.getAccessInfo(id, offset, limit);
-  }
+  // @Get(':id/access')
+  // @HttpCode(HttpStatus.OK)
+  // async getAccessInfo(
+  //   @Param('id') id: string,
+  //     @Query('page') page = 1,
+  //     @Query('limit') limit = 10,
+  // ): Promise<PaginationResult<IAccessLog[]>> {
+  //   const offset = (page - 1) * limit;
+  //   return await this.sessionService.getAccessInfo(id, offset, limit);
+  // }
 
-  @Post(':id/logoutDevice')
-  @HttpCode(HttpStatus.OK)
-  async logoutDevice(
-    @Body() data: LogoutDeviceDto,
-      @Req() req: IRequestInfoWithUser
-  ): Promise<void> {
-    await this.sessionService.logoutDevice(data.sessionId, data.accessId, req.user);
-  }
+  // @Post(':id/logoutDevice')
+  // @HttpCode(HttpStatus.OK)
+  // async logoutDevice(
+  //   @Body() data: LogoutDeviceDto,
+  //     @Req() req: IRequestInfoWithUser
+  // ): Promise<void> {
+  //   await this.sessionService.logoutDevice(data.sessionId, data.accessId, req.user);
+  // }
 
   @Post(':id/upload-avatar')
   @HttpCode(HttpStatus.OK)
