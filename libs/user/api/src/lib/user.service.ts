@@ -63,7 +63,7 @@ export class UserService {
     }
 
     try {
-      const createdUser = new this.userModel({ _id: result.id });
+      const createdUser = new this.userModel({ _id: result.id, email, name });
       await createdUser.save();
       return result;
     } catch (error) {
@@ -153,8 +153,8 @@ export class UserService {
       throw new BadRequestException('New password must be different from old password');
     }
 
-    const kcUser = await this.kcAuth.loadProfile(id);
-    if (!kcUser?.email) {
+    const kcUser = await this.findById(id);
+    if (!kcUser) {
       throw new NotFoundException('User not found');
     }
 
@@ -163,10 +163,14 @@ export class UserService {
       throw new BadRequestException('Incorrect password');
     }
 
+    await this.doChangePassword(id, newPassword, userData);
+
+    return true;
+  }
+
+  async doChangePassword(id: string, newPassword: string, userData: IRequestUserDataDto): Promise<boolean> {
     await this.kcAuth.changePassword(id, newPassword);
-
     await this.userEventService.emitPasswordChanged(id, getUserAccessData(userData));
-
     return true;
   }
 
@@ -215,6 +219,8 @@ export class UserService {
       await this.kcAuth.updateProfile(id, kcData);
       this.userEventService.emitUserEdited({ id, ...kcData});
     }
+
+    await this.userModel.updateOne({ _id: id }, data).exec();
 
     return kcData as unknown as UserReturnType;
   }

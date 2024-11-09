@@ -14,6 +14,10 @@ class RecoverCode implements IRecoveredCode {
 export class User implements Omit<IUserDto, 'id'> {
   @Prop({ type: String, required: true }) _id!: string;
 
+  @Prop({ required: false, minlength: 3 }) name!: string;
+
+  @Prop({ required: false, unique: true }) email!: string;
+
   @Exclude()
   @Type(() => RecoverCode)
   @Prop({ type: RecoverCode, required: false, select: false }) recoverCode?: IRecoveredCode;

@@ -2,8 +2,8 @@
 import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
 import { EmailService, logger } from '@gym-app/shared/api';
 import { UserService, getUserAccessData } from '@gym-app/user/api';
-import { IRequestInfoDto } from '@gym-app/user/types';
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotImplementedException, UnauthorizedException } from '@nestjs/common';
+import { IRequestInfoDto, IRequestUserDataDto } from '@gym-app/user/types';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
@@ -97,23 +97,23 @@ export class AuthService {
     };
   }
 
-  async changePassword(data: changePasswordDto, ip: string) {
-    // if (data.password !== data.confirmPassword) {
-    //   throw new Error('Passwords do not match');
-    // }
+  async changePassword(data: changePasswordDto, userData: IRequestUserDataDto) {
+    if (data.password !== data.confirmPassword) {
+      throw new HttpException('Password and confirm password do not match', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
-    // if (!data.email || !data.token) {
-    //   throw new Error('Invalid request');
-    // }
+    if (!data.email || !data.token) {
+      throw new HttpException('Email and token are required to change password', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
 
-    // const changePassword = await this.userService.changePassword(data.email, data.password, data.token, ip);
-    // if (!changePassword) {
-    //   throw new Error('Invalid request');
-    // }
+    const user = await this.userService.findByEmail(data.email);
 
-    // return {};
-    console.log({ data, ip });
-    throw new NotImplementedException('Change password is not implemented');
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    await this.userService.doChangePassword(user?.id,  data.password, userData);
+    return true;
   }
 
   async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {
