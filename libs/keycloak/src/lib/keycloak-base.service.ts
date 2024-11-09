@@ -1,8 +1,8 @@
+import { genHttpError, logger } from '@gym-app/shared/api';
 import { Inject, Injectable } from '@nestjs/common';
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import axiosRetry from 'axios-retry';
 import { ClientRepresentation } from './keycloak.model';
-import { logger } from '@gym-app/shared/api';
 
 @Injectable()
 export class KeycloakBaseService {
@@ -12,6 +12,7 @@ export class KeycloakBaseService {
   };
   private axiosInstance: AxiosInstance;
   private axiosInstanceRealm: AxiosInstance;
+  private axiosInstanceOpenID: AxiosInstance;
   private clientUuid = '';
   private basePath = '';
   private tokenExpiresAtMS = 0;
@@ -21,7 +22,8 @@ export class KeycloakBaseService {
     @Inject('KEYCLOAK_BASE_URL') private baseUrl: string,
   ) {
     this.axiosInstance = this.createInstance(this.baseUrl);
-    this.axiosInstanceRealm = this.createInstance(this.baseUrl);
+    this.axiosInstanceRealm = this.createInstance(`${this.baseUrl}/admin/realms/${this.realm}`);
+    this.axiosInstanceOpenID = this.createInstance(`${this.baseUrl}/realms/${this.realm}/protocol/openid-connect`);
   }
 
   private createInstance (baseURL: string): AxiosInstance {
@@ -50,7 +52,7 @@ export class KeycloakBaseService {
         this.basePath = await this.getUrl();
       }
     } catch (error) {
-      logger.error('Failed to initialize Keycloak service:', this.getErrorDetails(error));
+      logger.error('Failed to initialize Keycloak service:', genHttpError(error));
     }
   }
 
@@ -97,7 +99,7 @@ export class KeycloakBaseService {
       logger.debug('Authenticated with Keycloak realm: master');
 
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak:', this.getErrorDetails(error));
+      logger.error('Failed to authenticate with Keycloak:', genHttpError(error));
     } finally {
       if (KeycloakBaseService.authState.token) {
         this.axiosInstance.defaults.headers.common[ 'Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
@@ -110,7 +112,7 @@ export class KeycloakBaseService {
     return KeycloakBaseService.authState.token;
   }
 
-  private async getClientUuid(clientId: string): Promise<string> {
+  public async getClientUuid(clientId: string): Promise<string> {
     if (this.clientUuid) {
       return this.clientUuid;
     }
@@ -129,7 +131,7 @@ export class KeycloakBaseService {
         throw new Error(`Client ${clientId} not found`);
       }
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak:', this.getErrorDetails(error));
+      logger.error('Failed to get client UUID:', genHttpError(error));
       throw error;
     }
   }
@@ -160,7 +162,7 @@ export class KeycloakBaseService {
 
       return response.data;
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak:', this.getErrorDetails(error));
+      logger.error('Failed to login with Keycloak:', genHttpError(error));
       throw error;
     }
   }
@@ -187,11 +189,7 @@ export class KeycloakBaseService {
     return this.axiosInstanceRealm;
   }
 
-  public getErrorDetails(error: unknown) {
-    return error instanceof AxiosError ? {
-      status: error.response?.status || error.status,
-      code: error.code,
-      data: error.response?.data,
-    } : undefined;
+  public getOpenIDAxios() {
+    return this.axiosInstanceOpenID;
   }
 }

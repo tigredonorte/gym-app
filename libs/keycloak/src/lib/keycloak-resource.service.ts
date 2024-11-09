@@ -1,12 +1,11 @@
-import { logger } from '@gym-app/shared/api';
+import { genHttpError, logger } from '@gym-app/shared/api';
 import { Inject, Injectable } from '@nestjs/common';
 import { KeycloakBaseService } from './keycloak-base.service';
 import {
-  ClientRepresentation,
   PolicyRepresentation,
   ResourceRepresentation,
   RoleRepresentation,
-  ScopeRepresentation,
+  ScopeRepresentation
 } from './keycloak.model';
 
 interface KeycloakChildOptions {
@@ -35,7 +34,7 @@ export class KeycloakResourceService {
     try {
       await this.kc.authenticateKeycloak();
 
-      this.clientUuid = await this.getClientUuid(this.clientId);
+      this.clientUuid = await this.kc.getClientUuid(this.clientId);
       this.basePath = await this.getUrl();
 
       if (!this.enableLiveUpsertRealm) {
@@ -55,26 +54,7 @@ export class KeycloakResourceService {
         await this.createPermissions(this.childConfig.permissions);
       }
     } catch (error) {
-      logger.error('Failed to initialize Keycloak service:', this.kc.getErrorDetails(error));
-    }
-  }
-
-  private async getClientUuid(clientId: string): Promise<string> {
-    if (this.clientUuid) {
-      return this.clientUuid;
-    }
-    await this.kc.ensureAuthenticated();
-    const response = await this.kc.getAxios().get<ClientRepresentation[]>(
-      `/admin/realms/${this.realm}/clients`,
-      {
-        params: { clientId },
-      },
-    );
-    const clients = response.data;
-    if (clients.length > 0) {
-      return clients[0].id!;
-    } else {
-      throw new Error(`Client ${clientId} not found`);
+      logger.error('Failed to initialize Keycloak service:', genHttpError(error));
     }
   }
 
@@ -82,7 +62,7 @@ export class KeycloakResourceService {
     if (!this.clientUuid) {
       throw new Error('Client UUID not found');
     }
-    return `/admin/realms/${this.realm}/clients/${this.clientUuid}`;
+    return `/clients/${this.clientUuid}`;
   }
 
   async getResourceById(resourceId: string): Promise<ResourceRepresentation> {
@@ -106,13 +86,13 @@ export class KeycloakResourceService {
 
         try {
           await this.kc.getAxios().get(
-            `/admin/realms/${this.realm}/roles/${encodeURIComponent(role.name!)}`,
+            `${this.basePath}/roles/${encodeURIComponent(role.name!)}`,
           );
           logger.info(`Role ${role.name} already exists.`);
         } catch (error) {
           if (error.response && error.response.status === 404) {
             await this.kc.getAxios().post(
-              `/admin/realms/${this.realm}/roles`,
+              `${this.basePath}/roles`,
               role,
             );
             logger.info(`Role ${role.name} created.`);

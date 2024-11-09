@@ -1,4 +1,4 @@
-import { logger } from '@gym-app/shared/api';
+import { genHttpError, logger } from '@gym-app/shared/api';
 import { Inject, Injectable } from '@nestjs/common';
 import { KeycloakBaseService } from './keycloak-base.service';
 import {
@@ -8,24 +8,32 @@ import {
   ResourceRepresentation,
   SignupUser,
   UserRepresentation,
-  UserSession
+  UserSession,
 } from './keycloak.model';
 
 @Injectable()
 export class KeycloakAuthService {
+  private clientUuid = '';
   constructor(
     @Inject('KEYCLOAK_CLIENT_ID') private clientId: string,
     @Inject('KEYCLOAK_CLIENT_SECRET') private clientSecret: string,
-    @Inject('KEYCLOAK_REALM') private realm: string,
-    public kc: KeycloakBaseService
+    public kc: KeycloakBaseService,
   ) {
-    this.kc.init(this.clientId);
+    this.init();
+  }
+
+  async init() {
+    await this.kc.init(this.clientId);
+    this.clientUuid = await this.kc.getClientUuid(this.clientId);
+    if (!this.clientUuid) {
+      throw new Error('Client UUID not found');
+    }
   }
 
   async login(username: string, password: string): Promise<IKeycloakLoginResponse> {
     try {
-      const response = await this.kc.getRealmAxios().post(
-        `/realms/${this.realm}/protocol/openid-connect/token`,
+      const response = await this.kc.getOpenIDAxios().post(
+        '/token',
         new URLSearchParams({
           username,
           password,
@@ -42,15 +50,18 @@ export class KeycloakAuthService {
 
       return response.data;
     } catch (error) {
-      logger.error('Failed to authenticate with Keycloak:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to login on keycloak:', err);
+      throw err;
     }
   }
 
   async signup({ password, email, firstName, lastName }: SignupUser): Promise<CreatedUser> {
     try {
+      await this.kc.ensureAuthenticated();
+
       const response = await this.kc.getRealmAxios().post<CreatedUser>(
-        `/admin/realms/${this.realm}/users`,
+        '/users',
         {
           username: email,
           email,
@@ -59,44 +70,56 @@ export class KeycloakAuthService {
           credentials: [{ type: 'password', value: password, temporary: false }],
           enabled: true,
         },
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
-        },
       );
 
-      return response.data;
+      const location = response.headers['location'];
+      if (!location) {
+        throw new Error('Failed to retrieve the location of the created user.');
+      }
+      const userId = location.split('/').pop(); // Get the user ID from the URL
+
+      return {
+        id: userId,
+        email,
+        name: `${firstName} ${lastName}`,
+        createdTimestamp: Date.now(),
+      } as CreatedUser;
     } catch (error) {
-      logger.error('Failed to create user in Keycloak:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to create user in Keycloak:', err);
+      throw err;
     }
   }
 
   async recoverPassword(userId: string) {
     try {
-      const randomPassword = Math.random().toString(36).slice(-8) + '-' + Math.random().toString(36).slice(-8) + '-' + Math.random().toString(36).slice(-8);
+      const randomPassword =
+        Math.random().toString(36).slice(-8) +
+        '-' +
+        Math.random().toString(36).slice(-8) +
+        '-' +
+        Math.random().toString(36).slice(-8);
       await this.kc.getRealmAxios().put(
-        `/admin/realms/${this.realm}/users/${userId}/reset-password`,
+        `/users/${userId}/reset-password`,
         {
           type: 'password',
           temporary: true,
-          value: randomPassword
-        },
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
+          value: randomPassword,
         },
       );
 
       return { message: 'Password reset initiated' };
     } catch (error) {
-      logger.error('Failed to initiate password recovery:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to initiate password recovery:', err);
+      throw err;
     }
   }
 
   async refreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
     try {
-      const response = await this.kc.getRealmAxios().post(
-        `/realms/${this.realm}/protocol/openid-connect/token`,
+      const response = await this.kc.getOpenIDAxios().post(
+        '/token',
         new URLSearchParams({
           grant_type: 'refresh_token',
           client_id: this.clientId,
@@ -115,63 +138,61 @@ export class KeycloakAuthService {
         refreshToken: response.data.refresh_token,
       };
     } catch (error) {
-      logger.error('Failed to refresh token:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to refresh token:', err);
+      throw err;
     }
   }
 
   async changePassword(userId: string, newPassword: string) {
     try {
       await this.kc.getRealmAxios().put(
-        `/admin/realms/${this.realm}/users/${userId}/reset-password`,
+        `/users/${userId}/reset-password`,
         {
           type: 'password',
           temporary: false,
           value: newPassword,
         },
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
-        },
       );
 
       return { message: 'Password changed successfully' };
     } catch (error) {
-      logger.error('Failed to change password:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to change password:', err);
+      throw err;
     }
   }
 
   async changeEmail(userId: string, newEmail: string) {
     try {
       await this.kc.getRealmAxios().put(
-        `/admin/realms/${this.realm}/users/${userId}`,
+        `/users/${userId}`,
         { email: newEmail },
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
-        },
       );
 
       return { message: 'Email updated successfully' };
     } catch (error) {
-      logger.error('Failed to change email:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to change email:', err);
+      throw err;
     }
   }
 
-  async updateProfile<T extends Record<string, unknown>>(userId: string, profileData: { firstName?: string; lastName?: string; } & T ) {
+  async updateProfile<T extends Record<string, unknown>>(
+    userId: string,
+    profileData: { firstName?: string; lastName?: string } & T,
+  ) {
     try {
       await this.kc.getRealmAxios().put(
-        `/admin/realms/${this.realm}/users/${userId}`,
+        `/users/${userId}`,
         profileData,
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
-        },
       );
 
       return { message: 'User profile updated successfully' };
     } catch (error) {
-      logger.error('Failed to update user profile:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to update user profile:', err);
+      throw err;
     }
   }
 
@@ -182,7 +203,7 @@ export class KeycloakAuthService {
       }
       await this.kc.ensureAuthenticated();
 
-      const response = await this.kc.getRealmAxios().get(`/admin/realms/${this.realm}/users/${userId}`);
+      const response = await this.kc.getRealmAxios().get(`/users/${userId}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
@@ -190,8 +211,9 @@ export class KeycloakAuthService {
         throw new Error('User not found');
       }
 
-      logger.error(`Error loading user profile for id '${userId}'`, this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Error loading user profile for id '${userId}'`, err);
+      throw err;
     }
   }
 
@@ -200,10 +222,7 @@ export class KeycloakAuthService {
       await this.kc.ensureAuthenticated();
 
       const response = await this.kc.getRealmAxios().get<UserSession[]>(
-        `/admin/realms/${this.realm}/users/${userId}/sessions`,
-        {
-          headers: { Authorization: `Bearer ${this.kc.getToken()}` },
-        },
+        `/users/${userId}/sessions`,
       );
 
       return response.data;
@@ -213,8 +232,9 @@ export class KeycloakAuthService {
         throw new Error('User not found or no active sessions');
       }
 
-      logger.error(`Error retrieving sessions for user id '${userId}'`, this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Error retrieving sessions for user id '${userId}'`, err);
+      throw err;
     }
   }
 
@@ -226,10 +246,11 @@ export class KeycloakAuthService {
       if (error.response?.status === 401) {
         logger.info(`Password check failed for userEmail ${userEmail}: Incorrect password.`);
         return false;
-      } else {
-        logger.error(`Error during password check for userEmail ${userEmail}:`, this.kc.getErrorDetails(error));
-        throw error;
       }
+
+      const err = genHttpError(error);
+      logger.error(`Error during password check for userEmail ${userEmail}:`, err);
+      throw err;
     }
   }
 
@@ -238,20 +259,20 @@ export class KeycloakAuthService {
       await this.kc.ensureAuthenticated();
 
       const response = await this.kc.getRealmAxios().post<ResourceRepresentation>(
-        '/authz/resource-server/resource',
+        `/clients/${this.clientUuid}/authz/resource-server/resource`,
         payload,
       );
 
       logger.info(`Resource ${payload.name} created.`);
       return response.data;
     } catch (error) {
-      logger.error(`Failed to create resource ${payload.name}:`, error.response?.data || error);
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Failed to create resource ${payload.name}:`, { error: err, payload });
+      throw err;
     }
   }
 
   async createPermission(
-    clientId: string,
     permissionName: string,
     resourceName: string,
   ): Promise<PolicyRepresentation> {
@@ -266,19 +287,20 @@ export class KeycloakAuthService {
       };
 
       const response = await this.kc.getRealmAxios().post<PolicyRepresentation>(
-        '/authz/resource-server/permission/resource',
+        `/clients/${this.clientUuid}/authz/resource-server/permission/resource`,
         permissionPayload,
       );
 
       logger.info(`Permission ${permissionName} created.`);
       return response.data;
     } catch (error) {
-      logger.error(`Failed to create permission ${permissionName}:`, error.response?.data || error);
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Failed to create permission ${permissionName}:`, err);
+      throw err;
     }
   }
 
-  async createPolicy(clientId: string, policyName: string): Promise<PolicyRepresentation> {
+  async createPolicy(policyName: string): Promise<PolicyRepresentation> {
     try {
       await this.kc.ensureAuthenticated();
 
@@ -288,15 +310,16 @@ export class KeycloakAuthService {
       };
 
       const response = await this.kc.getRealmAxios().post<PolicyRepresentation>(
-        '/authz/resource-server/policy/role',
+        `/clients/${this.clientUuid}/authz/resource-server/policy/role`,
         policyPayload,
       );
 
       logger.info(`Policy ${policyName} created.`);
       return response.data;
     } catch (error) {
-      logger.error(`Failed to create policy ${policyName}:`, error.response?.data || error);
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Failed to create policy ${policyName}:`, err);
+      throw err;
     }
   }
 
@@ -304,22 +327,22 @@ export class KeycloakAuthService {
     try {
       await this.kc.ensureAuthenticated();
 
-      const response = await this.kc.getRealmAxios().get(`/admin/realms/${this.realm}/users`, {
+      const response = await this.kc.getRealmAxios().get('/users', {
         params: { email },
       });
 
-      // If users are found with the given email, the list will not be empty
       return response.data && response.data.length > 0;
     } catch (error) {
-      logger.error(`Failed to check user existence by email (${email}):`, this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error(`Failed to check user existence by email (${email}):`, err);
+      throw err;
     }
   }
 
   async logout(refreshToken: string): Promise<void> {
     try {
-      await this.kc.getRealmAxios().post(
-        `/realms/${this.realm}/protocol/openid-connect/logout`,
+      await this.kc.getOpenIDAxios().post(
+        '/logout',
         new URLSearchParams({
           client_id: this.clientId,
           client_secret: this.clientSecret,
@@ -329,25 +352,32 @@ export class KeycloakAuthService {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
-        }
+        },
       );
       logger.info('User successfully logged out from Keycloak.');
     } catch (error) {
-      logger.error('Failed to logout from Keycloak:', this.kc.getErrorDetails(error));
-      throw error;
+      const err = genHttpError(error);
+      logger.error('Failed to logout from Keycloak:', err);
+      throw err;
     }
   }
 
   async checkUserExists(userId: string): Promise<boolean> {
-    return this.checkIfExists(`/admin/realms/${this.realm}/users`, userId);
+    return this.checkIfExists('/users', userId);
   }
 
   async checkResourceExists(resourceId: string): Promise<boolean> {
-    return this.checkIfExists('/authz/resource-server/resource', resourceId);
+    return this.checkIfExists(
+      `/clients/${this.clientUuid}/authz/resource-server/resource`,
+      resourceId,
+    );
   }
 
   async checkPolicyExists(policyId: string): Promise<boolean> {
-    return this.checkIfExists('/authz/resource-server/policy', policyId);
+    return this.checkIfExists(
+      `/clients/${this.clientUuid}/authz/resource-server/policy`,
+      policyId,
+    );
   }
 
   private async checkIfExists(endpoint: string, identifier: string): Promise<boolean> {
@@ -360,10 +390,10 @@ export class KeycloakAuthService {
       if (error.response?.status === 404) {
         logger.info(`Resource not found at ${endpoint}/${identifier}`);
         return false;
-      } else {
-        logger.error(`Error checking existence at ${endpoint}/${identifier}`, this.kc.getErrorDetails(error));
-        throw error;
       }
+      const err = genHttpError(error);
+      logger.error(`Error checking existence at ${endpoint}/${identifier}`, err);
+      throw err;
     }
   }
 }
