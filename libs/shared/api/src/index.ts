@@ -1,4 +1,5 @@
 export * from './email';
+export * from './error';
 export * from './events';
 export * from './file';
 export * from './logger';
