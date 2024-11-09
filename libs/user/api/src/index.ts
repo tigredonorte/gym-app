@@ -1,7 +1,5 @@
-export * from './lib/book';
 export * from './lib/guards';
 export * from './lib/request-info-middleware';
-export * from './lib/session';
 export * from './lib/user-events.service';
 export * from './lib/user.model';
 export * from './lib/user.module';
