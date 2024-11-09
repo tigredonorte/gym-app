@@ -32,11 +32,11 @@ export const getRealmConfig = (): RealmRepresentation & { clients } => ({
       protocol: 'openid-connect',
       publicClient: false,
       rootUrl: `${process.env.KC_HOSTNAME}/realms/${process.env.REALM}`,
-      // rootUrl: `${process.env.KC_HOSTNAME_INTERNAL}:${process.env.KEYCLOAK_PORT}/realms/${process.env.REALM}`,
       directAccessGrantsEnabled: true,
       standardFlowEnabled: true,
       serviceAccountsEnabled: true,
       clientAuthenticatorType: 'client-secret',
+      authorizationServicesEnabled: true,
     },
     {
       clientId: 'frontend-client',
