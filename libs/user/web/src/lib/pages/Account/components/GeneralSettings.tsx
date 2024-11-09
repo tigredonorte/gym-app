@@ -7,7 +7,6 @@ import Card from '@mui/material/Card';
 import Grid from '@mui/material/Grid';
 import { Stack } from '@mui/system';
 import { useTranslation } from 'react-i18next';
-import './Account.scss';
 
 export interface GeneralSettingFormType extends FormContainerType {
   name: string;
@@ -26,8 +25,6 @@ export const GeneralSettings: React.FC<GeneralSettingsProps> = (props: GeneralSe
 
   return (
     <Grid container alignItems="stretch" spacing={2} sx={{ width: '100%' }}>
-
-
       <Card sx={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <CardHeader title={t('GeneralSettings.title')} />
         <CardBody>

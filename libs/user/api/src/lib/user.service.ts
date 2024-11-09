@@ -153,12 +153,12 @@ export class UserService {
       throw new BadRequestException('New password must be different from old password');
     }
 
-    const kcUser = await this.findById(id);
-    if (!kcUser) {
+    const user = await this.findById(id);
+    if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const isPasswordCorrect = await this.kcAuth.checkPassword(kcUser.email, oldPassword);
+    const isPasswordCorrect = await this.kcAuth.checkPassword(user.email, oldPassword);
     if (!isPasswordCorrect) {
       throw new BadRequestException('Incorrect password');
     }

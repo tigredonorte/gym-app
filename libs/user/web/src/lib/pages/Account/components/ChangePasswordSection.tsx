@@ -32,11 +32,11 @@ export const ChangePasswordSection: React.FC<ChangePasswordSectionProps> = React
       Container={Card}
     >
       <Form.Provider>
-        <Form.Container className="general-settings-form" onSave={handleSave}>
+        <Form.Container onSave={handleSave}>
+          <PasswordField name='oldPassword' label={t('ChangePasswordSection.currentPassword')} />
           <Form.Fields.ConfirmField confirmLabel={t('ChangePasswordSection.confirmPassword')} confirmName="confirmPassword">
-            <PasswordField name="newPassword" label={t('ChangePasswordSection.newPassword')} />
+            <PasswordField name="newPassword" autoComplete='new-password' label={t('ChangePasswordSection.newPassword')} />
           </Form.Fields.ConfirmField>
-          <PasswordField name='oldPassword' label={t('ChangePasswordSection.currentPassword')}  />
           <ErrorAlert message={t(error)} />
           <div className='button-container'>
             <Form.Button.Submit

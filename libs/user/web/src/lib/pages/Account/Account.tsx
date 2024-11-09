@@ -6,10 +6,10 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { getUser, getUserState, getUserStatus, UserActionTypes, UserRequestStatuses } from '../../reducer';
 import { changeEmail, ChangeEmailSettingFormType, changePassword, ChangePasswordFormType, loadUser, saveProfileInfo, uploadUserImage } from '../../reducer/UserActions';
+import './Account.scss';
 import { ChangeEmailSettings } from './components/ChangeEmailSettings';
 import { ChangePasswordSection } from './components/ChangePasswordSection';
-import './Account.scss';
-import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
+import { GeneralSettingFormType, GeneralSettings } from './components/GeneralSettings';
 
 const subjectStatuses = [UserActionTypes.LoadUser, UserActionTypes.UploadUserImage];
 
