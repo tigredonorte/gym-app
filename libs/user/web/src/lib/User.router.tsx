@@ -9,7 +9,6 @@ import { UserMenu } from './components/UserMenu';
 import { Account } from './pages/Account/Account';
 import { Confirm } from './pages/Confirm/Confirm';
 import { Logout } from './pages/Logout/Logout';
-import { Security } from './pages/Security/Security';
 
 interface ProfileRouterProps {
   children: React.ReactNode;
@@ -40,7 +39,6 @@ export const ProfileRouter: React.FC<ProfileRouterProps> = (props: ProfileRouter
       <Routes>
         <Route path="/" element={<Navigate to="/profile/account" />} />
         <Route path='account' element={<Account />} />
-        <Route path='security' element={<Security />} />
         {props.children}
         <Route path="*" element={<Navigate to="account" />} />
       </Routes>

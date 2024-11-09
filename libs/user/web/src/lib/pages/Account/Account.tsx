@@ -4,12 +4,12 @@ import Stack from '@mui/material/Stack';
 import React from 'react';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
-import { getUser, getUserState, getUserStatus, UserActionTypes } from '../../reducer';
-import { loadUser, saveProfileInfo, uploadUserImage } from '../../reducer/UserActions';
+import { getUser, getUserState, getUserStatus, UserActionTypes, UserRequestStatuses } from '../../reducer';
+import { changeEmail, ChangeEmailSettingFormType, changePassword, ChangePasswordFormType, loadUser, saveProfileInfo, uploadUserImage } from '../../reducer/UserActions';
+import { ChangeEmailSettings } from './components/ChangeEmailSettings';
+import { ChangePasswordSection } from './components/ChangePasswordSection';
 import './Account.scss';
-import { DeleteAccount } from './DeleteAccount';
 import { GeneralSettingFormType, GeneralSettings } from './GeneralSettings';
-import { NotificationSettings } from './NotificationSettings';
 
 const subjectStatuses = [UserActionTypes.LoadUser, UserActionTypes.UploadUserImage];
 
@@ -18,18 +18,18 @@ interface AccountProps {
   user?: IUser;
   loading: boolean;
   errorMessage: string;
+  statuses: UserRequestStatuses;
   getUserStatusProperty: <Key extends keyof ActionStatus>(property: Key) => ActionStatus[Key] | null;
   loadUser: () => void;
   uploadUserImage: (file: File) => void;
   saveProfileInfo: (userData: Partial<IUser>) => void;
+  changePassword: (changePasswordData: ChangePasswordFormType) => void;
+  changeEmail: (userData: ChangeEmailSettingFormType) => void;
 }
 
 interface AccountState {
   isFormValid: boolean;
   user?: IUser;
-  config: {
-    publicProfile: boolean;
-  };
 }
 
 class AccountClass extends React.Component<AccountProps, AccountState> {
@@ -41,9 +41,6 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
 
     this.state = {
       isFormValid: true,
-      config: {
-        publicProfile: true,
-      }
     };
   }
 
@@ -60,14 +57,12 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
     console.log('Change settings', { option, value });
   }
 
-  handleChangeImage(file: File) {
-    const { uploadUserImage } = this.props;
-
-    uploadUserImage(file);
+  async onChangeEmail(userData: ChangeEmailSettingFormType) {
+    this.props.changeEmail(userData);
   }
 
-  onDeleteAccount() {
-    console.log('Delete account');
+  async onChangePassword(changePasswordData: ChangePasswordFormType): Promise<void> {
+    this.props.changePassword(changePasswordData);
   }
 
   onCloseError() {
@@ -78,8 +73,7 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
   }
 
   render() {
-    const { config } = this.state;
-    const { user, errorMessage, loading, getUserStatusProperty, t } = this.props;
+    const { user, errorMessage, loading, statuses, getUserStatusProperty, t } = this.props;
 
     return (
       <CrudContainer
@@ -95,14 +89,17 @@ class AccountClass extends React.Component<AccountProps, AccountState> {
             loading={getUserStatusProperty('loading') || false}
             user={user as IUser}
             onSave={(data) => this.onSaveProfileInfo(data)}
-            handleChangeImage={this.handleChangeImage.bind(this)}
           />
-          <NotificationSettings
-            onChange={(option: string, value: boolean) => this.onChangeSettings(option, value)}
-            config={config}
+          <ChangeEmailSettings
+            errorMessage={statuses.changeEmail?.error || ''}
+            loading={statuses.changeEmail?.loading || false}
+            user={user as IUser}
+            onSave={(data) => this.onChangeEmail(data)}
           />
-          <DeleteAccount
-            onDelete={() => this.onDeleteAccount()}
+          <ChangePasswordSection
+            loading={statuses?.changePassword?.loading || false}
+            error={statuses?.changePassword?.error || ''}
+            onSave={this.onChangePassword.bind(this)} user={user as IUser}
           />
         </Stack>
       </CrudContainer>
@@ -115,11 +112,14 @@ export const Account = connect(
     user: getUser(state as never),
     loading: getUserStatus(state as never, UserActionTypes.LoadUser)?.loading || false,
     errorMessage: getUserStatus(state as never, UserActionTypes.LoadUser)?.error || '',
+    statuses: getUserState(state as never).statuses,
     getUserStatusProperty: getStatusesProperty(getUserState(state as never).statuses, subjectStatuses),
   }),
   {
     loadUser,
     saveProfileInfo,
     uploadUserImage,
+    changePassword,
+    changeEmail,
   }
 )(withTranslation('user')(AccountClass));

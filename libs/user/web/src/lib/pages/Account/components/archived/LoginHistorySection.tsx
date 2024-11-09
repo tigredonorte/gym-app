@@ -12,7 +12,7 @@ import Typography from '@mui/material/Typography';
 import { formatDistance } from 'date-fns';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { IAccessLog } from '../../../reducer/session.types';
+import { IAccessLog } from '../../../../reducer/session.types';
 
 export interface HistoryRow {
   time: string;
