@@ -1,16 +1,17 @@
 import { mdiAccountCircle, mdiLogout } from '@mdi/js';
-import { Avatar, Box, Divider, IconButton, Menu, Typography } from '@mui/material';
+import { Avatar, Divider, IconButton, Menu } from '@mui/material';
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AccountItem } from './AccountItem';
+import { AccountMenuDetails } from './AccountMenuDetails';
 
-interface AccountProps {
+interface AccountMenuProps {
   userName?: string;
   userEmail?: string;
   userProfileImage?: string;
 }
 
-export const Account: React.FC<AccountProps> = ({ userName, userEmail, userProfileImage }) => {
+export const AccountMenu: React.FC<AccountMenuProps> = ({ userName, userEmail, userProfileImage }) => {
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,12 +35,11 @@ export const Account: React.FC<AccountProps> = ({ userName, userEmail, userProfi
         aria-label="account of current user"
         aria-haspopup="true"
         onClick={handleOpen}
-        color="inherit"
       >
         {userProfileImage ? (
           <Avatar src={userProfileImage} alt="Profile Picture" />
         ) : (
-          <Avatar>{userName ? userName[0] : 'A'}</Avatar>
+          <Avatar>{(userName || '')[0]}</Avatar>
         )}
       </IconButton>
       <Menu
@@ -52,11 +52,7 @@ export const Account: React.FC<AccountProps> = ({ userName, userEmail, userProfi
           }
         }}
       >
-        <Box display="flex" flexDirection="column" alignItems="center" textAlign="center">
-          <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 2 }}>{userEmail}</Typography>
-          <Avatar src={userProfileImage} alt="Profile Picture" sx={{ width: 60, height: 60, marginBottom: 2 }} />
-          <Typography variant="h6" sx={{ marginBottom: 2 }}>{userName ? `Hi, ${userName}!` : 'Hi!'}</Typography>
-        </Box>
+        <AccountMenuDetails userName={userName} userEmail={userEmail} userProfileImage={userProfileImage} />
         <Divider sx={{ my: 1 }} />
         <AccountItem
           onClick={() => navigate('/profile/account')}

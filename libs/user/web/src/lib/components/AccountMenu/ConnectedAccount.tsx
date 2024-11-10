@@ -4,7 +4,7 @@ import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import { getUser } from '../../reducer';
 import { loadUser } from '../../reducer/UserActions';
-import { Account } from './Account';
+import { AccountMenu } from './AccountMenu';
 
 interface ConnectedAccountProps {
   user?: IUser;
@@ -16,27 +16,14 @@ const ConnectedAccountComponent: React.FC<ConnectedAccountProps> = ({ user, load
     loadUser();
   }, [loadUser]);
 
-  if (!user) {
-    return (
-      <Account
-        userName={''}
-        userEmail={''}
-        userProfileImage={''}
-      />
-    );
-  }
-
-  const { name, email, userAvatar } = user;
-
   return (
-    <Account
-      userName={name}
-      userEmail={email}
-      userProfileImage={userAvatar}
+    <AccountMenu
+      userName={user?.name}
+      userEmail={user?.email}
+      userProfileImage={user?.userAvatar}
     />
   );
 };
-
 
 export const ConnectedAccount = connect(
   (state) => ({

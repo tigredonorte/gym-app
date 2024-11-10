@@ -1,2 +1,2 @@
-export * from './Account';
+export * from './AccountMenu';
 export * from './ConnectedAccount';
