@@ -13,7 +13,7 @@ export type IMenuItem = {
 );
 
 export interface MenuIconProps extends Omit<IMenuItem, 'id'> {
-  onClick?: () => void;
+  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
 export const HeaderMenuIcon = (props: MenuIconProps) => {
@@ -24,7 +24,7 @@ export const HeaderMenuIcon = (props: MenuIconProps) => {
   }
 
   const iconButton = Icon && (
-    <IconButton size="large" aria-label={ariaLabel} color="inherit" onClick={() => !label && onClick?.()}>
+    <IconButton size="large" aria-label={ariaLabel} color="inherit" onClick={(ev) => !label && onClick?.(ev)}>
       <Badge badgeContent={count} color="error">
         {icon && <Icon size={1} path={icon} />}
       </Badge>

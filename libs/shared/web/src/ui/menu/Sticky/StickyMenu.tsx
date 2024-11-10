@@ -4,7 +4,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import MenuItem from '@mui/material/MenuItem';
 import MenuList from '@mui/material/MenuList';
 import React from 'react';
-import { calcLayoutHeight } from '../utils';
+import { calcLayoutHeight } from '../../utils';
 
 export interface MenuOption {
   id: string;
