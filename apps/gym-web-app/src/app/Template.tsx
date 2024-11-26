@@ -1,4 +1,5 @@
 import { Header, SearchComponent } from '@gym-app/shared/web';
+import { ConnectedAccount } from '@gym-app/user/web';
 import { Theme } from '@mui/material';
 import { useMediaQuery } from '@mui/system';
 
@@ -16,6 +17,7 @@ export const TemplateComponent = ({ children }: { children: React.ReactNode }) =
             src: '/logo/logo.jpg',
           }
         }}
+        rightComponent={<ConnectedAccount />}
       >
         {/* <NotificationsComponent
           label={isSmallScreen ? '' : 'Notifications'}

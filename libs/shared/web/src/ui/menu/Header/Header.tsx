@@ -1,4 +1,3 @@
-import { ConnectedAccount } from '@gym-app/user/web';
 import { AppBar, Box, Toolbar } from '@mui/material';
 import { SiteTitleComponent, SiteTitleProps } from './components/SiteTitle/SiteTitle';
 
@@ -6,9 +5,10 @@ export interface HeaderProps {
   titleProps: SiteTitleProps;
   children?: React.ReactNode;
   alignRight?: boolean;
+  rightComponent?: React.ReactNode;
 }
 
-export function Header({ children, titleProps, alignRight }: HeaderProps): JSX.Element {
+export function Header({ children, titleProps, alignRight, rightComponent }: HeaderProps): JSX.Element {
   return (
     <AppBar position="static">
       <Toolbar sx={{
@@ -24,7 +24,7 @@ export function Header({ children, titleProps, alignRight }: HeaderProps): JSX.E
           }}>
           {children}
         </Box>
-        <ConnectedAccount />
+        {rightComponent}
       </Toolbar>
     </AppBar>
   );

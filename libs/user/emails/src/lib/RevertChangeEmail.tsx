@@ -1,9 +1,8 @@
-import { Button, Container, Heading, Section, Text } from '@react-email/components';
-import { AccessDetails } from '../base/AccessDetails';
+import { Container, Heading, Section, Text } from '@react-email/components';
+import { defaultProps } from '../base/defaultProps.config';
 import { Email } from '../base/Email';
 import { DefaultEmailProps } from '../base/Email.model';
 import { tailwindConfig, typography } from '../base/tailwind.config';
-import { defaultProps } from '../base/defaultProps.config';
 
 export interface RevertChangeEmailProps extends DefaultEmailProps {
   title: string;
