@@ -1,4 +1,4 @@
-FROM node:20-alpine AS gym-api-base
+FROM node:20.17.0-alpine AS gym-api-base
 
 WORKDIR /usr/src/app
 

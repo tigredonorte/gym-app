@@ -1,6 +1,6 @@
-FROM node:20-alpine AS gym-api-base
+FROM node:20.17.0-alpine AS builder
 
-WORKDIR /usr/src/app
+WORKDIR /build
 
 RUN apk add --no-cache bash curl gnupg python3 make g++ && \
     npm install -g pnpm@9.12.0 && \
@@ -14,7 +14,8 @@ COPY . .
 
 RUN npx nx build gym-api --prod
 
-FROM node:20-alpine
+# runtime stage
+FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
@@ -23,9 +24,9 @@ RUN apk add --no-cache bash curl gnupg python3 make g++ && \
     curl -Ls https://cli.doppler.com/install.sh | sh && \
     npm install -g pm2 # Install PM2
 
-COPY --from=builder /usr/src/app/dist/apps/gym-api ./
-COPY --from=builder /usr/src/app/node_modules ./node_modules
-COPY --from=builder /usr/src/app/package.json ./
+COPY --from=builder /build/dist/apps/gym-api ./
+COPY --from=builder /build/node_modules ./node_modules
+COPY --from=builder /build/package.json ./
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser

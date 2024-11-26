@@ -1,6 +1,6 @@
-FROM node:20-alpine AS worker-base
+FROM node:20.17.0-alpine AS worker-base
 
-WORKDIR /usr/src/app
+WORKDIR /build
 
 RUN apk add --no-cache bash curl gnupg python3 make g++ && \
     npm install -g pnpm@9.12.0 && \
@@ -14,7 +14,7 @@ COPY . .
 
 RUN npx nx build workers --prod
 
-FROM node:20-alpine
+FROM node:20.17.0-alpine
 
 WORKDIR /app
 
@@ -23,9 +23,9 @@ RUN apk add --no-cache bash curl gnupg python3 make g++ && \
     curl -Ls https://cli.doppler.com/install.sh | sh && \
     npm install -g pm2 # Install PM2
 
-COPY --from=worker-base /usr/src/app/dist/apps/workers ./
-COPY --from=worker-base /usr/src/app/node_modules ./node_modules
-COPY --from=worker-base /usr/src/app/package.json ./
+COPY --from=worker-base /build/dist/apps/workers ./
+COPY --from=worker-base /build/node_modules ./node_modules
+COPY --from=worker-base /build/package.json ./
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
