@@ -60,3 +60,9 @@ mongo-keyfile
 # Sentry Config File
 .env.sentry-build-plugin
 .nx
+
+# Playwright Test Artifacts
+.last-run.json
+test-results/
+playwright-report/
+playwright/.cache/
