@@ -29,21 +29,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm run ci
+      - name: Setup Environment
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Lint all projects
         run: npm run lint
 
@@ -51,21 +38,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm run ci
+      - name: Setup Environment
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Build all projects
         run: npm run build
 
@@ -73,20 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm run ci
+      - name: Setup Environment
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Test all projects
         run: pnpm run test
