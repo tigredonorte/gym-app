@@ -3,8 +3,20 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
 
 defaults:
   run:
@@ -17,131 +29,64 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Check for relevant changes
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            src:
-              - 'apps/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - '.github/workflows/**'
-
       - name: Checkout
         uses: actions/checkout@v4
-        if: steps.changes.outputs.src == 'true'
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        if: steps.changes.outputs.src == 'true'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
           dest: ~/setup-pnpm
-
       - name: Install Node.js
         uses: actions/setup-node@v4
-        if: steps.changes.outputs.src == 'true'
         with:
           node-version: 18.17.1
           cache: 'pnpm'
-
       - name: Install dependencies
-        if: steps.changes.outputs.src == 'true'
         run: pnpm run ci
-
       - name: Lint all projects
-        if: steps.changes.outputs.src == 'true'
         run: npm run lint
 
   build:
     runs-on: ubuntu-latest
-    # The existing if condition for the job can remain,
-    # as it controls whether the job runs at all based on event type or branch.
-    # The path filter will then control whether the steps within the job run.
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Check for relevant changes
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            src:
-              - 'apps/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - '.github/workflows/**'
-
       - name: Checkout
         uses: actions/checkout@v4
-        if: steps.changes.outputs.src == 'true'
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        if: steps.changes.outputs.src == 'true'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
           dest: ~/setup-pnpm
-
       - name: Install Node.js
         uses: actions/setup-node@v4
-        if: steps.changes.outputs.src == 'true'
         with:
           node-version: 18.17.1
           cache: 'pnpm'
-
       - name: Install dependencies
-        if: steps.changes.outputs.src == 'true'
         run: pnpm run ci
-
       - name: Build all projects
-        if: steps.changes.outputs.src == 'true'
         run: npm run build
 
   test:
     runs-on: ubuntu-latest
-    # The existing if condition for the job can remain.
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Check for relevant changes
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            src:
-              - 'apps/**'
-              - 'libs/**'
-              - 'package.json'
-              - 'pnpm-lock.yaml'
-              - '.github/workflows/**'
-
       - name: Checkout
         uses: actions/checkout@v4
-        if: steps.changes.outputs.src == 'true'
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        if: steps.changes.outputs.src == 'true'
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
           dest: ~/setup-pnpm
-
       - name: Install Node.js
         uses: actions/setup-node@v4
-        if: steps.changes.outputs.src == 'true'
         with:
           node-version: 18.17.1
           cache: 'pnpm'
-
       - name: Install dependencies
-        if: steps.changes.outputs.src == 'true'
         run: pnpm run ci
-
       - name: Test all projects
-        if: steps.changes.outputs.src == 'true'
         run: pnpm run test
