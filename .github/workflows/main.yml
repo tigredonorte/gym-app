@@ -34,7 +34,7 @@ jobs:
       # - name: Setup Environment
       #   uses: ./.github/workflows/reusable-setup.yml
       - name: Call Debug Reusable Workflow
-        uses: ./.github/workflows/debug-reusable.yml
+        uses: ${{ github.workspace }}/.github/workflows/debug-reusable.yml
       - name: Lint all projects
         run: npm run lint
 
