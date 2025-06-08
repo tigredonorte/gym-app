@@ -29,6 +29,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Setup Environment
         uses: ./.github/workflows/reusable-setup.yml
       - name: Lint all projects
@@ -38,6 +40,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Setup Environment
         uses: ./.github/workflows/reusable-setup.yml
       - name: Build all projects
@@ -47,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Setup Environment
         uses: ./.github/workflows/reusable-setup.yml
       - name: Test all projects
