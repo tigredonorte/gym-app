@@ -3,8 +3,20 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'apps/**'
+      - 'libs/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
 
 defaults:
   run:
@@ -17,25 +29,12 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm run ci
-
+      # - name: Setup Environment
+      #   uses: ./.github/workflows/reusable-setup.yml
+      - name: Call Debug Reusable Workflow
+        uses: ${{ github.workspace }}/.github/workflows/debug-reusable.yml
       - name: Lint all projects
         run: npm run lint
 
@@ -43,25 +42,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm run ci
-
+      - name: Setup Environment
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Build all projects
         run: npm run build
 
@@ -69,24 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
-        with:
-          version: 9
-          run_install: false
-          dest: ~/setup-pnpm
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.1
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm run ci
-
+      - name: Setup Environment
+        uses: ./.github/workflows/reusable-setup.yml
       - name: Test all projects
         run: pnpm run test
