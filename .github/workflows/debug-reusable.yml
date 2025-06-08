@@ -1,0 +1,9 @@
+name: Debug Reusable Workflow
+on:
+  workflow_call:
+jobs:
+  debug_job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo from reusable
+        run: echo "Debug reusable workflow executed successfully"

@@ -31,8 +31,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/workflows/reusable-setup.yml
+      # - name: Setup Environment
+      #   uses: ./.github/workflows/reusable-setup.yml
+      - name: Call Debug Reusable Workflow
+        uses: ./.github/workflows/debug-reusable.yml
       - name: Lint all projects
         run: npm run lint
 
