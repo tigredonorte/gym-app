@@ -1,8 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// Removed the import of KeycloakAdminClient
-// import KeycloakAdminClient from '@keycloak/keycloak-admin-client';
-
 export enum DecisionStrategy {
   AFFIRMATIVE = 'AFFIRMATIVE',
   UNANIMOUS = 'UNANIMOUS',

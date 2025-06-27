@@ -42,7 +42,7 @@ services:
       - ./:/usr/src/app
 
   keycloak:
-    command: start-dev
+    command: start-dev --import-realm
 
   postgres:
     ports:

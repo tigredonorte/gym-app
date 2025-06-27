@@ -1,6 +1,12 @@
-import { IdentityProviderRepresentation, RealmRepresentation } from '@gym-app/keycloak';
+import {
+  ClientRepresentation,
+  IdentityProviderRepresentation,
+  RealmRepresentation,
+} from '@gym-app/keycloak';
 
-export const getRealmConfig = (): RealmRepresentation & { clients } => ({
+export const getRealmConfig = (): RealmRepresentation & {
+  clients: ClientRepresentation[];
+} => ({
   realm: process.env.REALM,
   enabled: true,
   registrationAllowed: true,
@@ -12,6 +18,20 @@ export const getRealmConfig = (): RealmRepresentation & { clients } => ({
   registrationEmailAsUsername: true,
   editUsernameAllowed: true,
   defaultLocale: 'en',
+  requiredActions: [],
+  browserFlow: 'browser',
+  registrationFlow: 'registration',
+  directGrantFlow: 'direct grant',
+  resetCredentialsFlow: 'reset credentials',
+  clientAuthenticationFlow: 'clients',
+  dockerAuthenticationFlow: 'docker auth',
+  duplicateEmailsAllowed: false,
+  bruteForceProtected: false,
+  loginTheme: 'keycloak',
+  adminTheme: 'keycloak',
+  accountTheme: 'keycloak',
+  emailTheme: 'keycloak',
+
   smtpServer: {
     host: process.env.SMTP_HOST,
     port: process.env.SMTP_PORT,
@@ -36,7 +56,6 @@ export const getRealmConfig = (): RealmRepresentation & { clients } => ({
       standardFlowEnabled: true,
       serviceAccountsEnabled: true,
       clientAuthenticatorType: 'client-secret',
-      authorizationServicesEnabled: true,
     },
     {
       clientId: 'frontend-client',
@@ -56,7 +75,7 @@ export const getRealmConfig = (): RealmRepresentation & { clients } => ({
   identityProviders: getIdentityProviders(),
 });
 
-export const getIdentityProviders = () => {
+export const getIdentityProviders = (): IdentityProviderRepresentation[] => {
   const identityProviders: IdentityProviderRepresentation[] = [];
 
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {

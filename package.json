@@ -7,11 +7,12 @@
     "node": "20.x"
   },
   "scripts": {
-    "setup": "bash ./infra/local/init-repository.sh",
+    "setup": "doppler setup && bash ./infra/local/init-repository.sh && pnpm install && pnpm run realm:generate",
+    "secrets": "doppler secrets download --no-file --format env > .doppler.env",
     "preinstall": "npx only-allow pnpm",
-    "dev": "NODE_ENV=development && pnpm run secrets && doppler run -- docker compose up --build --timestamps --watch --attach api --attach web --attach workers",
+    "pre-dev": "NODE_ENV=development && pnpm run secrets && pnpm run realm:generate",
+    "dev": "NODE_ENV=development && pnpm run pre-dev && doppler run -- docker compose up --build --timestamps --watch --attach api --attach web --attach workers",
     "dev:email": "email dev --dir=libs/",
-    "secrets": "doppler setup && doppler secrets download --no-file --format env > .doppler.env",
     "build": "nx run-many --target=build --all --exclude=gym-app --no-cloud",
     "lint": "nx run-many --target=lint --all --no-cloud",
     "lint:fix": "nx run-many --target=lint --all --fix",
@@ -19,6 +20,7 @@
     "test:affected": "nx affected:test",
     "test:watch": "nx test gym-app --watch",
     "ci": "pnpm install --frozen-lockfile",
+    "realm:generate": "doppler run -- npx ts-node --project ./infra/keycloak/tsconfig.json ./infra/keycloak/generateRealm.ts",
     "mongo-logs": "docker compose logs -f mongo1 | grep -oP '\"\\$date\":\"\\K[^\"]+|\"msg\":\"\\K[^\"]+' | sed -n 'N;s/\\n/ - /p'",
     "mongo-logs-health": "docker inspect --format='{{json .State.Health}}' gym-mongo1-1 | jq",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org thomfilgcom --project node ./build && sentry-cli sourcemaps upload --org thomfilgcom --project node ./build"

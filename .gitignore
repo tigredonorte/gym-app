@@ -59,3 +59,4 @@ mongo-keyfile
 .nx
 .doppler.env
 realmConfigHashCache.txt
+keycloak-config/

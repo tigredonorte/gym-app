@@ -119,12 +119,18 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.0.0
-    command: start
+    command: start --import-realm
+    entrypoint: /opt/keycloak/bin/entrypoint.sh
     environment:
       - KC_DB_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
       - KC_DB_USERNAME=${POSTGRES_USER}
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
       - KC_HOSTNAME_URL=http://${KC_HOSTNAME}:${NGINX_HOST_PORT}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./infra/keycloak/entrypoint.sh:/opt/keycloak/bin/entrypoint.sh
+      - ./keycloak-config:/opt/keycloak/data/import
     env_file:
       - .env
       - .doppler.env

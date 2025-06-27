@@ -10,16 +10,13 @@ export async function loadUserTranslations() {
 
 if (import.meta.hot) {
   import.meta.hot.accept('./en', async () => {
-    console.error('@@## user translations');
     loadUserTranslations();
   });
 
   import.meta.hot.accept('./pt-br', async () => {
-    console.error('@@## user translations');
     loadUserTranslations();
   });
   import.meta.hot.accept(['./en', './pt-br'], () => {
-    console.error('@@## user translations');
     loadUserTranslations();
   });
   import.meta.hot.invalidate();
