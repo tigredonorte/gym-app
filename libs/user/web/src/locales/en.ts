@@ -118,3 +118,7 @@ export const en = {
 };
 
 export type UserLocaleType = typeof en;
+
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}

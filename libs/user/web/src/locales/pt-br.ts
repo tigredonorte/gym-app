@@ -118,3 +118,7 @@ export const ptBr: UserLocaleType = {
     notFound: 'Usuário não encontrado',
   },
 };
+
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}

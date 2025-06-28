@@ -1,4 +1,4 @@
-import { EnvProvider, initializeI18n, initSentry, WebSocketProvider } from '@gym-app/shared/web';
+import { EnvProvider, initializeI18n, initSentry, TranslationProvider, WebSocketProvider } from '@gym-app/shared/web';
 import { AuthProvider } from '@gym-app/user/web';
 import * as Sentry from '@sentry/react';
 import React from 'react';
@@ -21,11 +21,13 @@ const App: React.FC = () => {
       <Sentry.ErrorBoundary fallback={() => <p>Something went wrong.</p>}>
         <Provider store={store}>
           <WebSocketProvider>
-            <AuthProvider>
-              <MUITheme>
-                <AppRouter />
-              </MUITheme>
-            </AuthProvider>
+            <TranslationProvider>
+              <AuthProvider>
+                <MUITheme>
+                  <AppRouter />
+                </MUITheme>
+              </AuthProvider>
+            </TranslationProvider>
           </WebSocketProvider>
         </Provider>
       </Sentry.ErrorBoundary>

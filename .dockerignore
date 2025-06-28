@@ -2,18 +2,13 @@
 .git
 .github
 .nginx
+.vscode
 .vsc
 build
 dist
-init-replica.sh
-# nginx
 node_modules
-# scripts
-tools
 uploads
 
-Dockerfile.mongo
 docker-compose.override.yml
 docker-compose.prod.yml
 docker-compose.yml
-migrations.json

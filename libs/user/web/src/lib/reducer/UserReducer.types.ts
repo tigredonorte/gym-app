@@ -1,6 +1,6 @@
 import {
   IPagination,
-  RequestStatusses,
+  RequestStatuses,
   StateWithStatus,
 } from '@gym-app/shared/web';
 import { IDeviceInfo, IUser } from '@gym-app/user/types';
@@ -11,18 +11,16 @@ export enum UserActionTypes {
   Login = 'login',
   Logout = 'logout',
   LoadUser = 'loadUser',
-  RemoveFromEmailHistory = 'removeFromEmailHistory',
   SaveProfileInfo = 'saveProfileInfo',
   ChangeEmail = 'changeEmail',
   ChangePassword = 'changePassword',
-  CancelChangePassword = 'cancelChangePassword',
   LoadUserSession = 'loadUserSession',
   LoadUserAccesses = 'loadUserAccesses',
   LogoutDevice = 'logoutDevice',
   UploadUserImage = 'uploadUserImage'
 }
 
-export type UserRequestStatusses = RequestStatusses<UserActionTypes>;
+export type UserRequestStatuses = RequestStatuses<UserActionTypes>;
 
 export interface UserState extends StateWithStatus<UserActionTypes> {
   user?: IUser;

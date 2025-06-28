@@ -1,4 +1,4 @@
-import { JwtAuthGuard, User } from '@gym-app/user/api';
+import { CreatedUser } from '@gym-app/keycloak';
 import { IRequestInfoDto } from '@gym-app/user/types';
 import {
   Body,
@@ -11,17 +11,20 @@ import {
   Req, UseGuards,
   ValidationPipe
 } from '@nestjs/common';
+import { AuthGuard, Public } from 'nest-keycloak-connect';
 import {
   CheckEmailDto,
   ConfirmRecoverPasswordDto,
   ForgotPasswordDto,
   LoginDto,
   LogoutDto,
+  RefreshTokenDto,
   SignupDto,
   changePasswordDto
 } from './auth.dto';
 import { AuthService } from './auth.service';
 
+@Public()
 @Controller('auth')
 export class AuthController {
 
@@ -29,29 +32,31 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() data: LoginDto, @Req() req: IRequestInfoDto) {
-    return this.authService.login(data, req.userData);
+  async login(@Body() data: LoginDto) {
+    return this.authService.login(data);
   }
 
   @Post('refreshToken')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  async refreshToken(
-    @Headers('authorization') token: string,
-      @Req() req: IRequestInfoDto
-  ): Promise<{ token: string }> {
-    return this.authService.refreshToken(req.user?.id || '', token, req.userData);
+  @UseGuards(AuthGuard)
+  async refreshToken(@Body() data: RefreshTokenDto): Promise<{ token: string }> {
+    return this.authService.refreshToken(data.userRefreshToken);
   }
 
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  async logout(@Body() data: LogoutDto, @Req() req: IRequestInfoDto) {
-    return this.authService.logout(data, req.userData);
+  @UseGuards(AuthGuard)
+  async logout(
+  @Body() data: LogoutDto,
+    @Req() req: IRequestInfoDto,
+    @Headers('authorization') authHeader: string,
+  ) {
+    return this.authService.logout(data, authHeader, req.userData);
   }
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() data: SignupDto, @Req() req: IRequestInfoDto): Promise<Omit<User, 'password'>> {
+  async signup(@Body() data: SignupDto, @Req() req: IRequestInfoDto): Promise<CreatedUser> {
     return this.authService.signup(data, req.userData);
   }
 
@@ -69,8 +74,11 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(HttpStatus.OK)
-  async changePassword(@Body(new ValidationPipe()) data: changePasswordDto, @Req() req: IRequestInfoDto) {
-    return this.authService.changePassword(data, req.ip);
+  async changePassword(
+  @Body(new ValidationPipe()) data: changePasswordDto,
+    @Req() req: IRequestInfoDto
+  ) {
+    return this.authService.changePassword(data, req.userData);
   }
 
   @Post('checkEmail')

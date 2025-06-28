@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import { mdiClose } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Button } from '@mui/material';

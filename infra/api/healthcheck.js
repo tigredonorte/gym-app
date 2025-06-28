@@ -4,10 +4,10 @@ const { io } = require('socket.io-client');
 
 const healthCheck = async () => {
   try {
-    console.info('Starting health check...');
+    console.info('Starting health check 2...');
     const [websocketResponse, apiResponse] = await Promise.allSettled([
-      checkWebSocketConnection('ws://nginx/ws'),
-      checkAPIHealth('http://nginx/api/'),
+      checkWebSocketConnection('ws://localhost:5000'),
+      checkAPIHealth('http://localhost:3000/api/health'),
     ]);
 
     if (websocketResponse.status === 'rejected' && apiResponse.status === 'rejected') {
@@ -30,7 +30,7 @@ const healthCheck = async () => {
   }
 };
 
-const checkAPIHealth = async (apiUrl) =>  new Promise((resolve, reject) => {
+const checkAPIHealth = async (apiUrl) => new Promise((resolve, reject) => {
   console.info(`Checking API health at: ${apiUrl}`);
   const url = new URL(apiUrl);
   const req = request({
@@ -45,6 +45,7 @@ const checkAPIHealth = async (apiUrl) =>  new Promise((resolve, reject) => {
       console.info(`Successfully connected to API at ${apiUrl}.`);
       resolve();
     } else {
+      console.warn(`Received status code: ${res.statusCode} from ${apiUrl}`);
       reject(new Error(`API health check failed with status code: ${res.statusCode}`));
     }
   });
@@ -60,12 +61,12 @@ const checkAPIHealth = async (apiUrl) =>  new Promise((resolve, reject) => {
   req.end();
 });
 
-
 const checkWebSocketConnection = (websocketUrl) => new Promise((resolve, reject) => {
   try {
     const url = new URL(websocketUrl);
     const path = url.pathname === '/' ? '/ws' : url.pathname;
-    const urlParsed = `${url.protocol}//${url.hostname}${path}`;
+    const port = url.port ? `:${url.port}` : '';
+    const urlParsed = `${url.protocol}//${url.hostname}${port}${path}`;
 
     console.info(`Attempting to connect to WebSocket at: ${urlParsed}`);
     const socket = io(urlParsed, {

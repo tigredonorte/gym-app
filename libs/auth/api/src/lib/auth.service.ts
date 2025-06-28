@@ -1,16 +1,13 @@
-import { EmailService } from '@gym-app/shared/api';
-import { SessionService, User, UserService, getUserAccessData } from '@gym-app/user/api';
-import { IRequestInfoDto, IUserDto } from '@gym-app/user/types';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+
+import { CreatedUser, KeycloakAuthService } from '@gym-app/keycloak';
+import { EmailService, logger } from '@gym-app/shared/api';
+import { UserService, getUserAccessData } from '@gym-app/user/api';
+import { IRequestInfoDto, IRequestUserDataDto } from '@gym-app/user/types';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import { jwtDecode } from 'jwt-decode';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
-import { UnauthorizedError } from './errors/UnauthorizedError';
-import _ = require('lodash');
-
-const JWT_SECRET = process.env['JWT_SECRET'] || 'your-secret-key';
 
 @Injectable()
 export class AuthService {
@@ -19,51 +16,61 @@ export class AuthService {
     private userService: UserService,
     private emailService: EmailService,
     private authEventsService: AuthEventsService,
-    private sessionService: SessionService,
+    private kcAuth: KeycloakAuthService
   ) {}
 
-  async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<Omit<User, 'password'>> {
-    const result = await this.userService.create(data);
-    const { name, id, email } = result;
-    await this.authEventsService.emitSignup({ user: { name, email, id: `${id}` }, userData });
-    return result;
+  async signup(data: SignupDto, userData: IRequestInfoDto['userData']): Promise<CreatedUser> {
+    try {
+      const result = await this.userService.create(data);
+      await this.authEventsService.emitSignup({ user: { name: data.name, email: data.email, id: `${result.id}` }, userData });
+      return result;
+    } catch (error) {
+      logger.error('Signup failed', error);
+      if (error instanceof HttpException && error.getStatus() === 409) {
+        throw new HttpException('Email already exists', HttpStatus.CONFLICT);
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
 
   async checkEmail(data: CheckEmailDto): Promise<boolean> {
-    return this.userService.emailExists(data.email);
+    return this.kcAuth.checkUserExistsByEmail(data.email);
   }
 
-  async logout({ sessionId, accessId }: LogoutDto, userData: IRequestInfoDto['userData']) {
-    const id = await this.sessionService.removeSession(sessionId, accessId);
-    const user = await this.userService.findById(id);
-    if (!user || !user.id) {
-      throw new Error('User not found');
+  async logout({ sessionId, refreshToken }: LogoutDto, token: string, userData: IRequestInfoDto['userData']) {
+    try {
+      const { email, name, sub: id } = jwt.decode(token) as { sub: string, name: string, email: string };
+      await this.kcAuth.logout(refreshToken);
+      await this.authEventsService.emitLogout({ sessionId, user: { email, name, id }, userData });
+    } catch (error) {
+      logger.error('Failed to logout on keycloak', error);
     }
-    await this.authEventsService.emitLogout({ sessionId, user: { email: user.email, name: user.name, id: `${user.id}` }, userData });
     return {};
   }
 
-  async login({ email, password }: LoginDto, userData: IRequestInfoDto['userData']) {
-    const result = await this.userService.findByEmailAndPassword(email, password);
+  async login({ email, password }: LoginDto) {
+    try {
+      logger.info('Login with keycloak');
+      const data = await this.kcAuth.login(email, password);
+      const {
+        sub: id,
+        name, email_verified: confirmed,
+        sid: sessionId,
+      } = jwt.decode(data.access_token) as { sid: string, name: string, email_verified: boolean, sub: string };
 
-    if (!result || !result.id) {
-      throw new UnauthorizedError();
+      return {
+        id,
+        name,
+        email,
+        confirmed,
+        sessionId,
+        token: data.access_token,
+        refreshToken: data.refresh_token,
+      };
+    } catch (error) {
+      logger.error('Failed to login', error);
+      throw new UnauthorizedException();
     }
-
-    const { name, id } = result;
-
-    const isFirstTimeOnDevice = await this.sessionService.isFirstTimeOnDevice(userData);
-
-    const token = this.getToken(result);
-    const { sessionId, accessId } = await this.sessionService.createSession(id, userData, token);
-    await this.authEventsService.emitLogin({ user: { email, name, id: `${id}` }, userData, sessionId, isFirstTimeOnDevice });
-
-    return {
-      ...result,
-      sessionId,
-      accessId,
-      token,
-    };
   }
 
   async forgotPassword(data: ForgotPasswordDto, userData: IRequestInfoDto['userData']) {
@@ -90,66 +97,36 @@ export class AuthService {
     };
   }
 
-  async changePassword(data: changePasswordDto, ip: string) {
+  async changePassword(data: changePasswordDto, userData: IRequestUserDataDto) {
     if (data.password !== data.confirmPassword) {
-      throw new Error('Passwords do not match');
+      throw new HttpException('Password and confirm password do not match', HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     if (!data.email || !data.token) {
-      throw new Error('Invalid request');
+      throw new HttpException('Email and token are required to change password', HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
-    const changePassword = await this.userService.changePassword(data.email, data.password, data.token, ip);
-    if (!changePassword) {
-      throw new Error('Invalid request');
-    }
+    const user = await this.userService.findByEmail(data.email);
 
-    return {};
-  }
-
-  async refreshToken(userId: string, oldToken: string, userData: IRequestInfoDto['userData']): Promise<{ token: string }> {
-
-    if (!userId) {
-      throw new UnauthorizedError('You must inform the user id');
-    }
-    const user = await this.userService.findById(userId);
     if (!user) {
-      throw new UnauthorizedError('User not found');
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
 
-    const tokenData = jwtDecode<IUserDto>(oldToken);
-    if (tokenData?.id !== userId) {
-      throw new UnauthorizedError('Invalid token');
-    }
-
-    oldToken = oldToken.replace('Bearer ', '');
-    const session = await this.sessionService.getSessionByToken(oldToken);
-
-    if (!session) {
-      throw new UnauthorizedError('Session not found');
-    }
-
-    if (!_.isEqual(session.deviceInfo, userData.deviceInfo)) {
-      throw new UnauthorizedError('Invalid device');
-    }
-
-    const token = this.getToken(user);
-    if (!token) {
-      throw new InternalServerErrorException('Unable to generate token');
-    }
-
-    await this.sessionService.updateSessionToken(session._id, token);
-
-    return {
-      token,
-    };
+    await this.userService.doChangePassword(user?.id,  data.password, userData);
+    return true;
   }
 
-  private getToken(user: IUserDto): string {
-    return jwt.sign(
-      user,
-      JWT_SECRET,
-      { expiresIn: process.env['JWT_EXPIRATION'] || '15min' }
-    );
+  async refreshToken(refreshToken: string): Promise<{ token: string, refreshToken: string }> {
+    if (!refreshToken) {
+      throw new HttpException('Refresh token is required to refresh the token.', HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    try {
+      const result = await this.kcAuth.refreshToken(refreshToken);
+      return result;
+    } catch (error) {
+      logger.error('Failed to refresh token', error);
+      throw new UnauthorizedException('Failed to refresh token');
+    }
   }
 }

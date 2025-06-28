@@ -7,11 +7,9 @@ services:
       dockerfile: ./infra/nginx/Dockerfile.nginx
     ports:
       - "80:80"
+    restart: always
     volumes:
       - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf
-    depends_on:
-      - api
-      - web
     networks:
       - gym-network
 
@@ -31,9 +29,11 @@ services:
       dockerfile: ./apps/gym-api/Dockerfile
     healthcheck:
       test: ["CMD", "node", "./infra/api/healthcheck.js"]
-      interval: 300s
+      interval: 5m
       timeout: 10s
       retries: 3
+      start_period: 1m
+      start_interval: 10s
     restart: always
     networks:
       - mongo-cluster
@@ -45,6 +45,43 @@ services:
     expose:
       - "3000"
       - "5000"
+
+  workers:
+    build:
+      context: .
+      dockerfile: ./apps/workers/Dockerfile
+    healthcheck:
+      test: ["CMD", "node", "./infra/workers/healthcheck.js"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 1m
+      start_interval: 10s
+    restart: always
+    networks:
+      - gym-network
+      - mongo-cluster
+    depends_on:
+      redis:
+        condition: service_healthy
+    expose:
+      - "3333"
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - gym-network
 
   mongo1:
     build:
@@ -80,14 +117,63 @@ services:
       - mongo1_db:/data/db
       - mongo1_configdb:/data/configdb
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.0
+    command: start --import-realm
+    entrypoint: /opt/keycloak/bin/entrypoint.sh
+    environment:
+      - KC_DB_URL=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - KC_HOSTNAME_URL=http://${KC_HOSTNAME}:${NGINX_HOST_PORT}
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+    volumes:
+      - ./infra/keycloak/entrypoint.sh:/opt/keycloak/bin/entrypoint.sh
+      - ./keycloak-config:/opt/keycloak/data/import
+    env_file:
+      - .env
+      - .doppler.env
+    ports:
+      - "${KEYCLOAK_PORT}"
+      - "9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - gym-network
+      - auth-network
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}"
+    env_file:
+      - .env
+      - .doppler.env
+    networks:
+      - auth-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
+  redis-data:
+    driver: local
+  pgdata:
   mongo1_db:
   mongo1_configdb:
 
 networks:
   gym-network:
   mongo-cluster:
-
-configs:
-  nginx-config:
-    file: ./nginx/nginx.conf
+  auth-network:
+    driver: bridge

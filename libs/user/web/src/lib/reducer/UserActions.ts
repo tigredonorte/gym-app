@@ -1,4 +1,4 @@
-import { deleteRequest, getRequest, IPaginationRequest, postRequest, requestData } from '@gym-app/shared/web';
+import { getRequest, IPaginationRequest, postRequest, requestData } from '@gym-app/shared/web';
 import { IUser } from '@gym-app/user/types';
 import { Dispatch } from '@reduxjs/toolkit';
 import { IAccessLog, IFetchedSession } from './session.types';
@@ -19,7 +19,7 @@ const getUserId = (id?: string) => {
 
 type getUserStateType = () => { user: UserState };
 
-export const logoutUser = (sessionId: string, accessId: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
+export const logoutUser = (sessionId: string, accessId: string, refreshToken: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
   requestData({
     actionName: UserActionTypes.Logout,
     defaultErrorMessage: 'logging out user',
@@ -29,7 +29,7 @@ export const logoutUser = (sessionId: string, accessId: string) => async (dispat
     skipLoadingUpdate: true,
     request: async() => {
       dispatch(UserActions.logout());
-      await postRequest('/auth/logout', { sessionId, accessId });
+      await postRequest('/auth/logout', { sessionId, accessId, refreshToken });
     }
   });
 
@@ -111,7 +111,7 @@ export const saveProfileInfo = (userData: Partial<IUser>) => async (dispatch: Di
     setActionType,
     request: async() => {
       const id = getUserId();
-      await postRequest(`user/edit/${id}`, userData);
+      await postRequest(`user/${id}/edit`, userData);
       dispatch(UserActions.updateUser(userData));
     }
   });
@@ -129,23 +129,9 @@ export const changeEmail = (userData: ChangeEmailSettingFormType) => async (disp
     setActionType,
     request: async() => {
       const id = getUserId();
-      const emailHistory = await postRequest<IUser['emailHistory']>(`user/update-email/${id}`, userData);
-      dispatch(UserActions.updateUser({ emailHistory }));
+      await postRequest<boolean>(`user/${id}/change-email`, userData);
+      dispatch(UserActions.updateUser({ email: userData.newEmail }));
     }
-  });
-
-export const cancelChangeEmail = (changeEmailCode: string) => async (dispatch: Dispatch, getState: getUserStateType) =>
-  requestData({
-    actionName: UserActionTypes.RemoveFromEmailHistory,
-    defaultErrorMessage: 'removing email from history',
-    dispatch,
-    getState: () => getState()?.user,
-    setActionType,
-    request: async() => {
-      const id = getUserId();
-      await deleteRequest(`user/change-email/${id}/${changeEmailCode}`);
-      dispatch(UserActions.removeFromEmailHistory(changeEmailCode));
-    },
   });
 
 export interface ChangePasswordFormType  {
@@ -162,22 +148,7 @@ export const changePassword = (changePasswordData: ChangePasswordFormType) => as
     setActionType,
     request: async () => {
       const id = getUserId();
-      const { passwordHistory } = await postRequest<Pick<IUser, 'passwordHistory'>>(`user/change-password/${id}`, changePasswordData);
-      dispatch(UserActions.updateUser({ passwordHistory }));
-    },
-  });
-
-export const cancelChangePassword = () => async (dispatch: Dispatch, getState: getUserStateType) =>
-  requestData({
-    actionName:  UserActionTypes.CancelChangePassword,
-    defaultErrorMessage: 'cancel change password',
-    dispatch,
-    getState: () => getState()?.user,
-    setActionType,
-    request: async() => {
-      const id = getUserId();
-      await deleteRequest(`user/change-password/${id}`);
-      dispatch(UserActions.removePasswordChangeRequest());
+      await postRequest<boolean>(`user/${id}/change-password`, changePasswordData);
     },
   });
 

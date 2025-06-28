@@ -1,0 +1,12 @@
+.search-container {
+  position: relative;
+
+  .search-input {
+    width: 200px;
+    transition: width 0.3s ease-in-out;
+  }
+
+  &.open .search-input {
+    width: 100%;
+  }
+}

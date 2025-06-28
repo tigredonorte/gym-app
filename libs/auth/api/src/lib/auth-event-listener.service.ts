@@ -1,4 +1,4 @@
-import { EmailService, EventService } from '@gym-app/shared/api';
+import { EmailService, EventService, logger } from '@gym-app/shared/api';
 import { UserEventPayload, getUserAccessData } from '@gym-app/user/api';
 import { IRequestInfoDto } from '@gym-app/user/types';
 import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
@@ -33,7 +33,8 @@ export class AuthEventListenerService implements OnApplicationBootstrap {
 
   private async sendEmailWhenUserLoggedIn(data: LoginEventPayload) {
     if (!data.isFirstTimeOnDevice) {
-      return console.info('Session already exists', { userId: data.user.id, sessionId: data.sessionId });
+      logger.info('Session already exists', { userId: data.user.id, sessionId: data.sessionId });
+      return;
     }
     const emailData = getUserAccessData(data.userData);
     await this.emailService.sendRenderedEmail(getEmailLoginTemplate(data.user.email, {

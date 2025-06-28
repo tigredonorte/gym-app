@@ -1,4 +1,4 @@
-import { CrudBox, postRequest, WebSocketContext } from '@gym-app/shared/web';
+import { CrudBox, HttpError, postRequest, WebSocketContext } from '@gym-app/shared/web';
 import { IUser } from '@gym-app/user/types';
 import { mdiLoading } from '@mdi/js';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ interface AuthData {
   token: string
   accessId: string
   sessionId: string
+  refreshToken: string
 }
 
 const initialState = {
@@ -18,6 +19,7 @@ const initialState = {
   sessionId: '',
   accessId: '',
   online: false,
+  refreshToken: '',
 };
 
 export interface AuthContextType extends Omit<AuthData, 'token'> {
@@ -32,7 +34,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 interface AuthProviderProps {
   children: React.ReactNode;
-  logoutUser: (sessionId: string, accessId: string) => Promise<void>;
+  logoutUser: (sessionId: string, accessId: string, refreshToken: string) => Promise<void>;
 }
 const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ children, logoutUser }) => {
   const { webSocketClient, isConnected } = React.useContext(WebSocketContext);
@@ -49,9 +51,10 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
   const logout = useCallback(async () => {
     const sessionId = localStorage.getItem('sessionId');
     const accessId = localStorage.getItem('accessId');
+    const userRefreshToken = localStorage.getItem('userRefreshToken');
     try {
-      webSocketClient?.disconnect();
-      await logoutUser(sessionId as string, accessId as string);
+      webSocketClient?.channelClear();
+      await logoutUser(sessionId as string, accessId as string, userRefreshToken as string);
     } catch (error) {
       console.error('Failed to logout:', error);
     }
@@ -77,12 +80,20 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
     }
   }, [clearAuthTimeout]);
 
-  const refreshToken = useCallback(async () => {
+  const refreshToken = useCallback(async (retry = 0, timeout = 5000) => {
     try {
-      const response = await postRequest<{ token: string }>('/auth/refreshToken', {});
+      const userRefreshToken = localStorage.getItem('userRefreshToken');
+      const response = await postRequest<{ token: string, userRefreshToken?: string }>('/auth/refreshToken', { userRefreshToken });
       const newToken = response.token;
       setNewToken(newToken);
     } catch (error) {
+      if (error instanceof HttpError && error.status >= 500 && retry++ < 3) {
+        if (error.message === 'Failed to fetch') {
+          console.warn(`Failed to refresh token, retrying in ${timeout}ms`);
+          setTimeout(() => refreshToken(retry, 2 * timeout + Math.random() * 1000), timeout);
+          return;
+        }
+      }
       console.error('Failed to refresh token:', error);
       logout();
     }
@@ -95,13 +106,19 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
   }) => {
     const { userId, accessId } = data;
     if (!webSocketClient) {
-      console.warn('WebSocket context not available or userId not provided');
+      console.warn('WebSocket client not available');
       return;
     }
 
-    if (!userId || !isConnected) {
+    if (!userId) {
+      console.warn('userId not provided, clearing channels');
       webSocketClient?.channelClear();
-      console.warn('WebSocket context not available or userId not provided');
+      return;
+    }
+
+    if (!isConnected) {
+      console.warn('WebSocket not connected, clearing channels');
+      webSocketClient?.channelClear();
       return;
     }
 
@@ -117,10 +134,11 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
 
   const login = useCallback(async (data: { email: string, password: string }) => {
     try {
-      const { token, accessId, sessionId, ...user } = await postRequest<AuthData & IUser>('/auth/login', data);
+      const { token, accessId, sessionId, refreshToken, ...user } = await postRequest<AuthData & IUser>('/auth/login', data);
       localStorage.setItem('userData', JSON.stringify(user));
       localStorage.setItem('accessId', accessId);
       localStorage.setItem('sessionId', sessionId);
+      localStorage.setItem('userRefreshToken', refreshToken);
       setNewToken(token);
       listenUserChanges({
         userId: user.id,
@@ -132,6 +150,7 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
         isAuthenticated: true,
         accessId,
         sessionId,
+        refreshToken,
         user,
       }));
 
@@ -149,7 +168,7 @@ const AuthProviderFn: React.FC<React.PropsWithChildren<AuthProviderProps>> = ({ 
     const sessionId = localStorage.getItem('sessionId');
     const accessId = localStorage.getItem('accessId');
 
-    if (isExpired) {
+    if (isExpired || !user) {
       localStorage.removeItem('token');
       localStorage.removeItem('userData');
     } else {

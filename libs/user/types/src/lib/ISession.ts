@@ -1,7 +1,7 @@
 import { IDeviceInfoDto, ILocationDto } from './IRequestInfo';
 
 export interface IAccessLog {
-  _id: string;
+  // _id: string;
   createdAt: Date;
   ip: string;
   location: ILocationDto;

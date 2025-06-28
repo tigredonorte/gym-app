@@ -16,3 +16,10 @@ services:
     build:
       context: .
       dockerfile: ./apps/gym-api/Dockerfile
+
+  workers:
+    environment:
+      - NODE_ENV=production
+    build:
+      context: .
+      dockerfile: ./apps/workers/Dockerfile
