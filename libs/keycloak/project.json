@@ -4,6 +4,7 @@
   "sourceRoot": "libs/keycloak/src",
   "projectType": "library",
   "tags": [],
+  "implicitDependencies": ["shared-api"],
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

@@ -47,7 +47,7 @@ const realmConfig = getRealmConfig();
     }),
     KeycloakModule.forRoot({
       realmConfig,
-      upsertRealmOnInit: true,
+      upsertRealmOnInit: false,
       client: realmConfig.clients.find((client) => client.clientId === 'backend-client'),
     }),
     EventModule,
