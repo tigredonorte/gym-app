@@ -1,4 +1,5 @@
 import { AuthPath, AuthRouter } from '@gym-app/auth/web';
+import { ProductResearchPath, ProductResearchRouter } from '@gym-app/product-research/web';
 import { ProfilePath, ProfileRouter, useAuth, UserPath, UserRouter } from '@gym-app/user/web';
 import { mdiCreditCardOutline } from '@mdi/js';
 import React from 'react';
@@ -38,6 +39,7 @@ export const AppRouter: React.FC = () => {
             <Route path="billing" element={<Billing />} />
           </ProfileRouter>
         } />
+        <Route path={`/${ProductResearchPath}/*`} element={<ProductResearchRouter />} />
         <Route path={`/${UserPath}/*`} element={<UserRouter />} />
         <Route path="*" element={<Navigate to={`/${ProfilePath}`} />} />
       </Routes>
