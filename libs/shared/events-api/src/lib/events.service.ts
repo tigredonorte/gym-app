@@ -9,11 +9,11 @@ import { NotificationGateway } from './notification.gateway';
 export class EventService {
   private dispatchedEvents: { [key: string]: boolean } = {};
   constructor(
-    @InjectModel(Event.name) private eventModel: Model<EventDocument>,
+    @InjectModel(Event.name) private eventModel: Model<EventDocument<never>>,
     private readonly notificationGateway: NotificationGateway
   ) {}
 
-  async create(eventType: string, payload: EventPayload): Promise<Event> {
+  async create<T, >(eventType: string, payload: EventPayload<T>): Promise<Event<T>> {
     const createdAt = new Date();
     const newEvent = new this.eventModel({ eventType, payload, createdAt });
     const data = await newEvent.save();
@@ -21,11 +21,11 @@ export class EventService {
     return data;
   }
 
-  async findAll(): Promise<Event[]> {
+  async findAll<T, >(): Promise<Event<T>[]> {
     return this.eventModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Event> {
+  async findOne<T, >(id: string): Promise<Event<T>> {
     const event = await this.eventModel.findById(id).exec();
     if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
@@ -33,7 +33,7 @@ export class EventService {
     return event;
   }
 
-  async update(id: string, eventType: string, payload: EventPayload): Promise<Event> {
+  async update<T, >(id: string, eventType: string, payload: EventPayload<T>): Promise<Event<T>> {
     const event = await this.eventModel.findByIdAndUpdate(id, { eventType, payload }, { new: true }).exec();
     if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
@@ -48,7 +48,7 @@ export class EventService {
     }
   }
 
-  async markEventAsReadById(eventId: string, serviceName: string): Promise<Event> {
+  async markEventAsReadById<T, >(eventId: string, serviceName: string): Promise<Event<T>> {
     const event = await this.eventModel.findByIdAndUpdate(
       eventId,
       { $addToSet: { readBy: serviceName } },

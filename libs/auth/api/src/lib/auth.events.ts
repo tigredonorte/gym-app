@@ -1,4 +1,4 @@
-import { EventService } from '@gym-app/shared/api';
+import { EventService } from '@gym-app/shared/events';
 import { UserEventPayload } from '@gym-app/user/api';
 import { IRequestInfoDto } from '@gym-app/user/types';
 import { Injectable } from '@nestjs/common';

@@ -4,7 +4,6 @@ import { EmailService, logger } from '@gym-app/shared/api';
 import { UserService, getUserAccessData } from '@gym-app/user/api';
 import { IRequestInfoDto, IRequestUserDataDto } from '@gym-app/user/types';
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
 import { CheckEmailDto, ConfirmRecoverPasswordDto, ForgotPasswordDto, LoginDto, LogoutDto, SignupDto, changePasswordDto } from './auth.dto';
 import { AuthEventsService } from './auth.events';
 import { getRecoverPasswordEmail } from './emails/recorverPasswordEmailData';
@@ -39,11 +38,20 @@ export class AuthService {
 
   async logout({ sessionId, refreshToken }: LogoutDto, token: string, userData: IRequestInfoDto['userData']) {
     try {
-      const { email, name, sub: id } = jwt.decode(token) as { sub: string, name: string, email: string };
+      const payload = this.kcAuth.verifyToken(token);
+      if (!payload) {
+        logger.warn('Invalid token provided for logout');
+        return {};
+      }
+
+      const email = payload['email'] as string;
+      const name = payload['name'] as string;
+      const id = payload.sub as string;
+
       await this.kcAuth.logout(refreshToken);
       await this.authEventsService.emitLogout({ sessionId, user: { email, name, id }, userData });
     } catch (error) {
-      logger.error('Failed to logout on keycloak', error);
+      logger.error('Failed to logout on keycloak:\n', error);
     }
     return {};
   }
@@ -52,18 +60,18 @@ export class AuthService {
     try {
       logger.info('Login with keycloak');
       const data = await this.kcAuth.login(email, password);
-      const {
-        sub: id,
-        name, email_verified: confirmed,
-        sid: sessionId,
-      } = jwt.decode(data.access_token) as { sid: string, name: string, email_verified: boolean, sub: string };
+
+      const payload = this.kcAuth.verifyToken(data.access_token);
+      if (!payload) {
+        throw new Error('Invalid token received from Keycloak');
+      }
 
       return {
-        id,
-        name,
-        email,
-        confirmed,
-        sessionId,
+        id: payload.sub as string,
+        name: payload['name'] as string,
+        email: payload['email'] as string,
+        confirmed: payload['email_verified'] as boolean,
+        sessionId: payload['sid'] as string,
         token: data.access_token,
         refreshToken: data.refresh_token,
       };

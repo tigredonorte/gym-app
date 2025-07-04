@@ -16,6 +16,7 @@ export class KeycloakBaseService {
   private clientUuid = '';
   private basePath = '';
   private tokenExpiresAtMS = 0;
+  private _publicKey: string | null = null;
 
   constructor(
     @Inject('KEYCLOAK_REALM') private realm: string,
@@ -43,16 +44,36 @@ export class KeycloakBaseService {
     return instance;
   }
 
-  public async init(clientId: string) {
-    try {
-      await this.authenticateKeycloak();
+  public get publicKey(): string {
+    if (!this._publicKey) {
+      throw new Error('Public key not initialized. Please ensure init() was called.');
+    }
+    return this._publicKey;
+  }
 
-      if (clientId) {
+  public get realmUrl(): string {
+    return `${this.baseUrl}/realms/${this.realm}`;
+  }
+
+  public async init(clientId: string): Promise<void> {
+    try {
+      // Get Keycloak realm configuration including public key
+      const response = await this.axiosInstance.get(`/realms/${this.realm}`);
+      this._publicKey = `-----BEGIN PUBLIC KEY-----\n${response.data.public_key}\n-----END PUBLIC KEY-----`;
+
+      // Set client UUID if we have authentication
+      try {
+        await this.ensureAuthenticated();
         this.clientUuid = await this.getClientUuid(clientId);
         this.basePath = await this.getUrl();
+      } catch (error) {
+        // If authentication fails, we can still verify tokens with the public key
+        logger.warn('Could not authenticate to get client UUID, but public key is available for token verification');
       }
     } catch (error) {
-      logger.error('Failed to initialize Keycloak service:', genHttpError(error));
+      const err = genHttpError(error);
+      logger.error('Failed to initialize Keycloak service:', err);
+      throw err;
     }
   }
 
@@ -82,8 +103,8 @@ export class KeycloakBaseService {
       };
 
       const data = await this.login(
-        process.env.KC_BOOTSTRAP_ADMIN_USERNAME,
-        process.env.KC_BOOTSTRAP_ADMIN_PASSWORD,
+        process.env.KC_BOOTSTRAP_ADMIN_USERNAME!,
+        process.env.KC_BOOTSTRAP_ADMIN_PASSWORD!,
         undefined,
         'admin-cli',
         'master',
@@ -102,8 +123,8 @@ export class KeycloakBaseService {
       logger.error('Failed to authenticate with Keycloak:', genHttpError(error));
     } finally {
       if (KeycloakBaseService.authState.token) {
-        this.axiosInstance.defaults.headers.common[ 'Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
-        this.axiosInstanceRealm.defaults.headers.common[ 'Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
+        this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
+        this.axiosInstanceRealm.defaults.headers.common['Authorization'] = `Bearer ${KeycloakBaseService.authState.token}`;
       }
     }
   }
@@ -139,9 +160,9 @@ export class KeycloakBaseService {
   async login(
     username: string,
     password: string,
-    clientSecret,
-    clientId,
-    realm,
+    clientSecret: string,
+    clientId: string,
+    realm: string,
   ) {
     try {
       const response = await this.axiosInstance.post(

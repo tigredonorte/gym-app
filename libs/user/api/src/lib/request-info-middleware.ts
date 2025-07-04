@@ -1,7 +1,7 @@
 import { logger } from '@gym-app/shared/api';
+import { KeycloakAuthService } from '@gym-app/keycloak';
 import { IRequestInfoDto, IUser, IUserDataInfo } from '@gym-app/user/types';
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Request, Response } from 'express';
 import * as geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
@@ -9,31 +9,41 @@ import { extractTokenFromHeader } from './guards/extractTokenFromHeader';
 
 @Injectable()
 export class CustomRequestInfoMiddleware implements NestMiddleware {
+  constructor(private readonly keycloakAuthService: KeycloakAuthService) {}
+
   use(req: IRequestInfoDto & Request, res: Response, next: () => void) {
     req.userData = getUserData(req);
-    const user = getUser(req, new JwtService());
+    const user = getUser(req, this.keycloakAuthService);
     req.user = user || undefined;
     next();
   }
 }
 
-function getUser(req: IRequestInfoDto & Request, jwtService: JwtService): IUser | null {
+function getUser(req: IRequestInfoDto & Request, keycloakAuthService: KeycloakAuthService): IUser | null {
   const token = extractTokenFromHeader(req);
   if (!token) {
     return null;
   }
 
   try {
-    const decoded = jwtService.decode(token.toString());
+    const decoded = keycloakAuthService.verifyToken(token);
+    if (!decoded) {
+      return null;
+    }
+
+    if (!decoded.sub || !decoded['email'] || !decoded['name']) {
+      throw new Error('Invalid token structure');
+    }
+
     return {
-      id: decoded?.sub,
-      email: decoded?.email,
-      name: decoded?.name,
-      blocked: decoded?.blocked,
-      confirmed: decoded?.email_verified,
+      id: decoded.sub,
+      email: decoded['email'],
+      name: decoded['name'],
+      blocked: decoded['blocked'] || false,
+      confirmed: decoded['email_verified'],
     };
   } catch (e) {
-    logger.error('Failed to decode token', e);
+    logger.error('Failed to verify token:\n', e);
     return null;
   }
 }

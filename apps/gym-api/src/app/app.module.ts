@@ -1,10 +1,12 @@
 import { AuthModule } from '@gym-app/auth/api';
 import { KeycloakModule } from '@gym-app/keycloak';
-import { EventModule, MetricsModule, QueueModule } from '@gym-app/shared/api';
-import { UserModule } from '@gym-app/user/api';
-import { Module } from '@nestjs/common';
+import { MetricsModule, QueueModule, SessionMiddleware } from '@gym-app/shared/api';
+import { EventModule } from '@gym-app/shared/events';
+import { CustomRequestInfoMiddleware, UserModule } from '@gym-app/user/api';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import * as requestIp from 'request-ip';
 import Joi from 'joi';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -27,6 +29,8 @@ const realmConfig = getRealmConfig();
         REDIS_HOST: Joi.string().required(),
         REDIS_PORT: Joi.number().required(),
         QUEUE_NAME: Joi.string().required(),
+        KEYCLOAK_CLIENT_ID: Joi.string().required(),
+        KEYCLOAK_REALM: Joi.string().required(),
       }),
     }),
     QueueModule,
@@ -55,4 +59,10 @@ const realmConfig = getRealmConfig();
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(requestIp.mw(), CustomRequestInfoMiddleware, SessionMiddleware)
+      .forRoutes('*');
+  }
+}

@@ -22,6 +22,22 @@ services:
       - gym-network
     expose:
       - "80"
+    develop:
+      watch:
+        # Sync changes from the local web app source directory to the container
+        - action: sync
+          path: ./apps/gym-web-app # Local path to your web app source code
+          target: /app            # Path inside the container where web app code lives
+          ignore:
+            - node_modules/ # Ignore node_modules for performance
+            - dist/
+            - .env
+            - .doppler.env
+        # Rebuild the image if package.json or pnpm-lock.yaml changes
+        - action: rebuild
+          path: ./apps/gym-web-app/package.json
+        - action: rebuild
+          path: ./apps/gym-web-app/pnpm-lock.yaml
 
   api:
     build:
@@ -45,6 +61,25 @@ services:
     expose:
       - "3000"
       - "5000"
+    develop:
+      watch:
+        # Sync changes from the local API source directory to the container
+        - action: sync
+          path: ./apps/gym-api # Local path to your API source code
+          target: /usr/src/app # Path inside the container where API code lives (adjust if different)
+          ignore:
+            - node_modules/
+            - dist/
+            - .env
+            - .doppler.env
+        # Rebuild the image if package.json or pnpm-lock.yaml changes
+        - action: rebuild
+          path: ./apps/gym-api/package.json
+        - action: rebuild
+          path: ./apps/gym-api/pnpm-lock.yaml
+        - action: sync
+          path: ./infra/api/healthcheck.js
+          target: ./infra/api/healthcheck.js # Or the path where it's copied inside the container
 
   workers:
     build:
@@ -66,6 +101,26 @@ services:
         condition: service_healthy
     expose:
       - "3333"
+    develop:
+      watch:
+        # Sync changes from the local workers source directory to the container
+        - action: sync
+          path: ./apps/workers # Local path to your Workers source code
+          target: /build      # Path inside the container where worker code lives (adjust if different)
+          ignore:
+            - node_modules/
+            - dist/
+            - .env
+            - .doppler.env
+        # Rebuild the image if package.json or pnpm-lock.yaml changes
+        - action: rebuild
+          path: ./apps/workers/package.json
+        - action: rebuild
+          path: ./apps/workers/pnpm-lock.yaml
+        # Also watch the healthcheck script if it's external to the main app directory
+        - action: sync
+          path: ./infra/workers/healthcheck.js
+          target: ./infra/workers/healthcheck.js # Or the path where it's copied inside the container
 
   redis:
     image: redis:latest
