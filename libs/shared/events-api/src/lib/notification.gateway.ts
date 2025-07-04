@@ -1,7 +1,7 @@
-import { JwtService } from '@nestjs/jwt';
+import { KeycloakAuthService } from '@gym-app/keycloak';
+import { logger } from '@gym-app/shared/api';
 import { OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { logger } from '../logger';
 
 interface AckType {
   success: boolean
@@ -21,7 +21,7 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
   private clients: { [key: string]: Socket } = {};
 
   constructor(
-    private readonly jwtService: JwtService
+    private readonly keycloakAuthService: KeycloakAuthService
   ) {
     logger.debug('\n\n\nNotificationGateway created with CORS origin:', process.env['FRONTEND_URL'], '\n\n\n');
   }
@@ -49,7 +49,10 @@ export class NotificationGateway implements OnGatewayConnection, OnGatewayDiscon
         throw new Error('Invalid channel');
       }
 
-      this.jwtService.verify(token, { secret: process.env['JWT_SECRET'] });
+      const verified = this.keycloakAuthService.verifyToken(token);
+      if (!verified) {
+        throw new Error('Invalid token');
+      }
       // @TODO: Add authorization logic here
 
       client.join(channel);

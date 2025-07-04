@@ -1,5 +1,6 @@
 import { genHttpError, logger } from '@gym-app/shared/api';
 import { Inject, Injectable } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
 import { KeycloakBaseService } from './keycloak-base.service';
 import {
   CreatedUser,
@@ -394,6 +395,33 @@ export class KeycloakAuthService {
       const err = genHttpError(error);
       logger.error(`Error checking existence at ${endpoint}/${identifier}`, err);
       throw err;
+    }
+  }
+
+  verifyToken(token: string): jwt.JwtPayload | null {
+    try {
+      const decoded = jwt.verify(token, this.kc.publicKey, {
+        algorithms: ['RS256'],
+        issuer: this.kc.realmUrl
+      }) as jwt.JwtPayload;
+
+      return {
+        ...decoded,
+        sub: decoded.sub as string,
+        email: decoded.email as string,
+        name: decoded.name as string,
+        email_verified: decoded.email_verified as boolean,
+        blocked: (decoded.blocked as boolean) || false
+      };
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        logger.info('Token has expired');
+      } else if (error instanceof jwt.JsonWebTokenError) {
+        logger.info('Token validation failed:', error.message);
+      } else {
+        logger.error('Error validating token:', error);
+      }
+      return null;
     }
   }
 }

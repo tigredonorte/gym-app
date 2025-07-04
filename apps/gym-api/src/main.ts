@@ -1,9 +1,7 @@
-import { MetricsInterceptor, MetricsService, SessionMiddleware } from '@gym-app/shared/api';
-import { CustomRequestInfoMiddleware } from '@gym-app/user/api';
+import { MetricsInterceptor, MetricsService } from '@gym-app/shared/api';
 import { ClassSerializerInterceptor, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as requestIp from 'request-ip';
 import { AppModule } from './app/app.module';
 import { getMorgan } from './middlewares/getMorgan';
 
@@ -32,9 +30,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(`${globalPrefix}/docs`, app, document);
 
-  app.use(requestIp.mw());
-  app.use(new CustomRequestInfoMiddleware().use);
-  app.use(new SessionMiddleware().use);
   app.useGlobalInterceptors(new MetricsInterceptor(app.get(MetricsService)));
   app.useGlobalPipes(new ValidationPipe({
     transform: true, // Automatically transform payloads to DTO instances

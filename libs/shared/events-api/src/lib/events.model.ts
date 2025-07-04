@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type EventPayload = Record<string, any>;
+export type EventPayload<T> = T;
 
 @Schema()
-export class Event {
+export class Event<T> {
   @Prop({ required: true })
     eventType!: string;
 
   @Prop({ required: true, type: Object })
-    payload!: EventPayload;
+    payload!: EventPayload<T>;
 
   @Prop({ required: true })
     createdAt!: Date;
@@ -19,6 +18,6 @@ export class Event {
     readBy!: string[];
 }
 
-export type EventDocument = Event & Document;
+export type EventDocument<T> = Event<T> & Document;
 
 export const EventSchema = SchemaFactory.createForClass(Event);
